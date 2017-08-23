@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
     <!--定义dubbo provider的基本配置信息-->
-    <dubbo:application name="web" />
+    <dubbo:application name="web"/>
 
     <!-- 注册位置 -->
-    <dubbo:registry address="${dubbo_registry_address}" />
+    <dubbo:registry address="${dubbo_registry_address}"/>
 
     <import resource="classpath*:**/spring/consumer/dubbo-service-consumer.xml"/>
 
