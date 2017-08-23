@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="LOG_PATH" value="/usr/local/tomcat/tomcat_log/web"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5level] [%logger.%M:%L] |%msg%n</pattern>
+            <!--<charset>utf-8</charset>-->
+        </encoder>
+        <!-- 此日志appender是为开发使用，只配置最底级别，控制台输出的日志级别是大于或等于此级别的日志信息-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>debug</level>
+        </filter>
+    </appender>
+
+    <appender name="platform" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/platform.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 每天生成一个文件，存放到目录下-->
+            <fileNamePattern>${LOG_PATH}/%d{yyyy-MM-dd}/platform.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+
+            <!-- 如果当个文件大于500M，则重新生成文件-->
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} > %msg%n</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+    <appender name="platform.async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>256</queueSize>
+        <appender-ref ref="platform"/>
+    </appender>
+
+    <appender name="access" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/access.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 每天生成一个文件，存放到目录下-->
+            <fileNamePattern>${LOG_PATH}/%d{yyyy-MM-dd}/access.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+
+            <!-- 如果当个文件大于500M，则重新生成文件-->
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} > %msg%n</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+    <appender name="access.async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>256</queueSize>
+        <appender-ref ref="access"/>
+    </appender>
+
+    <appender name="debug" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/debug.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 每天生成一个文件，存放到目录下-->
+            <fileNamePattern>${LOG_PATH}/%d{yyyy-MM-dd}/debug.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+
+            <!-- 如果当个文件大于500M，则重新生成文件-->
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} > %msg%n</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+    <appender name="debug.async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>256</queueSize>
+        <appender-ref ref="debug"/>
+    </appender>
+    <appender name="system" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/system.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 每天生成一个文件，存放到目录下-->
+            <fileNamePattern>${LOG_PATH}/%d{yyyy-MM-dd}/system.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+
+            <!-- 如果当个文件大于500M，则重新生成文件-->
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} > %msg%n</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+    <appender name="system.async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>256</queueSize>
+        <appender-ref ref="system"/>
+    </appender>
+
+    <appender name="error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 每天生成一个文件，存放到目录下-->
+            <fileNamePattern>${LOG_PATH}/%d{yyyy-MM-dd}/error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+
+            <!-- 如果当个文件大于500M，则重新生成文件-->
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} > %msg%n</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+    <appender name="error.async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>256</queueSize>
+        <appender-ref ref="error"/>
+    </appender>
+
+    <logger name="myph.log.access" level="info" additivity="false">
+        <appender-ref ref="access.async"/>
+    </logger>
+    <logger name="myph.log.exception" level="info" additivity="false">
+        <appender-ref ref="error.async"/>
+    </logger>
+    <logger name="myph.log.system" level="info" additivity="false">
+        <appender-ref ref="system.async"/>
+    </logger>
+    <logger name="myph.log.debug" level="info" additivity="false">
+        <appender-ref ref="debug.async"/>
+    </logger>
+
+
+    <!--输入spring的error -->
+    <logger name="com.myph" level="debug"/>
+    <logger name="com.alibaba.dubbo" level="debug"/>
+    <logger name="com.ibatis" level="debug"/>
+    <logger name="org.springframework" level="debug"/>
+    <logger name="com.ibatis.sqlmap.engine.impl.SqlMapClientDelegate" level="debug"/>
+    <logger name="org.apache.commons" level="debug"/>
+    <logger name="catalia" level="debug"/>
+    <logger name="org.apache" level="debug"/>
+    <logger name="org.apache.shiro" level="debug"/>
+    <logger name="com.ibatis.common.jdbc.SimpleDataSource" level="debug"/>
+    <logger name="java.sql.ResultSet" level="debug"/>
+    <logger name="com.ibatis.common.jdbc.ScriptRunner" level="debug"/>
+    <logger name="java.sql.Connection" level="debug"/>
+    <logger name="java.sql.PreparedStatement" level="debug"/>
+    <!--定义root 级别 -->
+    <root level="debug">
+        <appender-ref ref="platform.async"/>
+        <!--&lt;!&ndash; 本地测试开始&ndash;&gt;-->
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+
+</configuration>

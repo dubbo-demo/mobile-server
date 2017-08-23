@@ -1,0 +1,28 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+  <display-name>web</display-name>
+
+  <!--<context-param>-->
+  <!--<param-name>webAppRootKey</param-name>-->
+  <!--<param-value>central-server.root</param-value>-->
+  <!--</context-param>-->
+
+  <!-- 添加日志监听器 -->
+  <context-param>
+    <param-name>logbackConfigLocation</param-name>
+    <param-value>classpath:logback.xml</param-value>
+  </context-param>
+
+
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>
+      classpath:spring/applicationContext-base.xml
+      classpath:spring/dubbo-consumer-parent.xml
+    </param-value>
+  </context-param>
+
+</web-app>
