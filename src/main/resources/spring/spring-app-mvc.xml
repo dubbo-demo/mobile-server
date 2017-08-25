@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+        http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <value>text/plain;charset=utf-8</value>
+                            <value>text/html;charset=utf-8</value>
+                            <value>text/json;charset=utf-8</value>
+                            <value>application/json;charset=utf-8</value>
+                        </list>
+                    </property>
+                    <property name="features">
+                        <list>
+                            <value>WriteMapNullValue</value>
+                            <value>WriteNullListAsEmpty</value>
+                            <value>WriteNullStringAsEmpty</value>
+                            <value>WriteNullNumberAsZero</value>
+                            <value>WriteNullBooleanAsFalse</value>
+                            <value>WriteDateUseDateFormat</value>
+                            <value>WriteEnumUsingToString</value>
+                            <value>DisableCircularReferenceDetect</value>
+                            <value>QuoteFieldNames</value>
+                        </list>
+                    </property>
+                </bean>
+                <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter">
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <value>image/jpeg</value>
+                            <value>image/png</value>
+                            <value>image/jpg</value>
+                            <value>image/gif</value>
+                            <value>application/x-bmp</value>
+                        </list>
+                    </property>
+                </bean>
+                <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <value>text/html;charset=UTF-8</value>
+                            <value>text/plain;charset=UTF-8</value>
+                        </list>
+                    </property>
+                </bean>
+                <bean class="org.springframework.http.converter.FormHttpMessageConverter">
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <value>text/html;charset=UTF-8</value>
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
+
+        <property name="webBindingInitializer">
+            <bean class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
+                <property name="conversionService">
+                    <bean class="org.springframework.format.support.FormattingConversionServiceFactoryBean"></bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <!--aop用户请求日志-->
+    <aop:config>
+        <aop:pointcut id="apiPointcut" expression="execution(* com.way.mobile.controller..*.*(..))"/>
+        <aop:aspect id="apiAspect" ref="apiAroudBean">
+            <aop:around pointcut-ref="apiPointcut" method="handler"/>
+        </aop:aspect>
+        <aop:aspect id="loggerAspect" ref="genericLoggerBean">
+            <aop:around pointcut-ref="apiPointcut" method="loggerUserRequest"/>
+        </aop:aspect>
+    </aop:config>
+
+    <bean id="apiAroudBean" class="com.way.mobile.aop.ApiAround"></bean>
+
+    <bean id="genericLoggerBean" class="com.way.mobile.aop.RequestLogAop"></bean>
+
+    <!-- 拦截器配置 -->
+    <!--<mvc:interceptors>-->
+    <!--<bean class="com.way.mobile.interceptor.AuthInterceptor"/>-->
+    <!--</mvc:interceptors>-->
+
+    <!--上传 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="100000000"/>
+    </bean>
+
+
+    <context:component-scan base-package="com.way.mobile.controller.**"/>
+    <mvc:annotation-driven/>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/"/>
+        <property name="suffix" value=".html"/>
+    </bean>
+</beans>

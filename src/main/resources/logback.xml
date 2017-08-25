@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOG_PATH" value="/usr/local/tomcat/tomcat_log/web"/>
+    <property name="LOG_PATH" value="/usr/local/tomcat/tomcat_log/mobile-server"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <Target>System.out</Target>
@@ -134,22 +134,22 @@
         <appender-ref ref="error"/>
     </appender>
 
-    <logger name="myph.log.access" level="info" additivity="false">
+    <logger name="way.log.access" level="info" additivity="false">
         <appender-ref ref="access.async"/>
     </logger>
-    <logger name="myph.log.exception" level="info" additivity="false">
+    <logger name="way.log.exception" level="info" additivity="false">
         <appender-ref ref="error.async"/>
     </logger>
-    <logger name="myph.log.system" level="info" additivity="false">
+    <logger name="way.log.system" level="info" additivity="false">
         <appender-ref ref="system.async"/>
     </logger>
-    <logger name="myph.log.debug" level="info" additivity="false">
+    <logger name="way.log.debug" level="info" additivity="false">
         <appender-ref ref="debug.async"/>
     </logger>
 
 
     <!--输入spring的error -->
-    <logger name="com.myph" level="debug"/>
+    <logger name="com.way" level="debug"/>
     <logger name="com.alibaba.dubbo" level="debug"/>
     <logger name="com.ibatis" level="debug"/>
     <logger name="org.springframework" level="debug"/>
