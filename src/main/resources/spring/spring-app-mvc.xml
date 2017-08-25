@@ -85,7 +85,7 @@
             <aop:around pointcut-ref="apiPointcut" method="handler"/>
         </aop:aspect>
         <aop:aspect id="loggerAspect" ref="genericLoggerBean">
-            <aop:around pointcut-ref="apiPointcut" method="loggerUserRequest"/>
+            <aop:around  pointcut-ref="apiPointcut" method="loggerUserRequest"/>
         </aop:aspect>
     </aop:config>
 
