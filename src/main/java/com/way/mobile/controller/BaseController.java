@@ -18,9 +18,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 
 public abstract class BaseController {
-    protected final Logger log = LoggerFactory.getLogger(this.getClass());
     protected static final int DEFAULT_PAGE_SIZE = 10;
-
+    protected final Logger log = LoggerFactory.getLogger(this.getClass());
+    protected MobileClient mobileClient = new MobileClient();
 
     public BaseController() {
     }
@@ -33,12 +33,9 @@ public abstract class BaseController {
         return request.getContextPath() + url;
     }
 
-
     public String getCurrentUsername() {
         return "";
     }
-
-    protected MobileClient mobileClient = new MobileClient();
 
     public MobileClient getMobileClient() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();

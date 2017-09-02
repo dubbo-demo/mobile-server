@@ -2,7 +2,7 @@
  * Copyright (C), 2012-2016, 江苏中地集团有限公司
  * Author:   LG
  * Date:     2016年9月2日 上午8:38:45
- * Description: //模块目的、功能描述      
+ * Description: //模块目的、功能描述
  */
 package com.way.mobile.property.config;
 
@@ -28,20 +28,6 @@ public class PropertyConfigurerWithWhite extends PropertyPlaceholderConfigurer {
     // 装配配置文件属性到内存
     private static Map<String, String> properties = new HashMap<String, String>();
 
-    @Override
-    protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
-            throws BeansException {
-        PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(DEFAULT_PLACEHOLDER_PREFIX,
-                DEFAULT_PLACEHOLDER_SUFFIX, DEFAULT_VALUE_SEPARATOR, false);
-        for (Entry<Object, Object> entry : props.entrySet()) {
-            String stringKey = String.valueOf(entry.getKey());
-            String stringValue = String.valueOf(entry.getValue());
-            stringValue = helper.replacePlaceholders(stringValue, props);
-            properties.put(stringKey, stringValue);
-        }
-        super.processProperties(beanFactoryToProcess, props);
-    }
-
     /**
      * 功能描述: 获取全量配置属性<br>
      * 〈功能详细描述〉
@@ -65,5 +51,19 @@ public class PropertyConfigurerWithWhite extends PropertyPlaceholderConfigurer {
      */
     public static String getProperty(String key) {
         return properties.get(key);
+    }
+
+    @Override
+    protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
+            throws BeansException {
+        PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(DEFAULT_PLACEHOLDER_PREFIX,
+                DEFAULT_PLACEHOLDER_SUFFIX, DEFAULT_VALUE_SEPARATOR, false);
+        for (Entry<Object, Object> entry : props.entrySet()) {
+            String stringKey = String.valueOf(entry.getKey());
+            String stringValue = String.valueOf(entry.getValue());
+            stringValue = helper.replacePlaceholders(stringValue, props);
+            properties.put(stringKey, stringValue);
+        }
+        super.processProperties(beanFactoryToProcess, props);
     }
 }

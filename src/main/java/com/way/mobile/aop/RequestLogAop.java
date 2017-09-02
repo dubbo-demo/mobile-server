@@ -30,6 +30,20 @@ import java.util.Map;
 public class RequestLogAop extends BaseController {
 
 
+    /**
+     * @param src 源字符串
+     * @return 字符串，将src的第一个字母转换为大写，src为空时返回null
+     */
+    private static String change(String src) {
+        if (src != null) {
+            StringBuffer sb = new StringBuffer(src);
+            sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
+            return sb.toString();
+        } else {
+            return null;
+        }
+    }
+
     public Object loggerUserRequest(ProceedingJoinPoint joinPoint) throws Throwable {
         try {
 
@@ -161,21 +175,6 @@ public class RequestLogAop extends BaseController {
         }
 
         return null;
-    }
-
-
-    /**
-     * @param src 源字符串
-     * @return 字符串，将src的第一个字母转换为大写，src为空时返回null
-     */
-    private static String change(String src) {
-        if (src != null) {
-            StringBuffer sb = new StringBuffer(src);
-            sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
-            return sb.toString();
-        } else {
-            return null;
-        }
     }
 
 }
