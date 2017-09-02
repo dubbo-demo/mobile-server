@@ -21,11 +21,11 @@ import java.util.Map;
 
 /**
  * INFO: mobile统一用户请求日志
- * User: zhaokai
- * Date: 2016/10-31
- * Time: 9:19
- * Version: 1.0
- * History: <p>如果有修改过程，请记录</P>
+ * 〈功能详细描述〉
+ *
+ * @author xinpei.xu
+ * @see [相关类/方法]（可选）
+ * @since [产品/模块版本] （可选）
  */
 public class RequestLogAop extends BaseController {
 
