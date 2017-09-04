@@ -26,7 +26,7 @@ public class ApiAround {
         clock.start(); // 计时开始
         HttpServletRequest httpServletRequest = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         if (httpServletRequest == null) {
-            return joinPoint.proceed();
+            return  joinPoint.proceed();
         }
         // 拦截的实体类
         Object target = joinPoint.getTarget();
