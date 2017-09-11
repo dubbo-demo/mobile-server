@@ -34,6 +34,12 @@
             <artifactId>member-service-api</artifactId>
             <version>${member-service.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.bingoohuang</groupId>
+            <artifactId>patchca</artifactId>
+            <version>${patchca.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>mobile-server</finalName>

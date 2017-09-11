@@ -1,20 +1,20 @@
 package com.way.mobile.controller.user;
 
-import com.myph.base.common.SmsTemplateEnum;
-import com.myph.common.constant.Constants;
-import com.myph.common.exception.DataValidateException;
-import com.myph.common.log.MyphLogger;
-import com.myph.common.redis.CacheService;
-import com.myph.common.result.ServiceResult;
-import com.myph.common.util.IpUtil;
-import com.myph.common.util.Validater;
-import com.myph.member.infor.dto.MemberDto;
-import com.myph.member.infor.dto.MemberResetPasswordDto;
-import com.myph.mobile.common.constant.IConstantsConfig;
-import com.myph.mobile.common.patchca.RedisPatchcaStore;
-import com.myph.mobile.common.util.TokenJedisUtils;
-import com.myph.mobile.service.member.RegistService;
-import com.myph.sms.service.SmsService;
+import com.way.base.common.SmsTemplateEnum;
+import com.way.common.constant.Constants;
+import com.way.common.exception.DataValidateException;
+import com.way.common.log.WayLogger;
+import com.way.common.redis.CacheService;
+import com.way.common.result.ServiceResult;
+import com.way.common.util.IpUtil;
+import com.way.common.util.Validater;
+import com.way.member.user.dto.MemberDto;
+import com.way.member.user.dto.MemberResetPasswordDto;
+import com.way.mobile.common.constant.IConstantsConfig;
+import com.way.mobile.common.patchca.RedisPatchcaStore;
+import com.way.mobile.common.util.TokenJedisUtils;
+import com.way.mobile.service.user.RegistService;
+import com.way.base.sms.service.SmsService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,6 +26,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
+/**
+ *
+ * @ClassName: RegistController
+ * @Description: 注册Controller
+ * @author: xinpei.xu
+ * @date: 2017/08/17 22:30
+ *
+ */
 @Controller
 public class RegistController {
 	
@@ -42,12 +50,12 @@ public class RegistController {
 	public ServiceResult<String> getVerificationCode(final HttpServletRequest request, @ModelAttribute MemberDto params) {
 		// 设置设备号
 		params.setDeviceNo(request.getHeader("deviceNo"));
-		MyphLogger.info("生成图片验证码：/getVerificationCode.htm" + ",参数："+ params);
+		WayLogger.info("生成图片验证码：/getVerificationCode.htm" + ",参数："+ params);
 		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
 		try {
 			// 校验设备号是否为空
 			if (StringUtils.isBlank(params.getDeviceNo()) || "null".equals(params.getDeviceNo())) {
-				MyphLogger.error("发送短信验证码........异常，deviceNo设备号不能为空");
+				WayLogger.error("发送短信验证码........异常，deviceNo设备号不能为空");
 				serviceResult.setCode(ServiceResult.ERROR_CODE);
 				serviceResult.setMessage("设备号不能为空");
 				return serviceResult;
@@ -69,11 +77,11 @@ public class RegistController {
 				serviceResult.setMessage("发送短信验证码失败");
 			}
 		}catch (DataValidateException e) {
-			MyphLogger.error(e,"发送短信验证码异常");
+			WayLogger.error(e,"发送短信验证码异常");
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
 			serviceResult.setMessage(e.getMessage());
 		}catch (Exception e) {
-			MyphLogger.error(e,"发送短信验证码异常");
+			WayLogger.error(e,"发送短信验证码异常");
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
 			serviceResult.setMessage("失败");
 		}
@@ -136,14 +144,14 @@ public class RegistController {
 		} catch (DataValidateException e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
 			serviceResult.setMessage(e.getMessage());
-			MyphLogger.error(e,"注册失败");
+			WayLogger.error(e,"注册失败");
 		} catch (Exception e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
 			serviceResult.setMessage("注册失败");
-			MyphLogger.error(e,"注册失败");
+			WayLogger.error(e,"注册失败");
 		} finally {
 			memberDto.setPassword(StringUtils.EMPTY);
-			MyphLogger.access("注册：/regist.htm" + ",参数："+ memberDto);
+			WayLogger.access("注册：/regist.htm" + ",参数："+ memberDto);
 		}
 		return serviceResult;
 	}
@@ -172,13 +180,13 @@ public class RegistController {
 		} catch (DataValidateException e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
 			serviceResult.setMessage(e.getMessage());
-			MyphLogger.error(e,"忘记密码失败");
+			WayLogger.error(e,"忘记密码失败");
 		} catch (Exception e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
 			serviceResult.setMessage("忘记密码失败");
-			MyphLogger.error(e,"忘记密码失败");
+			WayLogger.error(e,"忘记密码失败");
 		} finally {
-			MyphLogger.access("忘记密码：/forgetPassword.do" + ",参数："+ memberDto);
+			WayLogger.access("忘记密码：/forgetPassword.do" + ",参数："+ memberDto);
 		}
 		return serviceResult;
 	}
@@ -230,13 +238,13 @@ public class RegistController {
 		} catch (DataValidateException e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
 			serviceResult.setMessage(e.getMessage());
-			MyphLogger.error(e,"重置密码失败");
+			WayLogger.error(e,"重置密码失败");
 		} catch (Exception e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
 			serviceResult.setMessage("重置密码失败");
-			MyphLogger.error(e,"重置密码失败");
+			WayLogger.error(e,"重置密码失败");
 		} finally {
-			MyphLogger.access("重置密码：/forgetPassword.do");
+			WayLogger.access("重置密码：/forgetPassword.do");
 		}
 		return serviceResult;
 	}

@@ -1,0 +1,225 @@
+package com.way.mobile.service.user.impl;
+
+import com.way.common.cache.RedisRootNameSpace;
+import com.way.common.constant.Constants;
+import com.way.common.constant.NumberConstants;
+import com.way.common.exception.DataValidateException;
+import com.way.common.redis.CacheService;
+import com.way.common.result.ServiceResult;
+import com.way.common.util.CommonUtils;
+import com.way.common.util.DateUtils;
+import com.way.common.util.Validater;
+import com.way.member.base.dto.MemberVerifyDto;
+import com.way.member.common.constants.IConstantsConfig;
+import com.way.member.common.constants.IResponseMsg;
+import com.way.member.common.constants.IVerificationCodeType;
+import com.way.member.infor.dto.MemberDto;
+import com.way.member.infor.dto.MemberResetPasswordDto;
+import com.way.member.infor.service.MemberService;
+import com.way.member.infor.service.PasswordService;
+import com.way.member.infor.service.RegistLogService;
+import com.way.mobile.common.util.PropertyConfig;
+import com.way.mobile.service.user.LoginService;
+import com.way.mobile.service.user.RegistService;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.Random;
+
+/**
+ *
+ * @ClassName: RegistServiceImpl
+ * @Description: 注册ServiceImpl
+ * @author: xinpei.xu
+ * @date: 2017/08/19 19:12
+ *
+ */
+@Service
+public class RegistServiceImpl implements RegistService {
+
+	@Autowired
+	private MemberService memberService;
+	@Autowired
+	private RegistLogService registLogService;
+	@Autowired
+	private PropertyConfig propertyConfig;
+	@Autowired
+	private LoginService loginService;
+	@Autowired
+	private PasswordService passwordService;
+
+	/**
+	 * @Title: sendCode
+	 * @Description: 生成短信验证码
+	 * @return: void
+	 * @throws DataValidateException
+	 */
+	public ServiceResult<String> sendCode(MemberDto memberDto) throws DataValidateException {
+		// 验证手机号是否已经注册
+		ServiceResult<MemberDto> m = memberService.loadMapByMobile(memberDto.getPhone());
+		String smsCodeType = IConstantsConfig.JEDIS_HEADER_REGIST_CODE;
+		if (IVerificationCodeType.FORGET_PASSWORD.equals(memberDto.getType())) {// 忘记密码的时候，校验
+			smsCodeType = IConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE;
+			// 未注册返回失败
+			if (null == m || m.getData() == null)
+				throw new DataValidateException("手机号码不存在");
+		} else if (IVerificationCodeType.REGIST.equals(memberDto.getType())) {// 注册时候，发送验证码的校验
+			// 校验手机号码是否已注册
+			if (m != null && m.getData() != null) {
+				if (m.getData().getMemberType() != null && m.getData().getMemberSource() != Constants.NO_INT)
+					throw new DataValidateException("手机号码存在");
+			}
+		}
+		String key = smsCodeType + memberDto.getPhone();
+		// 校验发送验证码的时间间隔
+		long surplusExpire = CacheService.KeyBase.getExprise(key);// 剩余有效时间
+		long usedExpire = propertyConfig.getSmsCodeExpire() - surplusExpire;// 已过时间
+		if (surplusExpire > 0 && usedExpire < propertyConfig.getSmsCodeExpireInterval())
+			throw new DataValidateException(IResponseMsg.SEND_CODE_MINUTE);
+
+		if (!memberDto.getType().equals(IVerificationCodeType.REGIST)
+				&& !memberDto.getType().equals(IVerificationCodeType.FORGET_PASSWORD)) {
+			throw new DataValidateException("发送失败，未知的验证码类型，type：" + memberDto.getType());
+		}
+		// 生成6位随机数
+		Random random = new Random();
+		String code = (random.nextDouble() + "").substring(2, 8);
+		// 验证码存到redis中
+		CacheService.StringKey.set(key, code, RedisRootNameSpace.UnitEnum.FIFTEEN_MIN);
+		return ServiceResult.newSuccess(code);
+	}
+	
+	public ServiceResult<MemberDto> regist(MemberDto memberDto) throws DataValidateException {
+		String mobile = memberDto.getPhone();
+		String key = IConstantsConfig.JEDIS_HEADER_REGIST_CODE + mobile;
+		String code = CacheService.StringKey.getObject(key, String.class);
+		if (StringUtils.isBlank(code))
+			throw new DataValidateException("请重新获取短信验证码");
+		if (!code.equals(memberDto.getVerificationCode()))
+			throw new DataValidateException("短信验证码不正确");
+		// 验证码校验成功，移除redis中的验证码
+		CacheService.KeyBase.delete(key);
+		ServiceResult<MemberDto> memberRes  = memberService.loadMapByMobile(memberDto.getPhone());
+		if (null != memberRes.getData()){ // 该手机号已经注册
+			if(memberRes.getData().getMemberSource() == Constants.NO_INT){
+				memberDto.setMemberType(Constants.NO);
+				return ServiceResult.newSuccess(memberDto);
+			}else{
+				throw new DataValidateException("手机号已注册");
+			}
+		}
+		// 新用户
+		memberDto.setMemberType(Constants.YES);
+		ServiceResult<MemberDto> memberDtoSer = memberService.memberRegist(memberDto);
+		// 保存准入信息表
+		saveMemberVerify(memberDtoSer);
+		// 注册成功调用登录接口登录，并异步保存用户登录信息
+		loginService.login(memberDto);
+		return ServiceResult.newSuccess(memberDto);
+	}
+	
+	/**
+	 * 保存准入信息表
+	 * @param memberDto
+	 */
+	private void saveMemberVerify(ServiceResult<MemberDto> memberDtoSer) {
+		if(ServiceResult.SUCCESS_CODE == memberDtoSer.getCode() && memberDtoSer.getData() != null){
+			// 初始化数据
+			MemberVerifyDto memberVerifyDto = new MemberVerifyDto();
+			memberVerifyDto = CommonUtils.transform(memberDtoSer.getData(), MemberVerifyDto.class);
+			// 必要数据
+			// 来源
+			memberVerifyDto.setMemberSource(NumberConstants.NUM_ONE);
+			// 创建时间
+			memberVerifyDto.setCreateTime(new Date());
+		}
+	}
+	
+	/**
+	 * 忘记密码
+	 * @param memberDto
+	 * @throws DataValidateException 
+	 */
+	public  ServiceResult<String> forgetPassword(MemberDto memberDto) throws DataValidateException {
+		String mobile = memberDto.getPhone();
+		// 校验手机号
+		if (!Validater.isMobileNew(mobile))
+			throw new DataValidateException("手机号不正确");
+		if (StringUtils.isEmpty(memberDto.getVerificationCode()))
+			throw new DataValidateException("请输入短信验证码");
+		if (StringUtils.isEmpty(memberDto.getPassword()))
+			throw new DataValidateException("请输入密码");
+
+		// 校验验证码
+		String key = IConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE + mobile;
+		String code = CacheService.StringKey.getObject(key, String.class);
+		if (code == null || code == "")
+			throw new DataValidateException("短信验证码已失效");
+		if (!memberDto.getVerificationCode().equals(code))
+			throw new DataValidateException("短信验证码不正确");
+
+		// 校验用户是否存在
+		ServiceResult<MemberDto> memberRes = memberService.loadMapByMobile(mobile);
+		// 用户不存在
+		if (memberRes.getData() == null)
+			throw new DataValidateException("手机号未注册");
+		// 用户存在
+		ServiceResult<String> passSer = passwordService.queryPasswdById(memberRes.getData().getMemberId());
+		if(StringUtils.isBlank(passSer.getData())){
+			memberDto.setMemberId(memberRes.getData().getMemberId());
+			// 老用户插入密码表
+			passwordService.savePasswordInfo(memberDto);
+		}else{
+			// 新用户更新密码表
+			memberService.updatePassword(memberRes.getData().getMemberId(), memberDto.getPassword());
+		}
+		// 验证码校验成功，移除redis中的验证码
+		CacheService.KeyBase.delete(key);
+		return ServiceResult.newSuccess();
+	}
+	
+	/**
+	 * 重置密码
+	 * @param memberDto
+	 * @throws DataValidateException 
+	 */
+	public ServiceResult<String> resetPassword(MemberResetPasswordDto memberResetPasswordDto) throws DataValidateException {
+		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
+		/** 校验密码是否正确 */
+		ServiceResult<String> passRes = passwordService.queryCurPasswdById(memberResetPasswordDto.getMemberId(), memberResetPasswordDto.getCurPasssword());
+		if(StringUtils.isBlank(passRes.getData())){
+			throw new DataValidateException("旧密码不正确");
+		}
+		// 更新密码
+		memberService.updatePassword(memberResetPasswordDto.getMemberId(), memberResetPasswordDto.getNewPassword());
+		return serviceResult;
+	}
+	
+	/**
+	 * @Title: checkResetPasswordFailTimes
+	 * @Description: 校验重置密码失败次数是否大于允许的最大值
+	 * @return: int
+	 * @throws DataValidateException 
+	 */
+	public int checkResetPasswordFailTimes(Object ob, String key) throws DataValidateException {
+		int tempFailTimes = 0;// 临时记录重置密码失败次数
+		if (null != ob) { // 已经存在该用户重置密码失败的信息
+			MemberResetPasswordDto resetPasswordFailVO = (MemberResetPasswordDto) ob;
+			if (propertyConfig.getPermitResetPasswordTimes() == resetPasswordFailVO.getResetPasswordFailTimes()) { // 重置密码失败次数达到允许的最大次数
+				Date lastResetPasswordFailTime = DateUtils.timeStamp2Date(""+resetPasswordFailVO.getLastResetPasswordFailTime());
+				// 默认时间间隔的单位为小时
+				long subHours = DateUtils.getSubHours(lastResetPasswordFailTime);
+					if (subHours >= propertyConfig.getResetPasswordFailInterval()) { // 时间间隔达到最大间隔时间
+						CacheService.KeyBase.delete(key);
+					} else { // 本次重置密码的时间间隔小于允许重置密码的时间间隔
+						throw new DataValidateException("密码修改过于频繁，请稍后重试");
+					}
+			} else { // 重置密码失败次数未达到允许的最大次数
+				tempFailTimes = resetPasswordFailVO.getResetPasswordFailTimes();
+			}
+		}
+		return tempFailTimes;
+	}
+}

@@ -30,7 +30,7 @@ import java.util.Random;
  * @ClassName: PatchcaImageCode
  * @Description: Patchca生成图片验证码
  * @author: xinpei.xu
- * @date: 2016年10月28日 下午5:01:50
+ * @date: 2017/08/17 20:23
  */
 public class PatchcaImageCode {
 	private static Logger logger = LoggerFactory.getLogger(PatchcaImageCode.class);
@@ -92,8 +92,6 @@ public class PatchcaImageCode {
 	/**
 	 * @ClassName: MyCustomBackgroundFactory
 	 * @Description: 自定义验证码图片背景,主要画一些噪点和干扰线
-	 * @author: yunlei.hua
-	 * @date: 2016年1月25日 下午5:17:12
 	 */
 	private class MyCustomBackgroundFactory implements BackgroundFactory {
 		private Random random = new Random();

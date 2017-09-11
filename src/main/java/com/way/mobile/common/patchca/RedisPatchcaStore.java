@@ -1,7 +1,7 @@
 package com.way.mobile.common.patchca;
 
-import com.myph.common.cache.RedisRootNameSpace;
-import com.myph.common.redis.CacheService;
+import com.way.common.cache.RedisRootNameSpace;
+import com.way.common.redis.CacheService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @ClassName: RedisPatchcaStore
  * @Description: 使用redis存储验证码
- * @author: chao.xu
- * @date: 2016年10月28日 上午10:13:22
+ * @author: xinpei.xu
+ * @date: 2017/08/17 20:52
  */
 public class RedisPatchcaStore {
 	private static Logger logger = LoggerFactory.getLogger(RedisPatchcaStore.class);

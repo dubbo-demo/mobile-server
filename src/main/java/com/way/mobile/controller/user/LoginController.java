@@ -1,8 +1,8 @@
 package com.way.mobile.controller.user;
 
-import com.myph.member.infor.dto.MemberDto;
-import com.myph.mobile.common.patchca.RedisPatchcaStore;
-import com.myph.mobile.service.member.LoginService;
+import com.way.member.user.dto.MemberDto;
+import com.way.mobile.common.patchca.RedisPatchcaStore;
+import com.way.mobile.service.user.LoginService;
 import com.way.common.exception.DataValidateException;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
@@ -19,6 +19,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ *
+ * @ClassName: LoginController
+ * @Description: 登陆Controller
+ * @author: xinpei.xu
+ * @date: 2017/08/17 22:49
+ *
+ */
 @Controller
 public class LoginController {
 
