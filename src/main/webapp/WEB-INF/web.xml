@@ -1,28 +1,120 @@
-<!DOCTYPE web-app PUBLIC
-        "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-        "http://java.sun.com/dtd/web-app_2_3.dtd" >
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+    <display-name>Mobile Server</display-name>
 
-<web-app>
-    <display-name>web</display-name>
-
-    <!--<context-param>-->
-    <!--<param-name>webAppRootKey</param-name>-->
-    <!--<param-value>central-server.root</param-value>-->
-    <!--</context-param>-->
+    <context-param>
+        <param-name>webAppRootKey</param-name>
+        <param-value>Mobile-Server.root</param-value>
+    </context-param>
 
     <!-- 添加日志监听器 -->
     <context-param>
         <param-name>logbackConfigLocation</param-name>
         <param-value>classpath:logback.xml</param-value>
     </context-param>
-
+    <listener>
+        <listener-class>ch.qos.logback.ext.spring.web.LogbackConfigListener</listener-class>
+    </listener>
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>
-            classpath:spring/applicationContext-base.xml
+            classpath:spring/applicationContext-*.xml
             classpath:spring/dubbo-consumer-parent.xml
         </param-value>
     </context-param>
 
+    <!-- Spring 刷新Introspector防止内存泄露 -->
+    <listener>
+        <listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+    </listener>
+    <listener>
+        <listener-class>
+            com.way.mobile.listener.CustomContextLoaderListener
+        </listener-class>
+    </listener>
+
+    <filter>
+        <filter-name>SetCharacterEncoding</filter-name>
+        <filter-class>
+            org.springframework.web.filter.CharacterEncodingFilter
+        </filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>utf-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+
+    <filter-mapping>
+        <filter-name>SetCharacterEncoding</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>AntiXssFilter</filter-name>
+        <filter-class>com.way.mobile.filter.AntiXssFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AntiXssFilter</filter-name>
+        <url-pattern>*.htm</url-pattern>
+        <url-pattern>*.do</url-pattern>
+    </filter-mapping>
+
+    <!-- 登录过滤器 -->
+    <filter>
+        <filter-name>MobileLoginFilter</filter-name>
+        <filter-class>com.way.mobile.filter.MobileLoginFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>MobileLoginFilter</filter-name>
+        <url-pattern>*.htm</url-pattern>
+        <url-pattern>*.do</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>mvc</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>
+                classpath:spring/spring-app-mvc.xml
+            </param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>mvc</servlet-name>
+        <!--支持动态和静态请求 以后方便nginx缓存处理-->
+        <url-pattern>*.htm</url-pattern>
+        <url-pattern>*.do</url-pattern>
+    </servlet-mapping>
+
+
+    <session-config>
+        <session-timeout>420</session-timeout>
+    </session-config>
+
+    <welcome-file-list>
+        <welcome-file>monitor.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!-- Error Page定义 -->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error/404.html</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/error/500.html</location>
+    </error-page>
 </web-app>
