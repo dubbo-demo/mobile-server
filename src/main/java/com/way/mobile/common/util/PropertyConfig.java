@@ -40,18 +40,6 @@ public class PropertyConfig {
 	@Value("${reset.password.fail.interval}")
 	private int resetPasswordFailInterval;
 
-	@Value("${OuterInterface.url}")
-	private String outerInfaceUrl;
-
-	@Value("${creditCenter.checkUser.url}")
-	private String creditCenterUrl;
-	
-	@Value("${data.step}")
-	private int dataStep;
-
-	@Value("${crawlCenter.url}")
-	private String crawlingUrl;
-
 	@Value("${mobileCenter.url}")
     private String mobileUrl;
 	   
@@ -109,38 +97,6 @@ public class PropertyConfig {
 
 	public void setResetPasswordFailInterval(int resetPasswordFailInterval) {
 		this.resetPasswordFailInterval = resetPasswordFailInterval;
-	}
-
-	public String getOuterInfaceUrl() {
-		return outerInfaceUrl;
-	}
-
-	public void setOuterInfaceUrl(String outerInfaceUrl) {
-		this.outerInfaceUrl = outerInfaceUrl;
-	}
-
-	public String getCreditCenterUrl() {
-		return creditCenterUrl;
-	}
-
-	public void setCreditCenterUrl(String creditCenterUrl) {
-		this.creditCenterUrl = creditCenterUrl;
-	}
-
-	public int getDataStep() {
-		return dataStep;
-	}
-
-	public void setDataStep(int dataStep) {
-		this.dataStep = dataStep;
-	}
-
-	public String getCrawlingUrl() {
-		return crawlingUrl;
-	}
-
-	public void setCrawlingUrl(String crawlingUrl) {
-		this.crawlingUrl = crawlingUrl;
 	}
 
     public String getMobileUrl() {

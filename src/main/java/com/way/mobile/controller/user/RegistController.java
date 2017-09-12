@@ -39,6 +39,7 @@ public class RegistController {
 	
 	@Autowired
 	private RegistService registService;
+
 	@Autowired
 	private SmsService smsService;
 	
