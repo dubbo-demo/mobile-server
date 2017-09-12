@@ -1,9 +1,9 @@
-package com.way.mobile.service.user;
+package com.way.mobile.service.member;
 
 import com.way.common.exception.DataValidateException;
 import com.way.common.result.ServiceResult;
-import com.way.member.user.dto.MemberDto;
-import com.way.member.user.dto.MemberResetPasswordDto;
+import com.way.member.member.dto.MemberDto;
+import com.way.member.member.dto.MemberResetPasswordDto;
 
 /**
  * 

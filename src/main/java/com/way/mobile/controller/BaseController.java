@@ -43,7 +43,7 @@ public abstract class BaseController {
             String version = request.getHeader("version"); // 版本号
             String devType = request.getHeader("client"); // 终端类型,iPhone,iPad, android
             if (devType == null) {
-                String userAgent = request.getHeader("user-agent");
+                String userAgent = request.getHeader("member-agent");
                 if (userAgent != null && userAgent.toLowerCase().contains("android")) {
                     devType = "android";
                 } else if (userAgent != null && userAgent.toLowerCase().contains("iphone")) {

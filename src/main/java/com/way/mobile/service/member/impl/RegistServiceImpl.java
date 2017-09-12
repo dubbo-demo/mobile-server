@@ -1,26 +1,23 @@
-package com.way.mobile.service.user.impl;
+package com.way.mobile.service.member.impl;
 
 import com.way.common.cache.RedisRootNameSpace;
 import com.way.common.constant.Constants;
-import com.way.common.constant.NumberConstants;
 import com.way.common.exception.DataValidateException;
 import com.way.common.redis.CacheService;
 import com.way.common.result.ServiceResult;
-import com.way.common.util.CommonUtils;
 import com.way.common.util.DateUtils;
 import com.way.common.util.Validater;
-import com.way.member.base.dto.MemberVerifyDto;
-import com.way.member.common.constants.IConstantsConfig;
-import com.way.member.common.constants.IResponseMsg;
-import com.way.member.common.constants.IVerificationCodeType;
-import com.way.member.infor.dto.MemberDto;
-import com.way.member.infor.dto.MemberResetPasswordDto;
-import com.way.member.infor.service.MemberService;
-import com.way.member.infor.service.PasswordService;
-import com.way.member.infor.service.RegistLogService;
+import com.way.member.member.service.MemberService;
+import com.way.member.member.service.PasswordService;
+import com.way.member.member.service.RegistLogService;
+import com.way.member.member.dto.MemberDto;
+import com.way.member.member.dto.MemberResetPasswordDto;
+import com.way.mobile.common.constant.ConstantsConfig;
+import com.way.mobile.common.constant.ResponseMsg;
+import com.way.mobile.common.constant.VerificationCodeType;
 import com.way.mobile.common.util.PropertyConfig;
-import com.way.mobile.service.user.LoginService;
-import com.way.mobile.service.user.RegistService;
+import com.way.mobile.service.member.LoginService;
+import com.way.mobile.service.member.RegistService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,13 +56,13 @@ public class RegistServiceImpl implements RegistService {
 	public ServiceResult<String> sendCode(MemberDto memberDto) throws DataValidateException {
 		// 验证手机号是否已经注册
 		ServiceResult<MemberDto> m = memberService.loadMapByMobile(memberDto.getPhone());
-		String smsCodeType = IConstantsConfig.JEDIS_HEADER_REGIST_CODE;
-		if (IVerificationCodeType.FORGET_PASSWORD.equals(memberDto.getType())) {// 忘记密码的时候，校验
-			smsCodeType = IConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE;
+		String smsCodeType = ConstantsConfig.JEDIS_HEADER_REGIST_CODE;
+		if (VerificationCodeType.FORGET_PASSWORD.equals(memberDto.getType())) {// 忘记密码的时候，校验
+			smsCodeType = ConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE;
 			// 未注册返回失败
 			if (null == m || m.getData() == null)
 				throw new DataValidateException("手机号码不存在");
-		} else if (IVerificationCodeType.REGIST.equals(memberDto.getType())) {// 注册时候，发送验证码的校验
+		} else if (VerificationCodeType.REGIST.equals(memberDto.getType())) {// 注册时候，发送验证码的校验
 			// 校验手机号码是否已注册
 			if (m != null && m.getData() != null) {
 				if (m.getData().getMemberType() != null && m.getData().getMemberSource() != Constants.NO_INT)
@@ -77,10 +74,10 @@ public class RegistServiceImpl implements RegistService {
 		long surplusExpire = CacheService.KeyBase.getExprise(key);// 剩余有效时间
 		long usedExpire = propertyConfig.getSmsCodeExpire() - surplusExpire;// 已过时间
 		if (surplusExpire > 0 && usedExpire < propertyConfig.getSmsCodeExpireInterval())
-			throw new DataValidateException(IResponseMsg.SEND_CODE_MINUTE);
+			throw new DataValidateException(ResponseMsg.SEND_CODE_MINUTE);
 
-		if (!memberDto.getType().equals(IVerificationCodeType.REGIST)
-				&& !memberDto.getType().equals(IVerificationCodeType.FORGET_PASSWORD)) {
+		if (!memberDto.getType().equals(VerificationCodeType.REGIST)
+				&& !memberDto.getType().equals(VerificationCodeType.FORGET_PASSWORD)) {
 			throw new DataValidateException("发送失败，未知的验证码类型，type：" + memberDto.getType());
 		}
 		// 生成6位随机数
@@ -90,10 +87,16 @@ public class RegistServiceImpl implements RegistService {
 		CacheService.StringKey.set(key, code, RedisRootNameSpace.UnitEnum.FIFTEEN_MIN);
 		return ServiceResult.newSuccess(code);
 	}
-	
+
+	/**
+	 * 用户注册
+	 * @param memberDto
+	 * @return
+	 * @throws DataValidateException
+	 */
 	public ServiceResult<MemberDto> regist(MemberDto memberDto) throws DataValidateException {
 		String mobile = memberDto.getPhone();
-		String key = IConstantsConfig.JEDIS_HEADER_REGIST_CODE + mobile;
+		String key = ConstantsConfig.JEDIS_HEADER_REGIST_CODE + mobile;
 		String code = CacheService.StringKey.getObject(key, String.class);
 		if (StringUtils.isBlank(code))
 			throw new DataValidateException("请重新获取短信验证码");
@@ -113,28 +116,9 @@ public class RegistServiceImpl implements RegistService {
 		// 新用户
 		memberDto.setMemberType(Constants.YES);
 		ServiceResult<MemberDto> memberDtoSer = memberService.memberRegist(memberDto);
-		// 保存准入信息表
-		saveMemberVerify(memberDtoSer);
 		// 注册成功调用登录接口登录，并异步保存用户登录信息
 		loginService.login(memberDto);
 		return ServiceResult.newSuccess(memberDto);
-	}
-	
-	/**
-	 * 保存准入信息表
-	 * @param memberDto
-	 */
-	private void saveMemberVerify(ServiceResult<MemberDto> memberDtoSer) {
-		if(ServiceResult.SUCCESS_CODE == memberDtoSer.getCode() && memberDtoSer.getData() != null){
-			// 初始化数据
-			MemberVerifyDto memberVerifyDto = new MemberVerifyDto();
-			memberVerifyDto = CommonUtils.transform(memberDtoSer.getData(), MemberVerifyDto.class);
-			// 必要数据
-			// 来源
-			memberVerifyDto.setMemberSource(NumberConstants.NUM_ONE);
-			// 创建时间
-			memberVerifyDto.setCreateTime(new Date());
-		}
 	}
 	
 	/**
@@ -153,7 +137,7 @@ public class RegistServiceImpl implements RegistService {
 			throw new DataValidateException("请输入密码");
 
 		// 校验验证码
-		String key = IConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE + mobile;
+		String key = ConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE + mobile;
 		String code = CacheService.StringKey.getObject(key, String.class);
 		if (code == null || code == "")
 			throw new DataValidateException("短信验证码已失效");
@@ -182,7 +166,7 @@ public class RegistServiceImpl implements RegistService {
 	
 	/**
 	 * 重置密码
-	 * @param memberDto
+	 * @param memberResetPasswordDto
 	 * @throws DataValidateException 
 	 */
 	public ServiceResult<String> resetPassword(MemberResetPasswordDto memberResetPasswordDto) throws DataValidateException {

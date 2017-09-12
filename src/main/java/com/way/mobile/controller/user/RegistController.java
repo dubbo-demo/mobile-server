@@ -8,12 +8,12 @@ import com.way.common.redis.CacheService;
 import com.way.common.result.ServiceResult;
 import com.way.common.util.IpUtil;
 import com.way.common.util.Validater;
-import com.way.member.user.dto.MemberDto;
-import com.way.member.user.dto.MemberResetPasswordDto;
-import com.way.mobile.common.constant.IConstantsConfig;
+import com.way.member.member.dto.MemberDto;
+import com.way.member.member.dto.MemberResetPasswordDto;
+import com.way.mobile.common.constant.ConstantsConfig;
 import com.way.mobile.common.patchca.RedisPatchcaStore;
 import com.way.mobile.common.util.TokenJedisUtils;
-import com.way.mobile.service.user.RegistService;
+import com.way.mobile.service.member.RegistService;
 import com.way.base.sms.service.SmsService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,7 +175,7 @@ public class RegistController {
 			serviceResult = registService.forgetPassword(memberDto);
 			if (serviceResult.getCode() == ServiceResult.SUCCESS_CODE) {
 				// 密码修改成功，删除redis中登录失败的记录
-				CacheService.KeyBase.delete(IConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhone());
+				CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhone());
 			}
 		} catch (DataValidateException e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
@@ -220,7 +220,7 @@ public class RegistController {
 			}
 			serviceResult = registService.resetPassword(memberResetPasswordDto);
 			// 获取重置密码次数
-			String key = IConstantsConfig.JEDIS_HEADER_RESET_PASSWORD_FAIL + memberResetPasswordDto.getMemberId();
+			String key = ConstantsConfig.JEDIS_HEADER_RESET_PASSWORD_FAIL + memberResetPasswordDto.getMemberId();
 			Object ob = CacheService.StringKey.getObject(key, Object.class);
 			// 临时记录重置密码失败次数
 			int tempFailTimes = registService.checkResetPasswordFailTimes(ob, key);

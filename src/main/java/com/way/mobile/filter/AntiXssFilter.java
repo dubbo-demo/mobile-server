@@ -189,7 +189,7 @@ public class AntiXssFilter implements Filter {
     private boolean getIncludeSqlSpecialCharsFlag(String s) {
         // 过滤掉的sql关键字，可以手动添加
         String badStr = "'|exec |execute |insert |select |delete |update |count|drop |master|truncate |"
-                + "declare |sitename|net user|xp_cmdshell|like'%|like '%|insert |create |"
+                + "declare |sitename|net member|xp_cmdshell|like'%|like '%|insert |create |"
                 + "table|grant|use |group_concat|column_name|"
                 + "information_schema.columns|table_schema|union |where |order by |group by ";
         String[] badStrs = badStr.split("\\|");

@@ -1,29 +1,17 @@
-/**   
- * @Title: MemberServiceImpl.java 
- * @Package: com.myph.member.infor.service 
- * @company: 麦芽金服
- * @Description: 麦芽普惠APP会员资料相关处理类
- * @author 徐超
- * @date 2016年10月27日 下午14:05:00
- * @version V1.0   
- */
-package com.way.mobile.service.user.impl;
+package com.way.mobile.service.member.impl;
 
-import com.way.common.constant.Constants;
-import com.way.common.constant.NumberConstants;
 import com.way.common.exception.DataValidateException;
 import com.way.common.redis.CacheService;
 import com.way.common.result.ServiceResult;
 import com.way.common.util.DateUtils;
-import com.way.member.user.dto.MemberDto;
-import com.way.member.user.dto.MemberLoginFailInfoDto;
-import com.way.member.user.service.MemberService;
-import com.way.mobile.common.constant.IConstantsConfig;
+import com.way.member.member.dto.MemberDto;
+import com.way.member.member.dto.MemberLoginFailInfoDto;
+import com.way.member.member.service.MemberService;
+import com.way.mobile.common.constant.ConstantsConfig;
 import com.way.mobile.common.po.LoginTokenInfo;
 import com.way.mobile.common.util.PropertyConfig;
 import com.way.mobile.common.util.TokenJedisUtils;
-import com.way.mobile.service.user.LoginService;
-import org.apache.commons.lang3.StringUtils;
+import com.way.mobile.service.member.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +48,7 @@ public class LoginServiceImpl implements LoginService {
 			MemberLoginFailInfoDto loginFailVO = (MemberLoginFailInfoDto) ob;
 			if (propertyConfig.getPermitLoginTimes() == loginFailVO.getLoginFailTimes()) { // 登录失败次数达到允许最大登录次数
 				Date lastLoginFailTime = DateUtils.timeStamp2Date("" + loginFailVO.getLastLoginFailTime());
-				if (propertyConfig.getLoginFailIntervalUnit() == IConstantsConfig.DATE_TIME_UNIT_DAY) { // 如果时间间隔的单位为天
+				if (propertyConfig.getLoginFailIntervalUnit() == ConstantsConfig.DATE_TIME_UNIT_DAY) { // 如果时间间隔的单位为天
 					long subDay = DateUtils.getSubDays(lastLoginFailTime);
 					if (subDay >= propertyConfig.getLoginFailInterval()) { // 时间间隔达到最大间隔日期
 						CacheService.KeyBase.delete(key);
@@ -90,7 +78,7 @@ public class LoginServiceImpl implements LoginService {
 	 */
 	public ServiceResult<MemberDto> login(MemberDto memberDto) throws DataValidateException {
 		// 登录失败的KEY键
-		String key = IConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhone();
+		String key = ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhone();
 		Object ob = CacheService.StringKey.getObject(key, Object.class);
 		// 临时记录登录失败次数
 		int tempFailTimes = checkLoginFailTimes(ob, key);
@@ -125,16 +113,7 @@ public class LoginServiceImpl implements LoginService {
 				}
 				String newToken = TokenJedisUtils.putTokenInfoExpire(resultDto.getMemberId() + "");
 				resultDto.setToken(newToken);
-				// 是否是老用户 0:线下,1:App
-				if(resultDto.getMemberSource() == NumberConstants.NUM_ZERO){
-					resultDto.setMemberType(Constants.NO);
-				} else{
-					resultDto.setMemberType(Constants.YES);
-					String isSubmitForApproval = Constants.NO;
-					// 初始化资料明细完成步骤
-					memberService.initDataCompletValues(memberDto.getMemberId(), isSubmitForApproval);
-				}
-			} else if (ServiceResult.ERROR_CODE == result.getCode()) { 
+			} else if (ServiceResult.ERROR_CODE == result.getCode()) {
 				// 密码错误登录失败，登录失败次数+1，最后登录失败时间改为当前时间
 				MemberLoginFailInfoDto loginFailVO = new MemberLoginFailInfoDto();
 				loginFailVO.setLastLoginFailTime(new Date().getTime());

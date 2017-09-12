@@ -1,12 +1,12 @@
 package com.way.mobile.common.constant;
 
 /**
- * @ClassName: IConstantsConfig
+ * @ClassName: ConstantsConfig
  * @Description: 配置参数需要的常量值
  * @author: xinpei.xu
  * @date: 2017/08/17 21:47
  */
-public interface IConstantsConfig {
+public interface ConstantsConfig {
 	
 	/*************** redis header ***********************/
 	/** redis header:登录失败 */

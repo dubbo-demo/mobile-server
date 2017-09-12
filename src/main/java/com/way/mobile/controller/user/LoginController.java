@@ -1,8 +1,8 @@
 package com.way.mobile.controller.user;
 
-import com.way.member.user.dto.MemberDto;
+import com.way.member.member.dto.MemberDto;
 import com.way.mobile.common.patchca.RedisPatchcaStore;
-import com.way.mobile.service.user.LoginService;
+import com.way.mobile.service.member.LoginService;
 import com.way.common.exception.DataValidateException;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
