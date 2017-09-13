@@ -1,4 +1,4 @@
-package com.way.mobile.controller.user;
+package com.way.mobile.controller.member;
 
 import com.way.base.common.SmsTemplateEnum;
 import com.way.common.constant.Constants;

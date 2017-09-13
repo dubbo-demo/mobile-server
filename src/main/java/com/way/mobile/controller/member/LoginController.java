@@ -1,4 +1,4 @@
-package com.way.mobile.controller.user;
+package com.way.mobile.controller.member;
 
 import com.way.member.member.dto.MemberDto;
 import com.way.mobile.common.patchca.RedisPatchcaStore;

@@ -26,7 +26,17 @@
         </dependency>
         <dependency>
             <groupId>com.way</groupId>
+            <artifactId>base-service-impl</artifactId>
+            <version>${base-service.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.way</groupId>
             <artifactId>member-service-api</artifactId>
+            <version>${member-service.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.way</groupId>
+            <artifactId>member-service-impl</artifactId>
             <version>${member-service.version}</version>
         </dependency>
 
