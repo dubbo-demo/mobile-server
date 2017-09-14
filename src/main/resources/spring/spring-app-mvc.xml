@@ -94,9 +94,9 @@
     <bean id="genericLoggerBean" class="com.way.mobile.aop.RequestLogAop"></bean>
 
     <!-- 拦截器配置 -->
-    <!--<mvc:interceptors>-->
-    <!--<bean class="com.way.mobile.interceptor.AuthInterceptor"/>-->
-    <!--</mvc:interceptors>-->
+    <mvc:interceptors>
+        <bean class="com.way.mobile.interceptor.AuthInterceptor"/>
+    </mvc:interceptors>
 
     <!--上传 -->
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
