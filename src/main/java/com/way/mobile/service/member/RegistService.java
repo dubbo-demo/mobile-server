@@ -32,19 +32,19 @@ public interface RegistService {
 	public ServiceResult<MemberDto> regist(MemberDto memberDto) throws DataValidateException;
 	
 	/**
-	 * @Title: forgetPassword
-	 * @Description: 忘记密码
+	 * @Title: resetPassword
+	 * @Description: 重置密码
 	 * @return: void
 	 * @throws DataValidateException 
 	 */
-	public ServiceResult<String> forgetPassword(MemberDto memberDto) throws DataValidateException;
+	public ServiceResult<String> resetPassword(MemberDto memberDto) throws DataValidateException;
 	
 	/**
 	 * 重置密码
 	 * @param memberResetPasswordDto
 	 * @throws DataValidateException 
 	 */
-	public ServiceResult<String> resetPassword(MemberResetPasswordDto memberResetPasswordDto) throws DataValidateException;
+//	public ServiceResult<String> resetPassword(MemberResetPasswordDto memberResetPasswordDto) throws DataValidateException;
 	
 	/**
 	 * @Title: checkResetPasswordFailTimes

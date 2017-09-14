@@ -6,7 +6,7 @@ import com.way.common.result.ServiceResult;
 import com.way.common.util.DateUtils;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.dto.MemberLoginFailInfoDto;
-import com.way.member.member.service.MemberService;
+import com.way.member.member.service.MemberInfoService;
 import com.way.mobile.common.constant.ConstantsConfig;
 import com.way.mobile.common.po.LoginTokenInfo;
 import com.way.mobile.common.util.PropertyConfig;
@@ -34,7 +34,7 @@ public class LoginServiceImpl implements LoginService {
 	private static final String loginFailMsg = "手机号或密码错误，今日还有times次输入机会，您可以找回密码";
 	
 	@Autowired
-	private MemberService memberService;
+	private MemberInfoService memberInfoService;
 
 	/**
 	 * @Title: checkLoginFailTimes
@@ -83,7 +83,7 @@ public class LoginServiceImpl implements LoginService {
 		// 临时记录登录失败次数
 		int tempFailTimes = checkLoginFailTimes(ob, key);
 		/** 调用户中心登录接口验证用户信息， 返回用户信息 */
-		ServiceResult<MemberDto> result = memberService.queryMemberInfo(memberDto.getPhone());
+		ServiceResult<MemberDto> result = memberInfoService.queryMemberInfo(memberDto.getPhone());
 		MemberDto resultDto = result.getData();
 		if(resultDto == null){
 			result.setCode(ServiceResult.ERROR_CODE);
@@ -98,7 +98,7 @@ public class LoginServiceImpl implements LoginService {
 			if (ServiceResult.SUCCESS_CODE == result.getCode()) {
 				memberDto.setMemberId(resultDto.getMemberId());
 				// 登录成功记入日志
-				memberService.saveMemberLoginInfo(memberDto);
+				memberInfoService.saveMemberLoginInfo(memberDto);
 				// 登录成功，则清零登录失败次数，视为第一次登录
 				if (null != ob) 
 					CacheService.KeyBase.delete(key);

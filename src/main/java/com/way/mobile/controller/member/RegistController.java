@@ -101,10 +101,6 @@ public class RegistController {
 		try {
 			// 终端
 			memberDto.setAppSource(request.getHeader("client"));
-			// 渠道
-			memberDto.setPromotionSource(request.getHeader("channel"));
-			// 终端
-			memberDto.setTerminalChannel(request.getHeader("client"));
 			// app版本号
 			memberDto.setVersion(request.getHeader("version"));
 			// 设备号
@@ -158,13 +154,13 @@ public class RegistController {
 	}
 	
 	/**
-	 * @Title: forgetPassword
-	 * @Description: 忘记密码
+	 * @Title: resetPassword
+	 * @Description: 重置密码
 	 * @return: ServiceResult<Object>
 	 */
-	@RequestMapping(value = "/forgetPassword", method = RequestMethod.POST)
+	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
 	@ResponseBody
-	public ServiceResult<String> forgetPassword(HttpServletRequest request, @ModelAttribute MemberDto memberDto) {
+	public ServiceResult<String> resetPassword(HttpServletRequest request, @ModelAttribute MemberDto memberDto) {
 		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
 		try {
 			// 校验参数
@@ -172,69 +168,11 @@ public class RegistController {
 					|| StringUtils.isEmpty(memberDto.getVerificationCode())) {
 				return ServiceResult.newFailure("必传参数不能为空");
 			}
-			/** 调用户中心忘记密码接口 */
-			serviceResult = registService.forgetPassword(memberDto);
+			/// 重置密码
+			serviceResult = registService.resetPassword(memberDto);
 			if (serviceResult.getCode() == ServiceResult.SUCCESS_CODE) {
 				// 密码修改成功，删除redis中登录失败的记录
 				CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhone());
-			}
-		} catch (DataValidateException e) {
-			serviceResult.setCode(ServiceResult.ERROR_CODE);
-			serviceResult.setMessage(e.getMessage());
-			WayLogger.error(e,"忘记密码失败");
-		} catch (Exception e) {
-			serviceResult.setCode(ServiceResult.ERROR_CODE);
-			serviceResult.setMessage("忘记密码失败");
-			WayLogger.error(e,"忘记密码失败");
-		} finally {
-			WayLogger.access("忘记密码：/forgetPassword.do" + ",参数："+ memberDto);
-		}
-		return serviceResult;
-	}
-	
-	/**
-	 * @Title: resetPassword
-	 * @Description: 重置密码
-	 * @return: ServiceResult<String>
-	 */
-	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
-	@ResponseBody
-	public ServiceResult<String> resetPassword(HttpServletRequest request, @ModelAttribute MemberResetPasswordDto memberResetPasswordDto) {
-		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
-		try {
-			// 校验参数
-			if (request.getAttribute("memberId") == null) {
-				return ServiceResult.newFailure("必传参数不能为空");
-			}
-			memberResetPasswordDto.setMemberId(Long.valueOf(request.getAttribute("memberId").toString()));
-			// 校验短信验证码
-			if (StringUtils.isEmpty(memberResetPasswordDto.getCurPasssword())){ // 旧密码为空
-				serviceResult.setCode(ServiceResult.ERROR_CODE);
-				serviceResult.setMessage("请输入当前密码");
-				return serviceResult;
-			}
-			// 校验手机号
-			if (StringUtils.isEmpty(memberResetPasswordDto.getNewPassword())) {
-				serviceResult.setCode(ServiceResult.ERROR_CODE);
-				serviceResult.setMessage("请输入新密码");
-				return serviceResult;
-			}
-			serviceResult = registService.resetPassword(memberResetPasswordDto);
-			// 获取重置密码次数
-			String key = ConstantsConfig.JEDIS_HEADER_RESET_PASSWORD_FAIL + memberResetPasswordDto.getMemberId();
-			Object ob = CacheService.StringKey.getObject(key, Object.class);
-			// 临时记录重置密码失败次数
-			int tempFailTimes = registService.checkResetPasswordFailTimes(ob, key);
-			if (ServiceResult.SUCCESS_CODE == serviceResult.getCode()) { 
-				// 重置密码成功，则清零重置密码失败次数，视为第一次登录
-				if (null != ob) 
-					CacheService.KeyBase.delete(key);
-				} else { 
-					// 重置密码失败，重置密码失败次数+1，最后重置密码失败时间改为当前时间
-					MemberResetPasswordDto resetPasswordFailVO = new MemberResetPasswordDto();
-					resetPasswordFailVO.setLastResetPasswordFailTime(new Date().getTime());
-					resetPasswordFailVO.setResetPasswordFailTimes(tempFailTimes+1);
-					CacheService.StringKey.set(key, resetPasswordFailVO);
 			}
 		} catch (DataValidateException e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
@@ -245,8 +183,66 @@ public class RegistController {
 			serviceResult.setMessage("重置密码失败");
 			WayLogger.error(e,"重置密码失败");
 		} finally {
-			WayLogger.access("重置密码：/forgetPassword.do");
+			WayLogger.access("重置密码：/resetPassword.do" + ",参数："+ memberDto);
 		}
 		return serviceResult;
 	}
+	
+//	/**
+//	 * @Title: resetPassword
+//	 * @Description: 重置密码
+//	 * @return: ServiceResult<String>
+//	 */
+//	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
+//	@ResponseBody
+//	public ServiceResult<String> resetPassword(HttpServletRequest request, @ModelAttribute MemberResetPasswordDto memberResetPasswordDto) {
+//		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
+//		try {
+//			// 校验参数
+//			if (request.getAttribute("memberId") == null) {
+//				return ServiceResult.newFailure("必传参数不能为空");
+//			}
+//			memberResetPasswordDto.setMemberId(Long.valueOf(request.getAttribute("memberId").toString()));
+//			// 校验短信验证码
+//			if (StringUtils.isEmpty(memberResetPasswordDto.getCurPasssword())){ // 旧密码为空
+//				serviceResult.setCode(ServiceResult.ERROR_CODE);
+//				serviceResult.setMessage("请输入当前密码");
+//				return serviceResult;
+//			}
+//			// 校验手机号
+//			if (StringUtils.isEmpty(memberResetPasswordDto.getNewPassword())) {
+//				serviceResult.setCode(ServiceResult.ERROR_CODE);
+//				serviceResult.setMessage("请输入新密码");
+//				return serviceResult;
+//			}
+//			serviceResult = registService.resetPassword(memberResetPasswordDto);
+//			// 获取重置密码次数
+//			String key = ConstantsConfig.JEDIS_HEADER_RESET_PASSWORD_FAIL + memberResetPasswordDto.getMemberId();
+//			Object ob = CacheService.StringKey.getObject(key, Object.class);
+//			// 临时记录重置密码失败次数
+//			int tempFailTimes = registService.checkResetPasswordFailTimes(ob, key);
+//			if (ServiceResult.SUCCESS_CODE == serviceResult.getCode()) {
+//				// 重置密码成功，则清零重置密码失败次数，视为第一次登录
+//				if (null != ob)
+//					CacheService.KeyBase.delete(key);
+//				} else {
+//					// 重置密码失败，重置密码失败次数+1，最后重置密码失败时间改为当前时间
+//					MemberResetPasswordDto resetPasswordFailVO = new MemberResetPasswordDto();
+//					resetPasswordFailVO.setLastResetPasswordFailTime(new Date().getTime());
+//					resetPasswordFailVO.setResetPasswordFailTimes(tempFailTimes+1);
+//					CacheService.StringKey.set(key, resetPasswordFailVO);
+//			}
+//		} catch (DataValidateException e) {
+//			serviceResult.setCode(ServiceResult.ERROR_CODE);
+//			serviceResult.setMessage(e.getMessage());
+//			WayLogger.error(e,"重置密码失败");
+//		} catch (Exception e) {
+//			serviceResult.setCode(ServiceResult.ERROR_CODE);
+//			serviceResult.setMessage("重置密码失败");
+//			WayLogger.error(e,"重置密码失败");
+//		} finally {
+//			WayLogger.access("重置密码：/resetPassword.do");
+//		}
+//		return serviceResult;
+//	}
 }

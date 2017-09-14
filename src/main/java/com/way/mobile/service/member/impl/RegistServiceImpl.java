@@ -7,7 +7,7 @@ import com.way.common.redis.CacheService;
 import com.way.common.result.ServiceResult;
 import com.way.common.util.DateUtils;
 import com.way.common.util.Validater;
-import com.way.member.member.service.MemberService;
+import com.way.member.member.service.MemberInfoService;
 import com.way.member.member.service.PasswordService;
 import com.way.member.member.service.RegistLogService;
 import com.way.member.member.dto.MemberDto;
@@ -37,7 +37,7 @@ import java.util.Random;
 public class RegistServiceImpl implements RegistService {
 
 	@Autowired
-	private MemberService memberService;
+	private MemberInfoService memberInfoService;
 	@Autowired
 	private RegistLogService registLogService;
 	@Autowired
@@ -55,7 +55,7 @@ public class RegistServiceImpl implements RegistService {
 	 */
 	public ServiceResult<String> sendCode(MemberDto memberDto) throws DataValidateException {
 		// 验证手机号是否已经注册
-		ServiceResult<MemberDto> m = memberService.loadMapByMobile(memberDto.getPhone());
+		ServiceResult<MemberDto> m = memberInfoService.loadMapByMobile(memberDto.getPhone());
 		String smsCodeType = ConstantsConfig.JEDIS_HEADER_REGIST_CODE;
 		if (VerificationCodeType.FORGET_PASSWORD.equals(memberDto.getType())) {// 忘记密码的时候，校验
 			smsCodeType = ConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE;
@@ -104,7 +104,7 @@ public class RegistServiceImpl implements RegistService {
 			throw new DataValidateException("短信验证码不正确");
 		// 验证码校验成功，移除redis中的验证码
 		CacheService.KeyBase.delete(key);
-		ServiceResult<MemberDto> memberRes  = memberService.loadMapByMobile(memberDto.getPhone());
+		ServiceResult<MemberDto> memberRes  = memberInfoService.loadMapByMobile(memberDto.getPhone());
 		if (null != memberRes.getData()){ // 该手机号已经注册
 			if(memberRes.getData().getMemberSource() == Constants.NO_INT){
 				memberDto.setMemberType(Constants.NO);
@@ -115,7 +115,7 @@ public class RegistServiceImpl implements RegistService {
 		}
 		// 新用户
 		memberDto.setMemberType(Constants.YES);
-		ServiceResult<MemberDto> memberDtoSer = memberService.memberRegist(memberDto);
+		ServiceResult<MemberDto> memberDtoSer = memberInfoService.memberRegist(memberDto);
 		// 注册成功调用登录接口登录，并异步保存用户登录信息
 		loginService.login(memberDto);
 		return ServiceResult.newSuccess(memberDto);
@@ -126,7 +126,7 @@ public class RegistServiceImpl implements RegistService {
 	 * @param memberDto
 	 * @throws DataValidateException 
 	 */
-	public  ServiceResult<String> forgetPassword(MemberDto memberDto) throws DataValidateException {
+	public  ServiceResult<String> resetPassword(MemberDto memberDto) throws DataValidateException {
 		String mobile = memberDto.getPhone();
 		// 校验手机号
 		if (!Validater.isMobileNew(mobile))
@@ -145,7 +145,7 @@ public class RegistServiceImpl implements RegistService {
 			throw new DataValidateException("短信验证码不正确");
 
 		// 校验用户是否存在
-		ServiceResult<MemberDto> memberRes = memberService.loadMapByMobile(mobile);
+		ServiceResult<MemberDto> memberRes = memberInfoService.loadMapByMobile(mobile);
 		// 用户不存在
 		if (memberRes.getData() == null)
 			throw new DataValidateException("手机号未注册");
@@ -157,7 +157,7 @@ public class RegistServiceImpl implements RegistService {
 			passwordService.savePasswordInfo(memberDto);
 		}else{
 			// 新用户更新密码表
-			memberService.updatePassword(memberRes.getData().getMemberId(), memberDto.getPassword());
+			memberInfoService.updatePassword(memberRes.getData().getMemberId(), memberDto.getPassword());
 		}
 		// 验证码校验成功，移除redis中的验证码
 		CacheService.KeyBase.delete(key);
@@ -169,17 +169,17 @@ public class RegistServiceImpl implements RegistService {
 	 * @param memberResetPasswordDto
 	 * @throws DataValidateException 
 	 */
-	public ServiceResult<String> resetPassword(MemberResetPasswordDto memberResetPasswordDto) throws DataValidateException {
-		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
-		/** 校验密码是否正确 */
-		ServiceResult<String> passRes = passwordService.queryCurPasswdById(memberResetPasswordDto.getMemberId(), memberResetPasswordDto.getCurPasssword());
-		if(StringUtils.isBlank(passRes.getData())){
-			throw new DataValidateException("旧密码不正确");
-		}
-		// 更新密码
-		memberService.updatePassword(memberResetPasswordDto.getMemberId(), memberResetPasswordDto.getNewPassword());
-		return serviceResult;
-	}
+//	public ServiceResult<String> resetPassword(MemberResetPasswordDto memberResetPasswordDto) throws DataValidateException {
+//		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
+//		/** 校验密码是否正确 */
+//		ServiceResult<String> passRes = passwordService.queryCurPasswdById(memberResetPasswordDto.getMemberId(), memberResetPasswordDto.getCurPasssword());
+//		if(StringUtils.isBlank(passRes.getData())){
+//			throw new DataValidateException("旧密码不正确");
+//		}
+//		// 更新密码
+//		memberInfoService.updatePassword(memberResetPasswordDto.getMemberId(), memberResetPasswordDto.getNewPassword());
+//		return serviceResult;
+//	}
 	
 	/**
 	 * @Title: checkResetPasswordFailTimes

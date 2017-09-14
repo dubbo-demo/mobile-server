@@ -42,9 +42,6 @@ public class LoginController {
     public void getCaptchaImage(HttpServletRequest request, HttpServletResponse response) {
         try {
             String deviceNo = request.getHeader("deviceNo");
-            if (StringUtils.isBlank(deviceNo)) {
-                deviceNo = request.getParameter("uniqueId");
-            }
             WayLogger.info("生成图片验证码：/getCaptchaImage.htm" + ",设备号deviceNo：" + deviceNo);
             if (StringUtils.isBlank(deviceNo) || "null".equals(deviceNo)) {
                 ResponseUtils.toJson(response, ServiceResult.ERROR_CODE, "设备号不能为空");
