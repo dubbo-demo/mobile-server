@@ -11,12 +11,11 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface UploadFileService {
 
-
     /**
      * 头像上传
-     * @param memberId
+     * @param phoneNo
      * @param file
      * @return
      */
-    String uploadHeadPic(String memberId, MultipartFile file);
+    String uploadHeadPic(String phoneNo, MultipartFile file);
 }

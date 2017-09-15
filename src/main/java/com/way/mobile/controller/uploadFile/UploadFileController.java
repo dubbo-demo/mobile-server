@@ -1,10 +1,10 @@
 package com.way.mobile.controller.uploadFile;
 
-import com.alibaba.dubbo.common.utils.StringUtils;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
 import com.way.mobile.common.util.TokenJedisUtils;
 import com.way.mobile.service.uploadFile.UploadFileService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,18 +37,18 @@ public class UploadFileController {
     @RequestMapping(value = "/uploadHeadPic", method = RequestMethod.POST)
     @ResponseBody
     public ServiceResult<Object> uploadHeadPic(MultipartFile file, HttpServletRequest request){
-        String memberId = "";
+        String phoneNo = "";
         String fileId = "";
         try {
             ServiceResult result = ServiceResult.newSuccess();
             // 获取用户手机号
-            memberId = TokenJedisUtils.getMemberIdByToken(request.getParameter("token"));
+            phoneNo = TokenJedisUtils.getMemberIdByToken(request.getParameter("token"));
             // 校验参数
-            if (null == memberId || null == file ) {
+            if (StringUtils.isBlank(phoneNo) || null == file ) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 头像上传
-            fileId = uploadFileService.uploadHeadPic(memberId, file);
+            fileId = uploadFileService.uploadHeadPic(phoneNo, file);
             if(StringUtils.isBlank(fileId)){
                 return ServiceResult.newFailure();
             }
@@ -57,10 +57,10 @@ public class UploadFileController {
             result.setData(resMap);
             return result;
         } catch (Exception e) {
-            WayLogger.error(e, "头像上传," + "请求参数：" + memberId);
+            WayLogger.error(e, "头像上传," + "请求参数：" + phoneNo);
             return ServiceResult.newFailure();
         } finally {
-            WayLogger.access("头像上传：/uploadHeadPic.do,参数：" + memberId + ",文件id：" + fileId);
+            WayLogger.access("头像上传：/uploadHeadPic.do,参数：" + phoneNo + ",文件id：" + fileId);
         }
     }
 
