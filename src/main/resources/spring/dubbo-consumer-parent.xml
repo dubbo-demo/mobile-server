@@ -5,11 +5,11 @@
         http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
     <!--定义dubbo provider的基本配置信息-->
-    <dubbo:application name="web"/>
+    <dubbo:application name="dubbo_mobile_server"/>
 
     <!-- 注册位置 -->
     <dubbo:registry address="${dubbo_registry_address}"/>
 
-    <import resource="classpath*:spring/consumer/dubbo-baseService-consumer.xml"/>
+    <import resource="classpath*:**/spring/consumer/dubbo-*-consumer.xml"/>
 
 </beans>

@@ -20,6 +20,7 @@
                 <value>classpath:/config/dubbo.properties</value>
                 <value>classpath:/config/log.properties</value>
                 <value>classpath:/config/redis.properties</value>
+                <value>classpath:/config/ValidationMessages.properties</value>
             </list>
         </property>
     </bean>
