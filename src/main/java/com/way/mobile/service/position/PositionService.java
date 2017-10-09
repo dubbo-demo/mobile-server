@@ -1,6 +1,7 @@
 package com.way.mobile.service.position;
 
 import com.way.common.result.ServiceResult;
+import com.way.member.position.dto.PositionInfoDto;
 
 /**
  * 功能描述：定位Service
@@ -11,9 +12,23 @@ import com.way.common.result.ServiceResult;
 public interface PositionService {
 
     /**
+     * 上传坐标
+     * @param positionInfoDto
+     * @return
+     */
+    ServiceResult<String> uploadPosition(PositionInfoDto positionInfoDto);
+
+    /**
      * 根据手机号获取用户实时坐标
      * @param phoneNo
      * @return
      */
-    ServiceResult<String> getRealtimePositionByPhoneNo(String phoneNo);
+    ServiceResult<Object> getRealtimePositionByPhoneNo(String phoneNo);
+
+    /**
+     * 获取退出前查看的用户实时坐标
+     * @param phoneNo
+     * @return
+     */
+    ServiceResult<Object> getPositionsBeforeExit(String phoneNo);
 }
