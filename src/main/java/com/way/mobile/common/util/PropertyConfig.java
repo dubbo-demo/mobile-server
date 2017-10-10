@@ -42,10 +42,10 @@ public class PropertyConfig {
 
 	@Value("${mobileCenter.url}")
     private String mobileUrl;
-	   
-	public int getPermitLoginTimes() {
-		return permitLoginTimes;
-	}
+
+	/** 请求间隔时间单位 */
+	@Value("${request.method.interval.unit}")
+	private int reqMethodIntervalUnit;
 
 	public void setPermitLoginTimes(int permitLoginTimes) {
 		this.permitLoginTimes = permitLoginTimes;
@@ -106,5 +106,12 @@ public class PropertyConfig {
     public void setMobileUrl(String mobileUrl) {
         this.mobileUrl = mobileUrl;
     }
-	
+
+	public int getReqMethodIntervalUnit() {
+		return reqMethodIntervalUnit;
+	}
+
+	public int getPermitLoginTimes() {
+		return permitLoginTimes;
+	}
 }
