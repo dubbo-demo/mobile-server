@@ -1,5 +1,6 @@
 package com.way.mobile.aop;
 
+import com.way.common.constant.Constants;
 import com.way.common.log.WayLogger;
 import com.way.common.redis.utils.NoShardedRedisCacheUtil;
 import com.way.common.result.ServiceResult;
@@ -73,7 +74,6 @@ public class CommonControllerAspect {
         if (null != params && params.length > 0) {
         	// 文件上传相关请求
             if (params[0] instanceof MultipartHttpServletRequest) {
-//                Map<String, String> map = new HashMap<>();
                 MultipartHttpServletRequest mulReq = (DefaultMultipartHttpServletRequest) params[0];
                 // 请求对象参数
                 paramRequest = mulReq;
@@ -81,36 +81,27 @@ public class CommonControllerAspect {
                 newToken = mulReq.getParameter("token");
                 if (null == newToken) {
 					WayLogger.debug("token是空");
-
-//                    map.put(IResponseCode.RETURN_CODE_STR, IResponseCode.TOKEN_EXPIRED_OVERTIME);
-//                    map.put(IResponseCode.RETURN_INFO_STR, );
-                    return ServiceResult.newFailure(4, "账号已过期，请重新登录");
+                    return ServiceResult.newFailure(Constants.TOKEN_EXPIRED_OVERTIME, "账号已过期，请重新登录");
                 }
 
                 if (newToken.length() < 30) {
 					WayLogger.debug("token是空");
-//                    map.put(IResponseCode.RETURN_CODE_STR, IResponseCode.FAIL);
-//                    map.put(IResponseCode.RETURN_INFO_STR, "无效的token");
-                    return ServiceResult.newFailure(1, "无效的token");
+                    return ServiceResult.newFailure(Constants.INVALID, "无效的token");
                 }
                 // 验证token
                 LoginTokenInfo tokenInfo = TokenJedisUtils.getTokenInfo(newToken);
                 if (tokenInfo != null) {
-                    if (tokenInfo.getStatus() == 1) {
-//                        map.put(IResponseCode.RETURN_CODE_STR, IResponseCode.TOKEN_EXPIRED_OTHERLOGIN);
-//						map.put(IResponseCode.RETURN_INFO_STR, "该账户已在其他设备登录，请注意安全");
-                        return ServiceResult.newFailure(2, "该账户已在其他设备登录，请注意安全");
+                    if (tokenInfo.getStatus() == Constants.INVALID) {
+                        return ServiceResult.newFailure(Constants.OKEN_EXPIRED_OTHERLOGIN, "该账户已在其他设备登录，请注意安全");
                     }
                 } else {
-//                    map.put(IResponseCode.RETURN_CODE_STR, IResponseCode.TOKEN_EXPIRED_OVERTIME);
-//                    map.put(IResponseCode.RETURN_INFO_STR, "账号已过期，请重新登录");
-                    return ServiceResult.newFailure(4, "账号已过期，请重新登录");
+                    return ServiceResult.newFailure(Constants.TOKEN_EXPIRED_OVERTIME, "账号已过期，请重新登录");
                 }
                 memberId = tokenInfo.getMemberId();
                 mulReq.setAttribute("memberId", memberId);
                 // 校验文件大小
 				ServiceResult serviceResult = verificationFile(mulReq);
-                if(StringUtils.equals(map.get(IResponseCode.RETURN_CODE_STR),IResponseCode.FAIL)){
+                if(Constants.INVALID == serviceResult.getCode()){
                 	 return serviceResult;
                 }
             } else if (params[0] instanceof HttpServletRequest) {
@@ -271,8 +262,7 @@ public class CommonControllerAspect {
 //		return result;
 //	}
     
-	private Map<String, String> verificationFile(MultipartHttpServletRequest mulReq) {
-		Map<String, String> map = new HashMap<String, String>();
+	private ServiceResult verificationFile(MultipartHttpServletRequest mulReq) {
 		Map<String, MultipartFile> fileMap = mulReq.getFileMap();
 		// 遍历所有的上传文件
 		for (Map.Entry<String, MultipartFile> entry : fileMap.entrySet()) {
@@ -282,21 +272,17 @@ public class CommonControllerAspect {
 					&& !multipartFile.getContentType().contains("image/jpg")
 					&& !multipartFile.getContentType().contains("image/jpeg")
 					&& !multipartFile.getContentType().contains("video/mp4")) {
-				map.put(IResponseCode.RETURN_CODE_STR, IResponseCode.FAIL);
-		        map.put(IResponseCode.RETURN_INFO_STR, "上传文件格式需要是png,jpg,jpeg,video");
-		        return map;
+		        return ServiceResult.newFailure(Constants.INVALID, "上传文件格式需要是png,jpg,jpeg,video");
 			}
 			String key = noShardedRedisCacheUtil.key(RedisConstants.SYS_PARAM_CONFIG, IModuleParamConfig.MYLOAN_MOBILE,
 					IModuleParamConfig.MYLOAN_MOBILE_MAX_FILE_SIZE);
 			String fileSize = noShardedRedisCacheUtil.get(key);
 			// 校验文件大小
 			if (StringUtils.isNotBlank(fileSize) && multipartFile.getSize() > Double.valueOf(fileSize) * 1024) {
-				map.put(IResponseCode.RETURN_CODE_STR, IResponseCode.FAIL);
-		        map.put(IResponseCode.RETURN_INFO_STR, "上传图片大小请控制在" + Double.valueOf(fileSize) + "KB以内");
-		        return map;
+		        return ServiceResult.newFailure(Constants.INVALID, "上传图片大小请控制在" + Double.valueOf(fileSize) + "KB以内");
 			}
 		}
-		return map;
+		return ServiceResult.newSuccess();
 	}
 
     /**
@@ -360,60 +346,25 @@ public class CommonControllerAspect {
 
     private Object retunrProcessObj(String returnType, String tipMsg) {
         Object resObj = null;
-        if (returnType.contains("BaseResponse")) {
-            resObj = new BaseResponse(IResponseCode.FAIL, tipMsg);
-        } else if (returnType.contains("ResponseInfoBase")) {
-            resObj = new ResponseInfoBase(IResponseCode.FAIL, tipMsg);
-        } else if (returnType.contains("Map")) {
-            Map<String, String> resultMap = new HashMap<String, String>();
-            resultMap.put(IResponseCode.RETURN_CODE_STR, IResponseCode.FAIL);
-            resultMap.put(IResponseCode.RETURN_INFO_STR, tipMsg);
-            resObj = resultMap;
-        } else if (returnType.contains("ResultParams")) {
-            resObj = new ResultParams(IResponseCode.FAIL, tipMsg);
+//        if (returnType.contains("BaseResponse")) {
+//            resObj = new BaseResponse(IResponseCode.FAIL, tipMsg);
+//        } else if (returnType.contains("ResponseInfoBase")) {
+//            resObj = new ResponseInfoBase(IResponseCode.FAIL, tipMsg);
+//        } else if (returnType.contains("Map")) {
+//            Map<String, String> resultMap = new HashMap<String, String>();
+//            resultMap.put(IResponseCode.RETURN_CODE_STR, IResponseCode.FAIL);
+//            resultMap.put(IResponseCode.RETURN_INFO_STR, tipMsg);
+//            resObj = resultMap;
+//        } else if (returnType.contains("ResultParams")) {
+//            resObj = new ResultParams(IResponseCode.FAIL, tipMsg);
+//        }
+        if(returnType.contains("ServiceResult")){
+            resObj = ServiceResult.newFailure(tipMsg);
         }
         return resObj;
 
     }
     
-	@SuppressWarnings("unchecked")
-	private ResultParams getReturnCode(Object result) {
-		ResultParams resultParam = new ResultParams();
-		if (result instanceof BaseResponse) {
-			BeanUtils.copyProperties(result, resultParam);
-			String msg = getMsg(resultParam.getRetcode(), resultParam.getRetinfo());
-			if (StringUtils.isNotEmpty(msg)) {
-				resultParam.setRetcode(IResponseCode.FAIL);
-				resultParam.setRetinfo(msg);
-			}
-		} else if (result instanceof ResponseInfoBase) {
-			BeanUtils.copyProperties(result, resultParam);
-			String msg = getMsg(resultParam.getRetcode(), resultParam.getRetinfo());
-			if (StringUtils.isNotEmpty(msg)) {
-				resultParam.setRetcode(IResponseCode.FAIL);
-				resultParam.setRetinfo(msg);
-			}
-		} else if (result instanceof Map) {
-			Map<String, Object> param = (Map<String, Object>) result;
-			resultParam.setRetcode(String.valueOf(param.get(IResponseCode.RETURN_CODE_STR)));
-			resultParam.setRetinfo(String.valueOf(param.get(IResponseCode.RETURN_INFO_STR)));
-			String msg = getMsg(String.valueOf(param.get(IResponseCode.RETURN_CODE_STR)),
-					String.valueOf(param.get(IResponseCode.RETURN_INFO_STR)));
-			if (StringUtils.isNotEmpty(msg)) {
-				resultParam.setRetcode(IResponseCode.FAIL);
-				resultParam.setRetinfo(msg);
-			}
-		} else if (result instanceof ResultParams) {
-			BeanUtils.copyProperties(result, resultParam);
-			String msg = getMsg(resultParam.getRetcode(), resultParam.getRetinfo());
-			if (StringUtils.isNotEmpty(msg)) {
-				resultParam.setRetcode(IResponseCode.FAIL);
-				resultParam.setRetinfo(msg);
-			}
-		}
-		return resultParam;
-	}
-
     @Before("pointCutController()")
     public void doBefore(JoinPoint jp) {
     }
@@ -421,34 +372,42 @@ public class CommonControllerAspect {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @AfterReturning(pointcut = "pointCutController()", returning = "result")
     public void doReturn(Object result) {
-        if (result instanceof BaseResponse) {
-            BaseResponse param = (BaseResponse) result;
-            String msg = getMsg(param.getRetcode(),param.getRetinfo());
-            if (StringUtils.isNotEmpty(msg)) {
-                param.setRetcode(IResponseCode.FAIL);
-                param.setRetinfo(msg);
-            }
-        } else if (result instanceof ResponseInfoBase) {
-            ResponseInfoBase param = (ResponseInfoBase) result;
-            String msg = getMsg(param.getRetcode(),param.getRetinfo());
-            if (StringUtils.isNotEmpty(msg)) {
-                param.setRetcode(IResponseCode.FAIL);
-                param.setRetinfo(msg);
-            }
-        } else if (result instanceof Map) {
-            Map param = (Map) result;
-            String msg = getMsg(String.valueOf(param.get(IResponseCode.RETURN_CODE_STR)),
-            		String.valueOf(param.get(IResponseCode.RETURN_INFO_STR)));
-            if (StringUtils.isNotEmpty(msg)) {
-                param.put(IResponseCode.RETURN_CODE_STR, IResponseCode.FAIL);
-                param.put(IResponseCode.RETURN_INFO_STR, msg);
-            }
-        } else if (result instanceof ResultParams) {
-            ResultParams param = (ResultParams) result;
-            String msg = getMsg(param.getRetcode(),param.getRetinfo());
-            if (StringUtils.isNotEmpty(msg)) {
-                param.setRetcode(IResponseCode.FAIL);
-                param.setRetinfo(msg);
+//        if (result instanceof BaseResponse) {
+//            BaseResponse param = (BaseResponse) result;
+//            String msg = getMsg(param.getRetcode(),param.getRetinfo());
+//            if (StringUtils.isNotEmpty(msg)) {
+//                param.setRetcode(IResponseCode.FAIL);
+//                param.setRetinfo(msg);
+//            }
+//        } else if (result instanceof ResponseInfoBase) {
+//            ResponseInfoBase param = (ResponseInfoBase) result;
+//            String msg = getMsg(param.getRetcode(),param.getRetinfo());
+//            if (StringUtils.isNotEmpty(msg)) {
+//                param.setRetcode(IResponseCode.FAIL);
+//                param.setRetinfo(msg);
+//            }
+//        } else if (result instanceof Map) {
+//            Map param = (Map) result;
+//            String msg = getMsg(String.valueOf(param.get(IResponseCode.RETURN_CODE_STR)),
+//            		String.valueOf(param.get(IResponseCode.RETURN_INFO_STR)));
+//            if (StringUtils.isNotEmpty(msg)) {
+//                param.put(IResponseCode.RETURN_CODE_STR, IResponseCode.FAIL);
+//                param.put(IResponseCode.RETURN_INFO_STR, msg);
+//            }
+//        } else if (result instanceof ResultParams) {
+//            ResultParams param = (ResultParams) result;
+//            String msg = getMsg(param.getRetcode(),param.getRetinfo());
+//            if (StringUtils.isNotEmpty(msg)) {
+//                param.setRetcode(IResponseCode.FAIL);
+//                param.setRetinfo(msg);
+//            }
+//        }
+        if(result instanceof ServiceResult){
+            ServiceResult param = (ServiceResult) result;
+            String msg = getMsg(param.getCode().toString(), param.getMessage());
+            if (StringUtils.isNotBlank(msg)) {
+                param.setCode(Constants.INVALID);
+                param.setMessage(msg);
             }
         }
 		WayLogger.debug("【CommonControllerAspect】转换后的返回消息体:" + result);
@@ -469,9 +428,7 @@ public class CommonControllerAspect {
             Integer.parseInt(code);
         } catch (Exception e) {
             msg = configuration.getValue(code);
-            // 为兼容老版本去除JXL0000手机认证成功的码
-			if (StringUtils.isEmpty(msg) && !"JXL0000".equals(code) && !"JXL1000".equals(code)
-					 && !"JXL0001".equals(code)) {
+			if (StringUtils.isBlank(msg)) {
 				/**
 				 * 没有找到对应的错误码-提示语直接透传
 				 */
