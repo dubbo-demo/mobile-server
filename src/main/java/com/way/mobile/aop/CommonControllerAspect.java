@@ -1,6 +1,7 @@
 package com.way.mobile.aop;
 
 import com.alibaba.fastjson.JSON;
+import com.way.base.versionUpdate.dto.VersionUpdateDto;
 import com.way.common.constant.Constants;
 import com.way.common.constant.IModuleParamConfig;
 import com.way.common.constant.NumberConstants;
@@ -205,10 +206,10 @@ public class CommonControllerAspect {
 				// 有版本配置
 				if (null != confs && !confs.isEmpty()) {
 					// 1.获取强制升级的最新版本
-					VersionUpgrade forceConf = null;
-					VersionUpgrade newConf = null;
+                    VersionUpdateDto forceConf = null;
+                    VersionUpdateDto newConf = null;
 					for (Map<String, Object> conf : confs) {
-						VersionUpgrade confVesion = (VersionUpgrade) BeanUtils.mapToObject(conf, VersionUpgrade.class);
+                        VersionUpdateDto confVesion = (VersionUpdateDto) BeanUtils.mapToObject(conf, VersionUpdateDto.class);
 						if (newConf == null) {
 							// 最新版本配置信息
 							newConf = confVesion;
@@ -268,8 +269,8 @@ public class CommonControllerAspect {
 					&& !multipartFile.getContentType().contains("video/mp4")) {
 		        return ServiceResult.newFailure(Constants.INVALID, "上传文件格式需要是png,jpg,jpeg,video");
 			}
-			String key = noShardedRedisCacheUtil.key(RedisConstants.SYS_PARAM_CONFIG, IModuleParamConfig.MYLOAN_MOBILE,
-					IModuleParamConfig.MYLOAN_MOBILE_MAX_FILE_SIZE);
+			String key = noShardedRedisCacheUtil.key(RedisConstants.SYS_PARAM_CONFIG, IModuleParamConfig.WAY_MEMBER,
+					IModuleParamConfig.WAY_MOBILE_MAX_FILE_SIZE);
 			String fileSize = noShardedRedisCacheUtil.get(key);
 			// 校验文件大小
 			if (StringUtils.isNotBlank(fileSize) && multipartFile.getSize() > Double.valueOf(fileSize) * 1024) {
