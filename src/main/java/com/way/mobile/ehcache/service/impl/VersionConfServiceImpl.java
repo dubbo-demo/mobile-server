@@ -7,7 +7,6 @@ import com.way.mobile.ehcache.service.VersionConfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +28,6 @@ public class VersionConfServiceImpl implements VersionConfService {
     private VersionUpdateService versionUpdateService;
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
     private PropertyConfig config;
 
     /**
@@ -48,12 +44,11 @@ public class VersionConfServiceImpl implements VersionConfService {
 		this.versionCache = versionCache;
 	}
 
-	/*
-     * (non-Javadoc)
-     * @see com.maiya.gcs.service.ehcache.VersionConfService#refreshIosVersion()
+    /**
+     * refreshVersionConf
+     * @return
      */
 	@Override
-	@SuppressWarnings("unchecked")
 	public void refreshVersionConf() {
 		versionCache.clear();
 		// 版本升级IOS列表
@@ -70,9 +65,9 @@ public class VersionConfServiceImpl implements VersionConfService {
 		versionCache.put("androidVersionConf", androidConfigs);
 	}
 
-    /*
-     * (non-Javadoc)
-     * @see com.maiya.gcs.service.ehcache.VersionConfService#getIosVersionConf()
+    /**
+     * getIosVersionConf
+     * @return
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -81,9 +76,9 @@ public class VersionConfServiceImpl implements VersionConfService {
         return (List<Map<String, Object>>) value.get();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.maiya.gcs.service.ehcache.VersionConfService#getAndroidVersionConf()
+    /**
+     * getAndroidVersionConf
+     * @return
      */
     @SuppressWarnings("unchecked")
     @Override
