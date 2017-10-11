@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
+
+    <diskStore path="/opt/mobile-cache"/>
+
+    <defaultCache maxElementsInMemory="5000" eternal="true"  timeToLiveSeconds="3600"
+		overflowToDisk="false"    
+		diskPersistent="false" />
+
+	 <cache name="versionCache" timeToLiveSeconds="1800" maxElementsInMemory="5000" eternal="true"
+	 overflowToDisk="false" diskPersistent="false" />
+	 
+</ehcache>

@@ -1,0 +1,94 @@
+package com.way.mobile.ehcache.service.impl;
+
+import com.way.base.versionUpdate.service.VersionUpdateService;
+import com.way.common.result.ServiceResult;
+import com.way.mobile.common.util.PropertyConfig;
+import com.way.mobile.ehcache.service.VersionConfService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.Cache.ValueWrapper;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * app版本升级<br>
+ * 〈功能详细描述〉
+ *
+ * @author xinpei.xu
+ * @see [相关类/方法]（可选）
+ * @since [产品/模块版本] （可选）
+ */
+public class VersionConfServiceImpl implements VersionConfService {
+
+    private Cache versionCache;
+
+    @Autowired
+    private VersionUpdateService versionUpdateService;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private PropertyConfig config;
+
+    /**
+     * @return the versionCache
+     */
+    public Cache getVersionCache() {
+		return versionCache;
+	}
+    
+    /**
+     * @param versionCache the versionCache to set
+     */
+	public void setVersionCache(Cache versionCache) {
+		this.versionCache = versionCache;
+	}
+
+	/*
+     * (non-Javadoc)
+     * @see com.maiya.gcs.service.ehcache.VersionConfService#refreshIosVersion()
+     */
+	@Override
+	@SuppressWarnings("unchecked")
+	public void refreshVersionConf() {
+		versionCache.clear();
+		// 版本升级IOS列表
+		List<Map<String, Object>> iosConfigs = new ArrayList<Map<String, Object>>();
+		// 版本升级安卓列表
+		List<Map<String, Object>> androidConfigs = new ArrayList<Map<String, Object>>();
+		// 查询版本升级列表
+        ServiceResult<Map<String, Object>> serviceResult = versionUpdateService.versionUpdateList();
+		if (null != serviceResult.getData()) {
+			iosConfigs = (List<Map<String, Object>>) serviceResult.getData().get("ios");
+			androidConfigs = (List<Map<String, Object>>) serviceResult.getData().get("android");
+		}
+		versionCache.put("iosVersionConf", iosConfigs);
+		versionCache.put("androidVersionConf", androidConfigs);
+	}
+
+    /*
+     * (non-Javadoc)
+     * @see com.maiya.gcs.service.ehcache.VersionConfService#getIosVersionConf()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Map<String, Object>> getIosVersionConf() {
+        ValueWrapper value = versionCache.get("iosVersionConf");
+        return (List<Map<String, Object>>) value.get();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.maiya.gcs.service.ehcache.VersionConfService#getAndroidVersionConf()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Map<String, Object>> getAndroidVersionConf() {
+        ValueWrapper value = versionCache.get("androidVersionConf");
+        return (List<Map<String, Object>>) value.get();
+    }
+}

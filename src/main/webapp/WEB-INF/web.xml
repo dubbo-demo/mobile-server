@@ -24,6 +24,7 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>
             classpath:spring/applicationContext-*.xml
+            classpath:spring/spring-cache.xml
             classpath:spring/dubbo-consumer-parent.xml
         </param-value>
     </context-param>
@@ -36,6 +37,10 @@
         <listener-class>
             com.way.mobile.listener.CustomContextLoaderListener
         </listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>com.way.mobile.ehcache.CacheListener</listener-class>
     </listener>
 
     <filter>

@@ -1,20 +1,26 @@
 package com.way.mobile.aop;
 
+import com.alibaba.fastjson.JSON;
 import com.way.common.constant.Constants;
+import com.way.common.constant.IModuleParamConfig;
+import com.way.common.constant.NumberConstants;
+import com.way.common.constant.RedisConstants;
 import com.way.common.log.WayLogger;
 import com.way.common.redis.utils.NoShardedRedisCacheUtil;
 import com.way.common.result.ServiceResult;
 import com.way.common.spring.Configuration;
+import com.way.common.util.BeanUtils;
 import com.way.common.util.Validater;
 import com.way.mobile.common.po.LoginTokenInfo;
 import com.way.mobile.common.util.PropertyConfig;
 import com.way.mobile.common.util.TokenJedisUtils;
+import com.way.mobile.ehcache.service.VersionConfService;
+import com.way.mobile.property.config.PropertyConfigurerWithWhite;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -26,6 +32,7 @@ import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequ
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,8 +53,8 @@ public class CommonControllerAspect {
     @Autowired
     public NoShardedRedisCacheUtil noShardedRedisCacheUtil;
 
-//    @Autowired
-//    private VersionConfService versionConfService;
+    @Autowired
+    private VersionConfService versionConfService;
 
     private static Configuration configuration;
 
@@ -66,7 +73,7 @@ public class CommonControllerAspect {
     }
 
     @Around("pointCutController()")
-    public Object doAround(ProceedingJoinPoint pjp) throws Throwable {
+    public ServiceResult doAround(ProceedingJoinPoint pjp) throws Throwable {
         Object[] params = pjp.getArgs();
         String newToken = null;
         String memberId = null;
@@ -115,35 +122,24 @@ public class CommonControllerAspect {
                 }
             }
 
-            if (null != newToken && null != memberId) {
-                TokenJedisUtils.expireTokenInfo(newToken, memberId, config.getTokenExpire());
-            }
+//            if (null != newToken && null != memberId) {
+//                TokenJedisUtils.expireTokenInfo(newToken, memberId);
+//            }
         }
         
 		if (paramRequest != null) {
-			// 兼容老版本
 			String version = paramRequest.getHeader("version");
-			if (StringUtils.isNotEmpty(version)) {
+			if (StringUtils.isNotBlank(version)) {
 				version = version.replace(".", "");
 				boolean isIntercept = false;
-				if (Validater.isNumber(version)
-						&& StringUtils.equals(paramRequest.getHeader("platform"), IConstantsConfig.PLATFORM_INFO_MAIYA)
-						&& Integer.valueOf(version) >= 235) {
-					isIntercept = true;
-				}
-				if (Validater.isNumber(version) && StringUtils.equals(paramRequest.getHeader("platform"),
-						IConstantsConfig.PLATFORM_INFO_MAIYAFQ) && Integer.valueOf(version) > 10) {
-					isIntercept = true;
-				}
-				if (StringUtils.equals(paramRequest.getHeader("platform"), IConstantsConfig.PLATFORM_INFO_ANXINHUA)) {
+				if (Validater.isNumber(version)) {
 					isIntercept = true;
 				}
 				if (isIntercept) {
 					// 校验版本升级
-//					Map<String, Object> tmpMap = versionUpgrade(paramRequest);
-					Map<String, Object> tmpMap = null;
-					if (tmpMap != null && !tmpMap.isEmpty()) {
-						return tmpMap;
+                    ServiceResult serviceResult = versionUpgrade(paramRequest);
+					if (null != serviceResult.getData()) {
+						return serviceResult;
 					}
 				}
 			}
@@ -153,11 +149,10 @@ public class CommonControllerAspect {
         boolean isMatch = false;
         // 判断当前请求是否 防重黑名单限制重复请求
         String methodName = pjp.getSignature().getName();
-        Object value = PropertyConfigurerWithBlack.getProperty(methodName);
+        Object value = PropertyConfigurerWithWhite.getProperty(methodName);
         if (null != value) {
             isMatch = true;
         }
-
 
         String limitKey = "";
         // 标识 当前请求是否被过滤了 true：过滤  false：没有
@@ -166,10 +161,10 @@ public class CommonControllerAspect {
             if (isMatch) {
                 // 步骤redis的key
                 limitKey = getLimitRedisKey(pjp, params, memberId);
-                Object resObj = reSubmitLimit(pjp, limitKey);
-                if (null != resObj) {
+                ServiceResult serviceResult = reSubmitLimit(pjp, limitKey);
+                if (null != serviceResult.getData()) {
                     isLimit = true;
-                    return resObj;
+                    return serviceResult;
                 }
             }
         } finally {
@@ -178,6 +173,7 @@ public class CommonControllerAspect {
                 noShardedRedisCacheUtil.del(limitKey);
             }
         }
+        return ServiceResult.newSuccess();
     }
     
     
@@ -189,78 +185,76 @@ public class CommonControllerAspect {
      * @see [相关类/方法](可选)
      * @since [产品/模块版本](可选)
      */
-//	private Map<String, Object> versionUpgrade(HttpServletRequest request) {
+	private ServiceResult versionUpgrade(HttpServletRequest request) {
 //		Map<String, Object> result = new HashMap<String, Object>();
-//		// 当前客户端版本
-//		String curVersion = request.getHeader("version");
-//		// 终端系统 1：IOS 2：Android
-//		String client = request.getHeader("client");
-//		// 平台标识
-//		String platform = request.getHeader("platform");
-//		// 若是非强制升级，已提示，客户端本地缓存该标识，用于接口端判断是否需要再提示非强制升级
-//		String nonForceFlag = request.getHeader("nonForceFlag");
-//
-//		if (StringUtils.isNotEmpty(curVersion) && StringUtils.isNotEmpty(client)) {
-//			try {
-//				// 从ehcache中获取版本配置信息
-//				List<Map<String, Object>> confs = versionConfService.getIosVersionConf();
-//				if (StringUtils.equals(NumberConstants.STR_TWO, client)) {
-//					confs = versionConfService.getAndroidVersionConf();
-//				}
-//				// 有版本配置
-//				if (null != confs && !confs.isEmpty()) {
-//					// 1.获取强制升级的最新版本
-//					VersionUpgrade forceConf = null;
-//					VersionUpgrade newConf = null;
-//					for (Map<String, Object> conf : confs) {
-//						VersionUpgrade confVesion = (VersionUpgrade) BeanUtil.mapToObject(conf, VersionUpgrade.class);
-//						if (StringUtils.equals(confVesion.getSplatform(), platform) && newConf == null) {
-//							// 最新版本配置信息
-//							newConf = confVesion;
-//						}
-//						if (confVesion.getbIsEnUpgrade() == NumberConstants.NUM_ONE
-//								&& StringUtils.equals(confVesion.getSplatform(), platform)) {
-//							forceConf = confVesion;
-//							break;
-//						}
-//					}
-//					// 当前版本配置
-//					int curVerionValue = Integer.parseInt(curVersion.replaceAll("\\.", ""));
-//					if (null != forceConf) {
-//						int compareValue = Integer.parseInt(forceConf.getsVersionNo().replaceAll("\\.", ""));
-//						// 当前版本低于强制版本，则升级
-//						if (curVerionValue < compareValue) {
-//							Map<String, String> msg = new HashMap<String, String>();
-//							result.put(IResponseCode.RETURN_CODE_STR, "-9999");
-//							msg.put("isupdate", NumberConstants.STR_ONE);
-//							msg.put("ismandatory", StringUtils.EMPTY + newConf.getbIsEnUpgrade());
-//							msg.put("comment", newConf.getsComment());
-//							msg.put("appurl", newConf.getsDownloadAddr());
-//							result.put(IResponseCode.RETURN_INFO_STR, JSON.toJSONString(msg));
-//							return result;
-//						}
-//					}
-//					// 当前版本已是最新强制升级版本，取版本列表中最新一条版本信息，根据非强制升级标识判断是否升级
-//					if (StringUtils.isEmpty(nonForceFlag) && newConf != null) {
-//						int compareValue = Integer.parseInt(newConf.getsVersionNo().replaceAll("\\.", ""));
-//						if (curVerionValue < compareValue) {
-//							Map<String, String> msg = new HashMap<String, String>();
-//							result.put(IResponseCode.RETURN_CODE_STR, "-8888");
-//							msg.put("isupdate", NumberConstants.STR_ONE);
-//							msg.put("ismandatory", StringUtils.EMPTY + newConf.getbIsEnUpgrade());
-//							msg.put("comment", newConf.getsComment());
-//							msg.put("appurl", newConf.getsDownloadAddr());
-//							result.put(IResponseCode.RETURN_INFO_STR, JSON.toJSONString(msg));
-//							return result;
-//						}
-//					}
-//				}
-//			} catch (Exception e) {
-//				WayLogger.error("CommonControllerAspect -> versionUpgrade", e.getMessage());
-//			}
-//		}
-//		return result;
-//	}
+        ServiceResult serviceResult = ServiceResult.newSuccess();
+		// 当前客户端版本
+		String curVersion = request.getHeader("version");
+		// 终端系统 1：IOS 2：Android
+		String client = request.getHeader("client");
+		// 若是非强制升级，已提示，客户端本地缓存该标识，用于接口端判断是否需要再提示非强制升级
+		String nonForceFlag = request.getHeader("nonForceFlag");
+
+		if (StringUtils.isNotEmpty(curVersion) && StringUtils.isNotEmpty(client)) {
+			try {
+				// 从ehcache中获取版本配置信息
+				List<Map<String, Object>> confs = versionConfService.getIosVersionConf();
+				if (StringUtils.equals(NumberConstants.STR_TWO, client)) {
+					confs = versionConfService.getAndroidVersionConf();
+				}
+				// 有版本配置
+				if (null != confs && !confs.isEmpty()) {
+					// 1.获取强制升级的最新版本
+					VersionUpgrade forceConf = null;
+					VersionUpgrade newConf = null;
+					for (Map<String, Object> conf : confs) {
+						VersionUpgrade confVesion = (VersionUpgrade) BeanUtils.mapToObject(conf, VersionUpgrade.class);
+						if (newConf == null) {
+							// 最新版本配置信息
+							newConf = confVesion;
+						}
+						if (confVesion.getMandatory() == NumberConstants.NUM_ONE) {
+							forceConf = confVesion;
+							break;
+						}
+					}
+					// 当前版本配置
+					int curVerionValue = Integer.parseInt(curVersion.replaceAll("\\.", ""));
+					if (null != forceConf) {
+						int compareValue = Integer.parseInt(forceConf.getVersionNo().replaceAll("\\.", ""));
+						// 当前版本低于强制版本，则升级
+						if (curVerionValue < compareValue) {
+							Map<String, String> msg = new HashMap<String, String>();
+                            serviceResult.setCode(Constants.VERSION_MANDATORY_UPGRADE);
+							msg.put("isUpdate", NumberConstants.STR_ONE);
+							msg.put("mandatory", StringUtils.EMPTY + newConf.getMandatory());
+							msg.put("comment", newConf.getComment());
+							msg.put("downLoadAddr", newConf.getDownloadAddr());
+                            serviceResult.setData(JSON.toJSONString(msg));
+							return serviceResult;
+						}
+					}
+					// 当前版本已是最新强制升级版本，取版本列表中最新一条版本信息，根据非强制升级标识判断是否升级
+					if (StringUtils.isEmpty(nonForceFlag) && newConf != null) {
+						int compareValue = Integer.parseInt(newConf.getVersionNo().replaceAll("\\.", ""));
+						if (curVerionValue < compareValue) {
+							Map<String, String> msg = new HashMap<String, String>();
+                            serviceResult.setCode(Constants.VERSION_UPGRADE);
+							msg.put("isUpdate", NumberConstants.STR_ONE);
+							msg.put("mandatory", StringUtils.EMPTY + newConf.getMandatory());
+							msg.put("comment", newConf.getComment());
+							msg.put("downLoadAddr", newConf.getDownloadAddr());
+                            serviceResult.setData(JSON.toJSONString(msg));
+                            return serviceResult;
+						}
+					}
+				}
+			} catch (Exception e) {
+				WayLogger.error("CommonControllerAspect -> versionUpgrade", e.getMessage());
+			}
+		}
+		return serviceResult;
+	}
     
 	private ServiceResult verificationFile(MultipartHttpServletRequest mulReq) {
 		Map<String, MultipartFile> fileMap = mulReq.getFileMap();
@@ -292,7 +286,7 @@ public class CommonControllerAspect {
      * @param key
      * @return
      */
-    private Object reSubmitLimit(ProceedingJoinPoint pjp, String key) {
+    private ServiceResult reSubmitLimit(ProceedingJoinPoint pjp, String key) {
 
         String signature = pjp.getSignature().toLongString();
         String returnType = signature.split(" ")[1];
@@ -301,7 +295,6 @@ public class CommonControllerAspect {
         if (remainTime > 0) {
             return retunrProcessObj(returnType, TIPMESSAGE);
         } else {
-            //noShardedRedisCacheUtil.setex(key, methodName, config.getReqMethodIntervalUnit());
             //改成 setnx方式
             boolean setNxResult = noShardedRedisCacheUtil.setNewnx(key, "LOCK", config.getReqMethodIntervalUnit());
             if (!setNxResult) {
@@ -339,29 +332,16 @@ public class CommonControllerAspect {
             }
         }
         // 步骤redis的key
-        String key = noShardedRedisCacheUtil.key(Constant.REQUEST_BLACKLIST + methodName,
-                memberId, deviceNo);
+        String key = noShardedRedisCacheUtil.key(RedisConstants.REQUEST_BLACKLIST + methodName, memberId, deviceNo);
         return key;
     }
 
-    private Object retunrProcessObj(String returnType, String tipMsg) {
-        Object resObj = null;
-//        if (returnType.contains("BaseResponse")) {
-//            resObj = new BaseResponse(IResponseCode.FAIL, tipMsg);
-//        } else if (returnType.contains("ResponseInfoBase")) {
-//            resObj = new ResponseInfoBase(IResponseCode.FAIL, tipMsg);
-//        } else if (returnType.contains("Map")) {
-//            Map<String, String> resultMap = new HashMap<String, String>();
-//            resultMap.put(IResponseCode.RETURN_CODE_STR, IResponseCode.FAIL);
-//            resultMap.put(IResponseCode.RETURN_INFO_STR, tipMsg);
-//            resObj = resultMap;
-//        } else if (returnType.contains("ResultParams")) {
-//            resObj = new ResultParams(IResponseCode.FAIL, tipMsg);
-//        }
+    private ServiceResult retunrProcessObj(String returnType, String tipMsg) {
+        ServiceResult serviceResult = null;
         if(returnType.contains("ServiceResult")){
-            resObj = ServiceResult.newFailure(tipMsg);
+            serviceResult = ServiceResult.newFailure(tipMsg);
         }
-        return resObj;
+        return serviceResult;
 
     }
     
@@ -372,36 +352,6 @@ public class CommonControllerAspect {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @AfterReturning(pointcut = "pointCutController()", returning = "result")
     public void doReturn(Object result) {
-//        if (result instanceof BaseResponse) {
-//            BaseResponse param = (BaseResponse) result;
-//            String msg = getMsg(param.getRetcode(),param.getRetinfo());
-//            if (StringUtils.isNotEmpty(msg)) {
-//                param.setRetcode(IResponseCode.FAIL);
-//                param.setRetinfo(msg);
-//            }
-//        } else if (result instanceof ResponseInfoBase) {
-//            ResponseInfoBase param = (ResponseInfoBase) result;
-//            String msg = getMsg(param.getRetcode(),param.getRetinfo());
-//            if (StringUtils.isNotEmpty(msg)) {
-//                param.setRetcode(IResponseCode.FAIL);
-//                param.setRetinfo(msg);
-//            }
-//        } else if (result instanceof Map) {
-//            Map param = (Map) result;
-//            String msg = getMsg(String.valueOf(param.get(IResponseCode.RETURN_CODE_STR)),
-//            		String.valueOf(param.get(IResponseCode.RETURN_INFO_STR)));
-//            if (StringUtils.isNotEmpty(msg)) {
-//                param.put(IResponseCode.RETURN_CODE_STR, IResponseCode.FAIL);
-//                param.put(IResponseCode.RETURN_INFO_STR, msg);
-//            }
-//        } else if (result instanceof ResultParams) {
-//            ResultParams param = (ResultParams) result;
-//            String msg = getMsg(param.getRetcode(),param.getRetinfo());
-//            if (StringUtils.isNotEmpty(msg)) {
-//                param.setRetcode(IResponseCode.FAIL);
-//                param.setRetinfo(msg);
-//            }
-//        }
         if(result instanceof ServiceResult){
             ServiceResult param = (ServiceResult) result;
             String msg = getMsg(param.getCode().toString(), param.getMessage());

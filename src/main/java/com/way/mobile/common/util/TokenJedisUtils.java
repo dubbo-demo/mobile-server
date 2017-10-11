@@ -43,8 +43,10 @@ public class TokenJedisUtils {
 			LoginTokenInfo tokenInfo = new LoginTokenInfo();
 			tokenInfo.setMemberId(memberId);
 			tokenInfo.setStatus(0);
-			CacheService.StringKey.set(token, tokenInfo, RedisRootNameSpace.UnitEnum.THIRTY_MIN);
-			CacheService.StringKey.set(memberId, token, RedisRootNameSpace.UnitEnum.THIRTY_MIN);
+//			CacheService.StringKey.set(token, tokenInfo, RedisRootNameSpace.UnitEnum.THIRTY_MIN);
+//			CacheService.StringKey.set(memberId, token, RedisRootNameSpace.UnitEnum.THIRTY_MIN);
+			CacheService.StringKey.set(token, tokenInfo);
+			CacheService.StringKey.set(memberId, token);
 		}
 	}
 	

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+   	http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+		<property name="cacheManager">
+			<bean class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+				<property name="configLocation" value="classpath:spring/ehcache.xml" />
+				<property name="shared" value="true" />
+				<property name="cacheManagerName" value="mobileCacheManager" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="versionConfServiceImpl" class="com.way.mobile.ehcache.service.impl.VersionConfServiceImpl">
+		<property name="versionCache">
+			<bean factory-bean="cacheManager" factory-method="getCache">
+				<constructor-arg value="versionCache" />
+			</bean>
+		</property>
+	</bean>
+</beans>
