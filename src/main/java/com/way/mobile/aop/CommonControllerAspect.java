@@ -187,7 +187,6 @@ public class CommonControllerAspect {
      * @since [产品/模块版本](可选)
      */
 	private ServiceResult versionUpgrade(HttpServletRequest request) {
-//		Map<String, Object> result = new HashMap<String, Object>();
         ServiceResult serviceResult = ServiceResult.newSuccess();
 		// 当前客户端版本
 		String curVersion = request.getHeader("version");
@@ -404,7 +403,6 @@ public class CommonControllerAspect {
      * @Description: 处理最终返回结果
      * @return: Object
      */
-    @SuppressWarnings("unused")
     private Object processResult(Object object) {
         return object;
     }

@@ -9,7 +9,6 @@ import com.way.common.util.DateUtils;
 import com.way.common.util.Validater;
 import com.way.member.member.service.MemberInfoService;
 import com.way.member.member.service.PasswordService;
-import com.way.member.member.service.RegistLogService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.dto.MemberResetPasswordDto;
 import com.way.mobile.common.constant.ConstantsConfig;
@@ -39,8 +38,6 @@ public class RegistServiceImpl implements RegistService {
 	@Autowired
 	private MemberInfoService memberInfoService;
 	@Autowired
-	private RegistLogService registLogService;
-	@Autowired
 	private PropertyConfig propertyConfig;
 	@Autowired
 	private LoginService loginService;
@@ -54,8 +51,9 @@ public class RegistServiceImpl implements RegistService {
 	 * @throws DataValidateException
 	 */
 	public ServiceResult<String> sendCode(MemberDto memberDto) throws DataValidateException {
+		String phoneNo = memberDto.getPhoneNo();
 		// 验证手机号是否已经注册
-		ServiceResult<MemberDto> m = memberInfoService.loadMapByMobile(memberDto.getPhone());
+		ServiceResult<MemberDto> m = memberInfoService.loadMapByMobile(phoneNo);
 		String smsCodeType = ConstantsConfig.JEDIS_HEADER_REGIST_CODE;
 		if (VerificationCodeType.FORGET_PASSWORD.equals(memberDto.getType())) {// 忘记密码的时候，校验
 			smsCodeType = ConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE;
@@ -65,11 +63,10 @@ public class RegistServiceImpl implements RegistService {
 		} else if (VerificationCodeType.REGIST.equals(memberDto.getType())) {// 注册时候，发送验证码的校验
 			// 校验手机号码是否已注册
 			if (m != null && m.getData() != null) {
-				if (m.getData().getMemberType() != null && m.getData().getMemberSource() != Constants.NO_INT)
-					throw new DataValidateException("手机号码存在");
+				throw new DataValidateException("手机号码存在");
 			}
 		}
-		String key = smsCodeType + memberDto.getPhone();
+		String key = smsCodeType + phoneNo;
 		// 校验发送验证码的时间间隔
 		long surplusExpire = CacheService.KeyBase.getExprise(key);// 剩余有效时间
 		long usedExpire = propertyConfig.getSmsCodeExpire() - surplusExpire;// 已过时间
@@ -95,27 +92,22 @@ public class RegistServiceImpl implements RegistService {
 	 * @throws DataValidateException
 	 */
 	public ServiceResult<MemberDto> regist(MemberDto memberDto) throws DataValidateException {
-		String mobile = memberDto.getPhone();
-		String key = ConstantsConfig.JEDIS_HEADER_REGIST_CODE + mobile;
+		String phoneNo = memberDto.getPhoneNo();
+		String key = ConstantsConfig.JEDIS_HEADER_REGIST_CODE + phoneNo;
 		String code = CacheService.StringKey.getObject(key, String.class);
-		if (StringUtils.isBlank(code))
+		if (StringUtils.isBlank(code)) {
 			throw new DataValidateException("请重新获取短信验证码");
-		if (!code.equals(memberDto.getVerificationCode()))
+		}
+		if (!code.equals(memberDto.getVerificationCode())) {
 			throw new DataValidateException("短信验证码不正确");
+		}
 		// 验证码校验成功，移除redis中的验证码
 		CacheService.KeyBase.delete(key);
-		ServiceResult<MemberDto> memberRes  = memberInfoService.loadMapByMobile(memberDto.getPhone());
+		ServiceResult<MemberDto> memberRes  = memberInfoService.loadMapByMobile(phoneNo);
 		if (null != memberRes.getData()){ // 该手机号已经注册
-			if(memberRes.getData().getMemberSource() == Constants.NO_INT){
-				memberDto.setMemberType(Constants.NO);
-				return ServiceResult.newSuccess(memberDto);
-			}else{
-				throw new DataValidateException("手机号已注册");
-			}
+			throw new DataValidateException("手机号已注册");
 		}
-		// 新用户
-		memberDto.setMemberType(Constants.YES);
-		ServiceResult<MemberDto> memberDtoSer = memberInfoService.memberRegist(memberDto);
+		memberInfoService.memberRegist(memberDto);
 		// 注册成功调用登录接口登录，并异步保存用户登录信息
 		loginService.login(memberDto);
 		return ServiceResult.newSuccess(memberDto);
@@ -127,9 +119,9 @@ public class RegistServiceImpl implements RegistService {
 	 * @throws DataValidateException 
 	 */
 	public  ServiceResult<String> resetPassword(MemberDto memberDto) throws DataValidateException {
-		String mobile = memberDto.getPhone();
+		String phoneNo = memberDto.getPhoneNo();
 		// 校验手机号
-		if (!Validater.isMobileNew(mobile))
+		if (!Validater.isMobileNew(phoneNo))
 			throw new DataValidateException("手机号不正确");
 		if (StringUtils.isEmpty(memberDto.getVerificationCode()))
 			throw new DataValidateException("请输入短信验证码");
@@ -137,7 +129,7 @@ public class RegistServiceImpl implements RegistService {
 			throw new DataValidateException("请输入密码");
 
 		// 校验验证码
-		String key = ConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE + mobile;
+		String key = ConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE + phoneNo;
 		String code = CacheService.StringKey.getObject(key, String.class);
 		if (code == null || code == "")
 			throw new DataValidateException("短信验证码已失效");
@@ -145,20 +137,13 @@ public class RegistServiceImpl implements RegistService {
 			throw new DataValidateException("短信验证码不正确");
 
 		// 校验用户是否存在
-		ServiceResult<MemberDto> memberRes = memberInfoService.loadMapByMobile(mobile);
+		ServiceResult<MemberDto> memberRes = memberInfoService.loadMapByMobile(phoneNo);
 		// 用户不存在
-		if (memberRes.getData() == null)
+		if (memberRes.getData() == null){
 			throw new DataValidateException("手机号未注册");
-		// 用户存在
-		ServiceResult<String> passSer = passwordService.queryPasswdById(memberRes.getData().getMemberId());
-		if(StringUtils.isBlank(passSer.getData())){
-			memberDto.setMemberId(memberRes.getData().getMemberId());
-			// 老用户插入密码表
-			passwordService.savePasswordInfo(memberDto);
-		}else{
-			// 新用户更新密码表
-			memberInfoService.updatePassword(memberRes.getData().getMemberId(), memberDto.getPassword());
 		}
+		// 更新密码表
+		memberInfoService.updatePassword(phoneNo, memberDto.getPassword());
 		// 验证码校验成功，移除redis中的验证码
 		CacheService.KeyBase.delete(key);
 		return ServiceResult.newSuccess();

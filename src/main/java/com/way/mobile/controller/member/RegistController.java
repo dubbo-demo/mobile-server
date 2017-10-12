@@ -72,7 +72,7 @@ public class RegistController {
 			ServiceResult<String> smsResult = registService.sendCode(params);
 			String smsCode = smsResult.getData();
 			if(StringUtils.isNotBlank(smsCode)){
-				smsService.sendSms(smsCode, params.getPhone(), SmsTemplateEnum.APP_REGIST_TEMPLATE);
+				smsService.sendSms(smsCode, params.getPhoneNo(), SmsTemplateEnum.APP_REGIST_TEMPLATE);
 			}else{
 				serviceResult.setCode(ServiceResult.ERROR_CODE);
 				serviceResult.setMessage("发送短信验证码失败");
@@ -99,14 +99,10 @@ public class RegistController {
 	public ServiceResult<Object> regist(HttpServletRequest request, @ModelAttribute MemberDto memberDto) {
 		ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
 		try {
-			// 终端
-			memberDto.setAppSource(request.getHeader("client"));
 			// app版本号
 			memberDto.setVersion(request.getHeader("version"));
 			// 设备号
             memberDto.setDeviceNo(request.getHeader("deviceNo"));
-            // ip地址
-            memberDto.setSIp(IpUtil.getIpAddr(request));
 			// 校验短信验证码
 			if (StringUtils.isEmpty(memberDto.getVerificationCode())) {
 				serviceResult.setCode(ServiceResult.ERROR_CODE);
@@ -114,13 +110,13 @@ public class RegistController {
 				return serviceResult;
 			}
 			// 校验手机号
-			if (Validater.isEmpty(memberDto.getPhone())) {
+			if (Validater.isEmpty(memberDto.getPhoneNo())) {
 				serviceResult.setCode(ServiceResult.ERROR_CODE);
 				serviceResult.setMessage("请输入手机号");
 				return serviceResult;
 			}
 			// 校验手机号格式是否正确
-			if (!Validater.isMobileNew(memberDto.getPhone())) {
+			if (!Validater.isMobileNew(memberDto.getPhoneNo())) {
 				serviceResult.setCode(ServiceResult.ERROR_CODE);
 				serviceResult.setMessage("手机号不正确");
 				return serviceResult;
@@ -129,15 +125,13 @@ public class RegistController {
 			ServiceResult<MemberDto> result = registService.regist(memberDto);
 			MemberDto dto = result.getData();
 			serviceResult.setData(dto);
-			if (serviceResult.getCode().equals(ServiceResult.SUCCESS_CODE)
-					&& !dto.getMemberType().equals(Constants.NO)) {// 注册成功
+			if (serviceResult.getCode().equals(ServiceResult.SUCCESS_CODE)) {// 注册成功
 				// 生成新token
-				String newToken = TokenJedisUtils.putTokenInfoExpire(dto.getMemberId() + StringUtils.EMPTY);
+				String newToken = TokenJedisUtils.putTokenInfoExpire(dto.getPhoneNo());
 				// dto
 				dto.setToken(newToken);
 				serviceResult.setData(dto);
 			}
-			//TODO 发生注册短信
 		} catch (DataValidateException e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
 			serviceResult.setMessage(e.getMessage());
@@ -164,7 +158,7 @@ public class RegistController {
 		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
 		try {
 			// 校验参数
-			if (StringUtils.isEmpty(memberDto.getPhone()) || StringUtils.isEmpty(memberDto.getPassword())
+			if (StringUtils.isEmpty(memberDto.getPhoneNo()) || StringUtils.isEmpty(memberDto.getPassword())
 					|| StringUtils.isEmpty(memberDto.getVerificationCode())) {
 				return ServiceResult.newFailure("必传参数不能为空");
 			}
@@ -172,7 +166,7 @@ public class RegistController {
 			serviceResult = registService.resetPassword(memberDto);
 			if (serviceResult.getCode() == ServiceResult.SUCCESS_CODE) {
 				// 密码修改成功，删除redis中登录失败的记录
-				CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhone());
+				CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhoneNo());
 			}
 		} catch (DataValidateException e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
