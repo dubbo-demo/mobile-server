@@ -58,8 +58,9 @@ public class RegistServiceImpl implements RegistService {
 		if (VerificationCodeType.FORGET_PASSWORD.equals(memberDto.getType())) {// 忘记密码的时候，校验
 			smsCodeType = ConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE;
 			// 未注册返回失败
-			if (null == m || m.getData() == null)
+			if (null == m || m.getData() == null){
 				throw new DataValidateException("手机号码不存在");
+			}
 		} else if (VerificationCodeType.REGIST.equals(memberDto.getType())) {// 注册时候，发送验证码的校验
 			// 校验手机号码是否已注册
 			if (m != null && m.getData() != null) {
@@ -70,8 +71,9 @@ public class RegistServiceImpl implements RegistService {
 		// 校验发送验证码的时间间隔
 		long surplusExpire = CacheService.KeyBase.getExprise(key);// 剩余有效时间
 		long usedExpire = propertyConfig.getSmsCodeExpire() - surplusExpire;// 已过时间
-		if (surplusExpire > 0 && usedExpire < propertyConfig.getSmsCodeExpireInterval())
+		if (surplusExpire > 0 && usedExpire < propertyConfig.getSmsCodeExpireInterval()){
 			throw new DataValidateException(ResponseMsg.SEND_CODE_MINUTE);
+		}
 
 		if (!memberDto.getType().equals(VerificationCodeType.REGIST)
 				&& !memberDto.getType().equals(VerificationCodeType.FORGET_PASSWORD)) {
