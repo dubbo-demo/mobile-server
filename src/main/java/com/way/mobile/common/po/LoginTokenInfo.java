@@ -12,16 +12,16 @@ public class LoginTokenInfo implements Serializable {
 
 	private static final long serialVersionUID = 8210387796860813458L;
 
-	private String memberId;
+	private String phoneNo;
 	/** token状态（0：正常登录，1：在另一台设备上登录） */
 	private int status = 0;
 
-	public String getMemberId() {
-		return memberId;
+	public String getPhoneNo() {
+		return phoneNo;
 	}
 
-	public void setMemberId(String memberId) {
-		this.memberId = memberId;
+	public void setPhoneNo(String phoneNo) {
+		this.phoneNo = phoneNo;
 	}
 
 	public int getStatus() {

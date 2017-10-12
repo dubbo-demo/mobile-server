@@ -1,13 +1,12 @@
 package com.way.mobile.controller.member;
 
-import com.way.member.member.dto.MemberDto;
-import com.way.mobile.common.patchca.RedisPatchcaStore;
-import com.way.mobile.service.member.LoginService;
 import com.way.common.exception.DataValidateException;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
-import com.way.common.util.IpUtil;
 import com.way.common.util.ResponseUtils;
+import com.way.member.member.dto.MemberDto;
+import com.way.mobile.common.patchca.RedisPatchcaStore;
+import com.way.mobile.service.member.LoginService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -61,10 +60,8 @@ public class LoginController {
         try {
             // 设备号
             memberDto.setDeviceNo(request.getHeader("deviceNo"));
-            // ip地址
-            memberDto.setSIp(IpUtil.getIpAddr(request));
             // 手机号
-            String mobile = memberDto.getPhone();
+            String mobile = memberDto.getPhoneNo();
             // 密码
             String password = memberDto.getPassword();
             if (StringUtils.isEmpty(mobile)) { // 手机号为空

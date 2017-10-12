@@ -77,13 +77,14 @@ public class LoginServiceImpl implements LoginService {
 	 * @throws DataValidateException 
 	 */
 	public ServiceResult<MemberDto> login(MemberDto memberDto) throws DataValidateException {
+		String phoneNo = memberDto.getPhoneNo();
 		// 登录失败的KEY键
-		String key = ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhone();
+		String key = ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + phoneNo;
 		Object ob = CacheService.StringKey.getObject(key, Object.class);
 		// 临时记录登录失败次数
 		int tempFailTimes = checkLoginFailTimes(ob, key);
 		/** 调用户中心登录接口验证用户信息， 返回用户信息 */
-		ServiceResult<MemberDto> result = memberInfoService.queryMemberInfo(memberDto.getPhone());
+		ServiceResult<MemberDto> result = memberInfoService.queryMemberInfo(phoneNo);
 		MemberDto resultDto = result.getData();
 		if(resultDto == null){
 			result.setCode(ServiceResult.ERROR_CODE);
@@ -96,14 +97,11 @@ public class LoginServiceImpl implements LoginService {
 				return result;
 			}
 			if (ServiceResult.SUCCESS_CODE == result.getCode()) {
-				memberDto.setMemberId(resultDto.getMemberId());
-				// 登录成功记入日志
-				memberInfoService.saveMemberLoginInfo(memberDto);
 				// 登录成功，则清零登录失败次数，视为第一次登录
 				if (null != ob) 
 					CacheService.KeyBase.delete(key);
 				// 登录成功返回token
-				String oldToken = TokenJedisUtils.getTokenByMemberId(resultDto.getMemberId() + "");
+				String oldToken = TokenJedisUtils.getTokenByMemberId(phoneNo);
 				if (null != oldToken) {// 存在旧token，说明是在另一台设备上登录，将旧token状态置为1
 					LoginTokenInfo tokenInfo = TokenJedisUtils.getTokenInfo(oldToken);
 					if (null != tokenInfo) {
@@ -111,7 +109,7 @@ public class LoginServiceImpl implements LoginService {
 						TokenJedisUtils.resetTokenInfoExpire(oldToken, tokenInfo, (int) TokenJedisUtils.getTokenSurplusExpire(oldToken));
 					}
 				}
-				String newToken = TokenJedisUtils.putTokenInfoExpire(resultDto.getMemberId() + "");
+				String newToken = TokenJedisUtils.putTokenInfoExpire(phoneNo);
 				resultDto.setToken(newToken);
 			} else if (ServiceResult.ERROR_CODE == result.getCode()) {
 				// 密码错误登录失败，登录失败次数+1，最后登录失败时间改为当前时间

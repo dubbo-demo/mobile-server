@@ -15,20 +15,20 @@ import org.apache.commons.lang3.StringUtils;
 public class TokenJedisUtils {
 
 	/**
-	 * @param memberId
+	 * @param phoneNo
 	 * @Title: putTokenInfoExpire
 	 * @Description: 将用户的token信息保存到redis中，并设置有效时长
 	 * @return: String
 	 */
-	public static String putTokenInfoExpire(String memberId) {
+	public static String putTokenInfoExpire(String phoneNo) {
 		String token = null;
-		if (!StringUtils.isEmpty(memberId)) {
+		if (StringUtils.isNotBlank(phoneNo)) {
 			token = BeanUtils.getUUID();
 			LoginTokenInfo tokenInfo = new LoginTokenInfo();
-			tokenInfo.setMemberId(memberId);
+			tokenInfo.setPhoneNo(phoneNo);
 			tokenInfo.setStatus(0);
 			CacheService.StringKey.set(token, tokenInfo);
-			CacheService.StringKey.set(memberId, token);
+			CacheService.StringKey.set(phoneNo, token);
 		}
 		return token;
 	}
@@ -38,15 +38,15 @@ public class TokenJedisUtils {
 	 * @Description: 重新设置token的有效时长 
 	 * @return: void
 	 */
-	public static void expireTokenInfo(String token, String memberId) {
-		if (!StringUtils.isEmpty(memberId)) {
+	public static void expireTokenInfo(String token, String phoneNo) {
+		if (StringUtils.isNotBlank(phoneNo)) {
 			LoginTokenInfo tokenInfo = new LoginTokenInfo();
-			tokenInfo.setMemberId(memberId);
+			tokenInfo.setPhoneNo(phoneNo);
 			tokenInfo.setStatus(0);
 //			CacheService.StringKey.set(token, tokenInfo, RedisRootNameSpace.UnitEnum.THIRTY_MIN);
 //			CacheService.StringKey.set(memberId, token, RedisRootNameSpace.UnitEnum.THIRTY_MIN);
 			CacheService.StringKey.set(token, tokenInfo);
-			CacheService.StringKey.set(memberId, token);
+			CacheService.StringKey.set(phoneNo, token);
 		}
 	}
 	
@@ -60,7 +60,7 @@ public class TokenJedisUtils {
 			LoginTokenInfo tokenInfo = CacheService.StringKey.getObject(token, LoginTokenInfo.class);
 			if (tokenInfo != null) {
 				CacheService.KeyBase.delete(token);
-				CacheService.KeyBase.delete(tokenInfo.getMemberId());
+				CacheService.KeyBase.delete(tokenInfo.getPhoneNo());
 			}
 		}
 	}
@@ -94,11 +94,11 @@ public class TokenJedisUtils {
 	 * @return: String
 	 */
 	public static String getMemberIdByToken(String token) {
-		String memberId = null;
+		String phoneNo = null;
 		LoginTokenInfo tokenInfo = CacheService.StringKey.getObject(token, LoginTokenInfo.class);
 		if (null != tokenInfo)
-			memberId = tokenInfo.getMemberId();
-		return memberId;
+			phoneNo = tokenInfo.getPhoneNo();
+		return phoneNo;
 	}
 	
 	/**
