@@ -7,6 +7,7 @@ import com.way.common.util.DateUtils;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.dto.MemberLoginFailInfoDto;
 import com.way.member.member.service.MemberInfoService;
+import com.way.member.member.service.PasswordService;
 import com.way.mobile.common.constant.ConstantsConfig;
 import com.way.mobile.common.po.LoginTokenInfo;
 import com.way.mobile.common.util.PropertyConfig;
@@ -35,6 +36,9 @@ public class LoginServiceImpl implements LoginService {
 	
 	@Autowired
 	private MemberInfoService memberInfoService;
+
+	@Autowired
+	private PasswordService passwordService;
 
 	/**
 	 * @Title: checkLoginFailTimes
@@ -91,7 +95,7 @@ public class LoginServiceImpl implements LoginService {
 			result.setMessage("手机号未注册");
 			return result;
 		}else{
-			if(!resultDto.getPassword().equals(memberDto.getPassword())){
+			if(passwordService.checkCurPassword(phoneNo, memberDto.getPassword()).getCode() == 1){
 				result.setCode(ServiceResult.ERROR_CODE);
 				result.setMessage("手机号或密码错误");
 				return result;
@@ -118,9 +122,9 @@ public class LoginServiceImpl implements LoginService {
 				loginFailVO.setLoginFailTimes(tempFailTimes+1);
 				CacheService.StringKey.set(key, loginFailVO);
 				
-				int subTimes = propertyConfig.getPermitLoginTimes() - tempFailTimes-1;
+				int subTimes = propertyConfig.getPermitLoginTimes() - tempFailTimes - 1;
 				result.setCode(ServiceResult.ERROR_CODE);
-				result.setMessage(loginFailMsg.replace("times", ""+subTimes));
+				result.setMessage(loginFailMsg.replace("times", "" + subTimes));
 			}
 		}
 		return result;

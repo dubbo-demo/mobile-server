@@ -59,7 +59,7 @@ public class CommonControllerAspect {
 
     private static Configuration configuration;
 
-    public static final String expression = "execution(* com.way.mobile.*.controller.*.*(..)) and within(@org.springframework.stereotype.Controller *)";
+    public static final String expression = "execution(* com.way.mobile.controller..*.*(..)) and within(@org.springframework.stereotype.Controller *)";
 
     @PostConstruct
     public static void loadCodeDef() {
@@ -74,10 +74,10 @@ public class CommonControllerAspect {
     }
 
     @Around("pointCutController()")
-    public ServiceResult doAround(ProceedingJoinPoint pjp) throws Throwable {
+    public Object doAround(ProceedingJoinPoint pjp) throws Throwable {
         Object[] params = pjp.getArgs();
         String newToken = null;
-        String memberId = null;
+        String phoneNo = null;
         HttpServletRequest paramRequest = null;
         if (null != params && params.length > 0) {
         	// 文件上传相关请求
@@ -105,8 +105,8 @@ public class CommonControllerAspect {
                 } else {
                     return ServiceResult.newFailure(Constants.TOKEN_EXPIRED_OVERTIME, "账号已过期，请重新登录");
                 }
-                memberId = tokenInfo.getMemberId();
-                mulReq.setAttribute("memberId", memberId);
+                phoneNo = tokenInfo.getPhoneNo();
+                mulReq.setAttribute("phoneNo", phoneNo);
                 // 校验文件大小
 				ServiceResult serviceResult = verificationFile(mulReq);
                 if(Constants.INVALID == serviceResult.getCode()){
@@ -119,7 +119,7 @@ public class CommonControllerAspect {
                 // 获取token
                 newToken = request.getParameter("token");
                 if (null != newToken) {
-                    memberId = TokenJedisUtils.getMemberIdByToken(newToken);
+                    phoneNo = TokenJedisUtils.getMemberIdByToken(newToken);
                 }
             }
 
@@ -161,20 +161,20 @@ public class CommonControllerAspect {
         try {
             if (isMatch) {
                 // 步骤redis的key
-                limitKey = getLimitRedisKey(pjp, params, memberId);
+                limitKey = getLimitRedisKey(pjp, params, phoneNo);
                 ServiceResult serviceResult = reSubmitLimit(pjp, limitKey);
                 if (null != serviceResult.getData()) {
                     isLimit = true;
                     return serviceResult;
                 }
             }
+            return pjp.proceed();
         } finally {
             // 改成有 第一个进入方法的拥有者来完成 清除key的动作
             if (isMatch && !isLimit) {
                 noShardedRedisCacheUtil.del(limitKey);
             }
         }
-        return ServiceResult.newSuccess();
     }
     
     
@@ -309,30 +309,30 @@ public class CommonControllerAspect {
      *
      * @param pjp
      * @param params
-     * @param memberId
+     * @param phoneNo
      * @return
      */
-    private String getLimitRedisKey(ProceedingJoinPoint pjp, Object[] params, String memberId) {
+    private String getLimitRedisKey(ProceedingJoinPoint pjp, Object[] params, String phoneNo) {
         String deviceNo = "";
         String methodName = pjp.getSignature().getName();
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
                 .getRequestAttributes()).getRequest();
         //memberid找不到 尝试获取请求头 deviceNo
-        if (StringUtils.isBlank(memberId)) {
+        if (StringUtils.isBlank(phoneNo)) {
             deviceNo = request.getHeader("deviceNo");
         }
 
         //要防止一些特殊接口可能出现memberId 和deviceNo 都不存在的情况， 要规避这样的情况
-        if (StringUtils.isBlank(memberId) && StringUtils.isBlank(deviceNo)) {
+        if (StringUtils.isBlank(phoneNo) && StringUtils.isBlank(deviceNo)) {
             String queryStr = request.getQueryString();
             if (StringUtils.isNotBlank(queryStr)) {
-                memberId = String.valueOf(request.getQueryString().hashCode());
+                phoneNo = String.valueOf(request.getQueryString().hashCode());
             } else {//随机 通常这个不会被执行  只是做冗余
-                memberId = RandomStringUtils.randomNumeric(8);
+                phoneNo = RandomStringUtils.randomNumeric(8);
             }
         }
         // 步骤redis的key
-        String key = noShardedRedisCacheUtil.key(RedisConstants.REQUEST_BLACKLIST + methodName, memberId, deviceNo);
+        String key = noShardedRedisCacheUtil.key(RedisConstants.REQUEST_BLACKLIST + methodName, phoneNo, deviceNo);
         return key;
     }
 

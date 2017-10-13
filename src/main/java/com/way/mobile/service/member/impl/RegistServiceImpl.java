@@ -152,23 +152,6 @@ public class RegistServiceImpl implements RegistService {
 	}
 	
 	/**
-	 * 重置密码
-	 * @param memberResetPasswordDto
-	 * @throws DataValidateException 
-	 */
-//	public ServiceResult<String> resetPassword(MemberResetPasswordDto memberResetPasswordDto) throws DataValidateException {
-//		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
-//		/** 校验密码是否正确 */
-//		ServiceResult<String> passRes = passwordService.queryCurPasswdById(memberResetPasswordDto.getMemberId(), memberResetPasswordDto.getCurPasssword());
-//		if(StringUtils.isBlank(passRes.getData())){
-//			throw new DataValidateException("旧密码不正确");
-//		}
-//		// 更新密码
-//		memberInfoService.updatePassword(memberResetPasswordDto.getMemberId(), memberResetPasswordDto.getNewPassword());
-//		return serviceResult;
-//	}
-	
-	/**
 	 * @Title: checkResetPasswordFailTimes
 	 * @Description: 校验重置密码失败次数是否大于允许的最大值
 	 * @return: int

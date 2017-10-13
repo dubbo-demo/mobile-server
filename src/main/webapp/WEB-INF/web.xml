@@ -75,15 +75,15 @@
     </filter-mapping>
 
     <!-- 登录过滤器 -->
-    <filter>
-        <filter-name>MobileLoginFilter</filter-name>
-        <filter-class>com.way.mobile.filter.MobileLoginFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>MobileLoginFilter</filter-name>
-        <url-pattern>*.htm</url-pattern>
-        <url-pattern>*.do</url-pattern>
-    </filter-mapping>
+    <!--<filter>-->
+        <!--<filter-name>MobileLoginFilter</filter-name>-->
+        <!--<filter-class>com.way.mobile.filter.MobileLoginFilter</filter-class>-->
+    <!--</filter>-->
+    <!--<filter-mapping>-->
+        <!--<filter-name>MobileLoginFilter</filter-name>-->
+        <!--<url-pattern>*.htm</url-pattern>-->
+        <!--<url-pattern>*.do</url-pattern>-->
+    <!--</filter-mapping>-->
 
     <servlet>
         <servlet-name>mvc</servlet-name>

@@ -1,15 +1,12 @@
 package com.way.mobile.controller.member;
 
 import com.way.base.common.SmsTemplateEnum;
-import com.way.common.constant.Constants;
 import com.way.common.exception.DataValidateException;
 import com.way.common.log.WayLogger;
 import com.way.common.redis.CacheService;
 import com.way.common.result.ServiceResult;
-import com.way.common.util.IpUtil;
 import com.way.common.util.Validater;
 import com.way.member.member.dto.MemberDto;
-import com.way.member.member.dto.MemberResetPasswordDto;
 import com.way.mobile.common.constant.ConstantsConfig;
 import com.way.mobile.common.patchca.RedisPatchcaStore;
 import com.way.mobile.common.util.TokenJedisUtils;
@@ -24,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 
 /**
  *
@@ -182,61 +178,4 @@ public class RegistController {
 		return serviceResult;
 	}
 	
-//	/**
-//	 * @Title: resetPassword
-//	 * @Description: 重置密码
-//	 * @return: ServiceResult<String>
-//	 */
-//	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
-//	@ResponseBody
-//	public ServiceResult<String> resetPassword(HttpServletRequest request, @ModelAttribute MemberResetPasswordDto memberResetPasswordDto) {
-//		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
-//		try {
-//			// 校验参数
-//			if (request.getAttribute("memberId") == null) {
-//				return ServiceResult.newFailure("必传参数不能为空");
-//			}
-//			memberResetPasswordDto.setMemberId(Long.valueOf(request.getAttribute("memberId").toString()));
-//			// 校验短信验证码
-//			if (StringUtils.isEmpty(memberResetPasswordDto.getCurPasssword())){ // 旧密码为空
-//				serviceResult.setCode(ServiceResult.ERROR_CODE);
-//				serviceResult.setMessage("请输入当前密码");
-//				return serviceResult;
-//			}
-//			// 校验手机号
-//			if (StringUtils.isEmpty(memberResetPasswordDto.getNewPassword())) {
-//				serviceResult.setCode(ServiceResult.ERROR_CODE);
-//				serviceResult.setMessage("请输入新密码");
-//				return serviceResult;
-//			}
-//			serviceResult = registService.resetPassword(memberResetPasswordDto);
-//			// 获取重置密码次数
-//			String key = ConstantsConfig.JEDIS_HEADER_RESET_PASSWORD_FAIL + memberResetPasswordDto.getMemberId();
-//			Object ob = CacheService.StringKey.getObject(key, Object.class);
-//			// 临时记录重置密码失败次数
-//			int tempFailTimes = registService.checkResetPasswordFailTimes(ob, key);
-//			if (ServiceResult.SUCCESS_CODE == serviceResult.getCode()) {
-//				// 重置密码成功，则清零重置密码失败次数，视为第一次登录
-//				if (null != ob)
-//					CacheService.KeyBase.delete(key);
-//				} else {
-//					// 重置密码失败，重置密码失败次数+1，最后重置密码失败时间改为当前时间
-//					MemberResetPasswordDto resetPasswordFailVO = new MemberResetPasswordDto();
-//					resetPasswordFailVO.setLastResetPasswordFailTime(new Date().getTime());
-//					resetPasswordFailVO.setResetPasswordFailTimes(tempFailTimes+1);
-//					CacheService.StringKey.set(key, resetPasswordFailVO);
-//			}
-//		} catch (DataValidateException e) {
-//			serviceResult.setCode(ServiceResult.ERROR_CODE);
-//			serviceResult.setMessage(e.getMessage());
-//			WayLogger.error(e,"重置密码失败");
-//		} catch (Exception e) {
-//			serviceResult.setCode(ServiceResult.ERROR_CODE);
-//			serviceResult.setMessage("重置密码失败");
-//			WayLogger.error(e,"重置密码失败");
-//		} finally {
-//			WayLogger.access("重置密码：/resetPassword.do");
-//		}
-//		return serviceResult;
-//	}
 }
