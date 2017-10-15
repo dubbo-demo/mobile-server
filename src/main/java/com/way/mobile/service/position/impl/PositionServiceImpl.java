@@ -1,6 +1,8 @@
 package com.way.mobile.service.position.impl;
 
 import com.way.common.result.ServiceResult;
+import com.way.member.friend.dto.FriendsInfoDto;
+import com.way.member.friend.service.FriendsInfoService;
 import com.way.member.position.dto.PositionInfoDto;
 import com.way.member.position.service.PositionInfoService;
 import com.way.mobile.service.position.PositionService;
@@ -23,6 +25,9 @@ public class PositionServiceImpl implements PositionService {
 
     @Autowired
     private PositionInfoService positionInfoService;
+
+    @Autowired
+    private FriendsInfoService friendsInfoService;
 
     /**
      * 上传坐标
@@ -77,7 +82,7 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public ServiceResult<Object> getPositionsBeforeExit(String phoneNo) {
         // 查出退出前查看的好友信息
-//        List<>
+        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendsInfoBeforeExit(phoneNo);
 
         return null;
     }
