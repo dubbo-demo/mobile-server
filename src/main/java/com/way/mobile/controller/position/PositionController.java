@@ -102,4 +102,30 @@ public class PositionController {
         }
         return serviceResult;
     }
+
+    /**
+     * 根据组ID获取用户实时坐标
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/getRealtimePositionByGroupId", method = RequestMethod.POST)
+    public ServiceResult<Object> getRealtimePositionByGroupId(HttpServletRequest request, @ModelAttribute String groupId){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 获取退出前查看的用户实时坐标
+            serviceResult = positionService.getRealtimePositionByGroupId(phoneNo, groupId);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "根据组ID获取用户实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+        } finally {
+            WayLogger.access("根据组ID获取用户实时坐标：/getRealtimePositionByGroupId.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+        }
+        return serviceResult;
+    }
+
 }

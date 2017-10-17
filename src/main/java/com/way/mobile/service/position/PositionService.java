@@ -31,4 +31,12 @@ public interface PositionService {
      * @return
      */
     ServiceResult<Object> getPositionsBeforeExit(String phoneNo);
+
+    /**
+     * 根据组ID获取用户实时坐标
+     * @param phoneNo
+     * @param groupId
+     * @return
+     */
+    ServiceResult<Object> getRealtimePositionByGroupId(String phoneNo, String groupId);
 }

@@ -1,5 +1,6 @@
 package com.way.mobile.service.position.impl;
 
+import com.way.common.constant.Constants;
 import com.way.common.result.ServiceResult;
 import com.way.member.friend.dto.FriendsInfoDto;
 import com.way.member.friend.service.FriendsInfoService;
@@ -81,9 +82,49 @@ public class PositionServiceImpl implements PositionService {
      */
     @Override
     public ServiceResult<Object> getPositionsBeforeExit(String phoneNo) {
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        List<PositionInfoDto> list = new ArrayList<PositionInfoDto>();
+        Map<String, List<PositionInfoDto>> map = new HashMap<String, List<PositionInfoDto>>();
         // 查出退出前查看的好友信息
         List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendsInfoBeforeExit(phoneNo);
+        for(FriendsInfoDto friendsInfoDto : friendsInfoDtos){
+            // 如果被授权可见
+            if(friendsInfoDto.getIsAuthorizedVisible() == Constants.YES_INT){
+                // 根据手机号获取用户实时坐标
+                ServiceResult<PositionInfoDto> positionInfoDto = positionInfoService.getRealtimePositionByPhoneNo(friendsInfoDto.getFriendPhoneNo());
+                list.add(positionInfoDto.getData());
+            }
+        }
+        map.put("positions", list);
+        serviceResult.setData(map);
+        return serviceResult;
+    }
 
-        return null;
+    /**
+     * 根据组ID获取用户实时坐标
+     * @param phoneNo
+     * @param groupId
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> getRealtimePositionByGroupId(String phoneNo, String groupId) {
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        List<PositionInfoDto> list = new ArrayList<PositionInfoDto>();
+        Map<String, List<PositionInfoDto>> map = new HashMap<String, List<PositionInfoDto>>();
+        // 根据组ID获取好友信息
+        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getRealtimePositionByGroupId(phoneNo, groupId);
+        for(FriendsInfoDto friendsInfoDto : friendsInfoDtos){
+            // 如果被授权可见
+            if(friendsInfoDto.getIsAuthorizedVisible() == Constants.YES_INT){
+                // 根据手机号获取用户实时坐标
+                ServiceResult<PositionInfoDto> positionInfoDto = positionInfoService.getRealtimePositionByPhoneNo(friendsInfoDto.getFriendPhoneNo());
+                list.add(positionInfoDto.getData());
+            }
+        }
+        // 更新好友是否退出前查看状态
+        friendsInfoService.updateIsCheckBeforeExitByGroupId(phoneNo, groupId, Constants.YES_INT);
+        map.put("positions", list);
+        serviceResult.setData(map);
+        return serviceResult;
     }
 }
