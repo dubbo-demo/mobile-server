@@ -1,6 +1,7 @@
 package com.way.mobile.service.member;
 
 import com.way.common.result.ServiceResult;
+import com.way.member.member.dto.MemberDto;
 
 /**
  * @ClassName: MemberService
@@ -17,4 +18,11 @@ public interface MemberService {
      * @return
      */
     ServiceResult<String> checkPhone(String phoneNo);
+
+    /**
+     * 根据手机号搜索用户
+     * @param phoneNo
+     * @return
+     */
+    ServiceResult<MemberDto> searchUserByPhoneNo(String phoneNo);
 }

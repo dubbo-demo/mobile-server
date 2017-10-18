@@ -94,9 +94,9 @@ public class FriendController {
             serviceResult = friendService.cancelGetGroupPosition(phoneNo, groupId);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
-            WayLogger.error(e, "取消查看组好友实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+            WayLogger.error(e, "取消查看组好友实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
         } finally {
-            WayLogger.access("取消查看组好友实时坐标：/cancelGetFriendPosition.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+            WayLogger.access("取消查看组好友实时坐标：/cancelGetFriendPosition.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
         }
         return serviceResult;
     }
@@ -126,4 +126,30 @@ public class FriendController {
         }
         return serviceResult;
     }
+
+    /**
+     * 查询好友列表
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/getPhoneContactStatus", method = RequestMethod.POST)
+    public ServiceResult<Object> getFriendList(HttpServletRequest request){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 查询好友列表
+            serviceResult = friendService.getFriendList(phoneNo);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "查询好友列表失败," + "请求参数：phoneNo：" + phoneNo);
+        } finally {
+            WayLogger.access("查询好友列表：/getFriendList.do,参数：phoneNo：" + phoneNo);
+        }
+        return serviceResult;
+    }
+
 }

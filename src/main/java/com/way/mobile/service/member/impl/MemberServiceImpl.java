@@ -36,4 +36,14 @@ public class MemberServiceImpl implements MemberService {
         }
         return serviceResult;
     }
+
+    /**
+     * 根据手机号搜索用户
+     * @param phoneNo
+     * @return
+     */
+    @Override
+    public ServiceResult<MemberDto> searchUserByPhoneNo(String phoneNo) {
+        return memberInfoService.searchUserByPhoneNo(phoneNo);
+    }
 }

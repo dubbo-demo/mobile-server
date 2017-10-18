@@ -40,4 +40,12 @@ public interface FriendService {
      * @return
      */
     ServiceResult<Object> getPhoneContactStatus(String phoneNo, String friendPhoneNo);
+
+    /**
+     * 查询好友列表
+     * @param phoneNo
+     * @return
+     */
+    ServiceResult<Object> getFriendList(String phoneNo);
+
 }

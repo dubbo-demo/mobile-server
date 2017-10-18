@@ -7,12 +7,13 @@ import com.way.member.friend.dto.FriendsInfoDto;
 import com.way.member.friend.service.FriendsInfoService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.service.MemberInfoService;
-import com.way.member.position.service.PositionInfoService;
 import com.way.mobile.service.friend.FriendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.applet.Main;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -92,4 +93,23 @@ public class FriendServiceImpl implements FriendService {
         serviceResult.setData(map);
         return serviceResult;
     }
+
+    /**
+     * 查询好友列表
+     * @param phoneNo
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> getFriendList(String phoneNo) {
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        Map<String, List<FriendsInfoDto>> map = new HashMap<String, List<FriendsInfoDto>>();
+        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendList(phoneNo);
+        for(FriendsInfoDto friendsInfoDto : friendsInfoDtos){
+            friendsInfoDto.setRemarkFirstLetter(friendsInfoDto.getFriendRemarkName().substring(0, 1));
+        }
+        map.put("friends", friendsInfoDtos);
+        serviceResult.setData(map);
+        return serviceResult;
+    }
+
 }

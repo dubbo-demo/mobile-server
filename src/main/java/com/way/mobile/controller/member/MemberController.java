@@ -3,6 +3,8 @@ package com.way.mobile.controller.member;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
 import com.way.common.util.Validater;
+import com.way.member.friend.dto.FriendsInfoDto;
+import com.way.member.member.dto.MemberDto;
 import com.way.mobile.service.member.MemberService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @ClassName: MemberInfoController
@@ -53,4 +57,32 @@ public class MemberController {
         return serviceResult;
     }
 
+    /**
+     * 根据手机号搜索用户
+     * @param request
+     * @param friendPhoneNo
+     * @return
+     */
+    @RequestMapping(value = "/searchUserByPhoneNo", method = RequestMethod.POST)
+    public ServiceResult<MemberDto> searchUserByPhoneNo(HttpServletRequest request, @ModelAttribute String friendPhoneNo){
+        ServiceResult<MemberDto> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(friendPhoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 根据手机号搜索用户
+            serviceResult = memberService.searchUserByPhoneNo(friendPhoneNo);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "根据手机号搜索用户失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+        } finally {
+            WayLogger.access("根据手机号搜索用户：/searchUserByPhoneNo.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+        }
+        return serviceResult;
+    }
 }
