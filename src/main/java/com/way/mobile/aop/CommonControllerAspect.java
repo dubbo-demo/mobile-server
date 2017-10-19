@@ -63,7 +63,7 @@ public class CommonControllerAspect {
 
     @PostConstruct
     public static void loadCodeDef() {
-        configuration = new Configuration("validationMessages.properties");
+        configuration = new Configuration("config/validationMessages.properties");
 		WayLogger.debug("加载与app交互的编码及说明:" + configuration.getProperties());
     }
 

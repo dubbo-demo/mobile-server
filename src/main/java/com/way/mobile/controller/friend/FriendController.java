@@ -132,7 +132,7 @@ public class FriendController {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/getPhoneContactStatus", method = RequestMethod.POST)
+    @RequestMapping(value = "/getFriendList", method = RequestMethod.POST)
     public ServiceResult<Object> getFriendList(HttpServletRequest request){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
