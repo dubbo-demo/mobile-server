@@ -4,13 +4,13 @@ import com.way.common.constant.Constants;
 import com.way.common.constant.NumberConstants;
 import com.way.common.result.ServiceResult;
 import com.way.member.friend.dto.FriendsInfoDto;
+import com.way.member.friend.service.ApplyFriendInfoService;
 import com.way.member.friend.service.FriendsInfoService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.service.MemberInfoService;
 import com.way.mobile.service.friend.FriendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.applet.Main;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +30,9 @@ public class FriendServiceImpl implements FriendService {
 
     @Autowired
     private MemberInfoService memberInfoService;
+
+    @Autowired
+    private ApplyFriendInfoService applyFriendInfoService;
 
     /**
      * 获取首页好友以及组信息
@@ -110,6 +113,49 @@ public class FriendServiceImpl implements FriendService {
         map.put("friends", friendsInfoDtos);
         serviceResult.setData(map);
         return serviceResult;
+    }
+
+    /**
+     * 申请添加好友
+     * @param phoneNo
+     * @param friendPhoneNo
+     * @param applyInfo
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> applyForAddFriend(String phoneNo, String friendPhoneNo, String applyInfo) {
+        // 增加被申请记录
+        applyFriendInfoService.applyForAddFriend(phoneNo, friendPhoneNo, applyInfo);
+        return ServiceResult.newSuccess();
+    }
+
+    /**
+     * 获取被申请好友记录
+     * @param phoneNo
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> getApplicationRecordOfFriend(String phoneNo) {
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        Map<String, List<FriendsInfoDto>> map = new HashMap<String, List<FriendsInfoDto>>();
+        // 获取被申请好友记录
+        List<FriendsInfoDto> friendsInfoDtos = applyFriendInfoService.getApplicationRecordOfFriend(phoneNo);
+        map.put("records", friendsInfoDtos);
+        serviceResult.setData(map);
+        return serviceResult;
+    }
+
+    /**
+     * 同意/拒绝添加好友申请
+     *
+     * @param phoneNo
+     * @param friendPhoneNo
+     * @param isApprove
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> agreeToAddFriend(String phoneNo, String friendPhoneNo, String isApprove) {
+        return applyFriendInfoService.agreeToAddFriend(phoneNo, friendPhoneNo, isApprove);
     }
 
 }

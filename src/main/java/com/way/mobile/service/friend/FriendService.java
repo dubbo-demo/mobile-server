@@ -48,4 +48,29 @@ public interface FriendService {
      */
     ServiceResult<Object> getFriendList(String phoneNo);
 
+    /**
+     * 申请添加好友
+     * @param phoneNo
+     * @param friendPhoneNo
+     * @param applyInfo
+     * @return
+     */
+    ServiceResult<Object> applyForAddFriend(String phoneNo, String friendPhoneNo, String applyInfo);
+
+    /**
+     * 获取被申请好友记录
+     * @param phoneNo
+     * @return
+     */
+    ServiceResult<Object> getApplicationRecordOfFriend(String phoneNo);
+
+    /**
+     * 同意/拒绝添加好友申请
+     *
+     * @param phoneNo
+     * @param phoneNo
+     * @param friendPhoneNo
+     * @return
+     */
+    ServiceResult<Object> agreeToAddFriend(String phoneNo, String friendPhoneNo, String isApprove);
 }

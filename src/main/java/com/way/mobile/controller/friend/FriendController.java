@@ -152,4 +152,92 @@ public class FriendController {
         return serviceResult;
     }
 
+    /**
+     * 申请添加好友
+     * @param request
+     * @param friendPhoneNo
+     * @param applyInfo
+     * @return
+     */
+    @RequestMapping(value = "/applyForAddFriend", method = RequestMethod.POST)
+    public ServiceResult<Object> applyForAddFriend(HttpServletRequest request, @ModelAttribute String friendPhoneNo, @ModelAttribute String applyInfo){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(friendPhoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(applyInfo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 申请添加好友
+            serviceResult = friendService.applyForAddFriend(phoneNo, friendPhoneNo, applyInfo);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "申请添加好友失败," + "请求参数：phoneNo：" + phoneNo);
+        } finally {
+            WayLogger.access("申请添加好友：/applyForAddFriend.do,参数：phoneNo：" + phoneNo);
+        }
+        return serviceResult;
+    }
+
+    /**
+     * 获取被申请好友记录
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/getApplicationRecordOfFriend", method = RequestMethod.POST)
+    public ServiceResult<Object> getApplicationRecordOfFriend(HttpServletRequest request){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 获取被申请好友记录
+            serviceResult = friendService.getApplicationRecordOfFriend(phoneNo);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "获取被申请好友记录失败," + "请求参数：phoneNo：" + phoneNo);
+        } finally {
+            WayLogger.access("获取被申请好友记录：/getApplicationRecordOfFriend.do,参数：phoneNo：" + phoneNo);
+        }
+        return serviceResult;
+    }
+
+    /**
+     * 同意/拒绝添加好友申请
+     * @param request
+     * @param friendPhoneNo
+     * @param isApprove
+     * @param applicationId
+     * @return
+     */
+    @RequestMapping(value = "/agreeToAddFriend", method = RequestMethod.POST)
+    public ServiceResult<Object> agreeToAddFriend(HttpServletRequest request, @ModelAttribute String friendPhoneNo, @ModelAttribute String isApprove, @ModelAttribute String applicationId){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(isApprove)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 同意/拒绝添加好友申请
+            serviceResult = friendService.agreeToAddFriend(phoneNo, friendPhoneNo, isApprove);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "同意/拒绝添加好友申请失败," + "请求参数：phoneNo：" + phoneNo);
+        } finally {
+            WayLogger.access("同意/拒绝添加好友申请：/agreeToAddFriend.do,参数：phoneNo：" + phoneNo);
+        }
+        return serviceResult;
+    }
 }
