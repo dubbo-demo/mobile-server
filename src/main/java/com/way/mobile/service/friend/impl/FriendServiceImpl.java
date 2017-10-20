@@ -158,4 +158,45 @@ public class FriendServiceImpl implements FriendService {
         return applyFriendInfoService.agreeToAddFriend(phoneNo, friendPhoneNo, isApprove);
     }
 
+    /**
+     * 修改好友信息
+     * @param phoneNo
+     * @param dto
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> modifyFriendInfo(String phoneNo, FriendsInfoDto dto) {
+        // 修改好友信息
+        friendsInfoService.modifyFriendInfo(phoneNo, dto);
+        // 修改被授权人好友信息
+        friendsInfoService.modifyAuthorizedFriendInfo(phoneNo, dto);
+        return ServiceResult.newSuccess();
+    }
+
+    /**
+     * 删除好友
+     * @param phoneNo
+     * @param friendPhoneNo
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> deleteFriend(String phoneNo, String friendPhoneNo) {
+        // 删除好友
+        friendsInfoService.deleteFriend(phoneNo, friendPhoneNo);
+        // 删除对方好友
+        friendsInfoService.deleteFriend(friendPhoneNo, phoneNo);
+        return ServiceResult.newSuccess();
+    }
+
+    /**
+     * 新建组
+     * @param phoneNo
+     * @param groupName
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> addGroupInfo(String phoneNo, String groupName) {
+        return null;
+    }
+
 }
