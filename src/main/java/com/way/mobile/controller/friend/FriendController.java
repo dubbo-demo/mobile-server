@@ -3,6 +3,7 @@ package com.way.mobile.controller.friend;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
 import com.way.member.friend.dto.FriendsInfoDto;
+import com.way.member.friend.dto.GroupInfoDto;
 import com.way.mobile.service.friend.FriendService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -337,6 +338,105 @@ public class FriendController {
             WayLogger.error(e, "新建组失败," + "请求参数：phoneNo：" + phoneNo);
         } finally {
             WayLogger.access("新建组：/addGroupInfo.do,参数：phoneNo：" + phoneNo);
+        }
+        return serviceResult;
+    }
+
+    /**
+     * 查看组信息
+     * @param request
+     * @param groupId
+     * @return
+     */
+    @RequestMapping(value = "/getGroupInfo", method = RequestMethod.POST)
+    public ServiceResult<GroupInfoDto> getGroupInfo(HttpServletRequest request, @ModelAttribute String groupId){
+        ServiceResult<GroupInfoDto> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(groupId)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 查看组信息
+            serviceResult = friendService.getGroupInfo(phoneNo, groupId);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "查看组信息失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+        } finally {
+            WayLogger.access("查看组信息：/getGroupInfo.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+        }
+        return serviceResult;
+    }
+
+    /**
+     * 修改组信息
+     * @param request
+     * @param dto
+     * @return
+     */
+    @RequestMapping(value = "/modifyGroupInfo", method = RequestMethod.POST)
+    public ServiceResult<GroupInfoDto> modifyGroupInfo(HttpServletRequest request, @ModelAttribute GroupInfoDto dto){
+        ServiceResult<GroupInfoDto> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(dto.getGroupId())) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(dto.getGroupName())) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(dto.getAccreditStartTime())) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(dto.getAccreditEndTime())) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (null == dto.getIsAccreditVisible()) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 修改组信息
+            serviceResult = friendService.modifyGroupInfo(phoneNo, dto);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "修改组信息失败," + "请求参数：phoneNo：" + phoneNo + "，GroupInfoDto：" + dto);
+        } finally {
+            WayLogger.access("修改组信息：/modifyGroupInfo.do,参数：phoneNo：" + phoneNo + "，GroupInfoDto：" + dto);
+        }
+        return serviceResult;
+    }
+
+    /**
+     * 删除组信息
+     * @param request
+     * @param groupId
+     * @return
+     */
+    @RequestMapping(value = "/deleteGroupInfo", method = RequestMethod.POST)
+    public ServiceResult<GroupInfoDto> deleteGroupInfo(HttpServletRequest request, @ModelAttribute String groupId){
+        ServiceResult<GroupInfoDto> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(groupId)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 删除组信息
+            serviceResult = friendService.deleteGroupInfo(phoneNo, groupId);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "删除组信息失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+        } finally {
+            WayLogger.access("删除组信息：/deleteGroupInfo.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
         }
         return serviceResult;
     }

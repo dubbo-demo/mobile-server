@@ -3,9 +3,12 @@ package com.way.mobile.service.friend.impl;
 import com.way.common.constant.Constants;
 import com.way.common.constant.NumberConstants;
 import com.way.common.result.ServiceResult;
+import com.way.common.util.DateUtils;
 import com.way.member.friend.dto.FriendsInfoDto;
+import com.way.member.friend.dto.GroupInfoDto;
 import com.way.member.friend.service.ApplyFriendInfoService;
 import com.way.member.friend.service.FriendsInfoService;
+import com.way.member.friend.service.GroupInfoService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.service.MemberInfoService;
 import com.way.mobile.service.friend.FriendService;
@@ -33,6 +36,9 @@ public class FriendServiceImpl implements FriendService {
 
     @Autowired
     private ApplyFriendInfoService applyFriendInfoService;
+
+    @Autowired
+    private GroupInfoService groupInfoService;
 
     /**
      * 获取首页好友以及组信息
@@ -196,7 +202,62 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<Object> addGroupInfo(String phoneNo, String groupName) {
-        return null;
+        return groupInfoService.addGroupInfo(phoneNo, groupName);
+    }
+
+    /**
+     * 查看组信息
+     * @param phoneNo
+     * @param groupId
+     * @return
+     */
+    @Override
+    public ServiceResult<GroupInfoDto> getGroupInfo(String phoneNo, String groupId) {
+        ServiceResult<GroupInfoDto> serviceResult = ServiceResult.newSuccess();
+        // 查出组信息
+        GroupInfoDto groupInfo = groupInfoService.getGroupInfo(groupId);
+        // 根据组ID获取好友信息
+        List<FriendsInfoDto> friendsInfo = friendsInfoService.getFriendListByGroupId(groupId);
+        groupInfo.setFriends(friendsInfo);
+        serviceResult.setData(groupInfo);
+        return serviceResult;
+    }
+
+    /**
+     * 修改组信息
+     * @param phoneNo
+     * @param dto
+     * @return
+     */
+    @Override
+    public ServiceResult<GroupInfoDto> modifyGroupInfo(String phoneNo, GroupInfoDto dto) {
+        // 修改组信息
+        groupInfoService.modifyGroupInfo(dto);
+        // 根据组ID获取好友信息
+        List<FriendsInfoDto> friendsInfo = friendsInfoService.getFriendListByGroupId(dto.getGroupId());
+        for(FriendsInfoDto friendsInfoDto : friendsInfo){
+            friendsInfoDto.setIsAccreditVisible(dto.getIsAccreditVisible());
+            friendsInfoDto.setAccreditStartTime(dto.getAccreditStartTime());
+            friendsInfoDto.setAccreditEndTime(dto.getAccreditEndTime());
+            // 修改好友信息
+            modifyFriendInfo(phoneNo, friendsInfoDto);
+        }
+        return ServiceResult.newSuccess();
+    }
+
+    /**
+     * 删除组信息
+     * @param phoneNo
+     * @param groupId
+     * @return
+     */
+    @Override
+    public ServiceResult<GroupInfoDto> deleteGroupInfo(String phoneNo, String groupId) {
+        // 将好友组信息清空
+        friendsInfoService.updateFriendsGroupInfo(phoneNo, groupId);
+        // 删除组信息
+        groupInfoService.deleteGroupInfo(groupId);
+        return ServiceResult.newSuccess();
     }
 
 }

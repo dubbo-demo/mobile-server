@@ -2,6 +2,7 @@ package com.way.mobile.service.friend;
 
 import com.way.common.result.ServiceResult;
 import com.way.member.friend.dto.FriendsInfoDto;
+import com.way.member.friend.dto.GroupInfoDto;
 
 /**
  * 功能描述：好友Service
@@ -98,4 +99,28 @@ public interface FriendService {
      * @return
      */
     ServiceResult<Object> addGroupInfo(String phoneNo, String groupName);
+
+    /**
+     * 查看组信息
+     * @param phoneNo
+     * @param groupId
+     * @return
+     */
+    ServiceResult<GroupInfoDto> getGroupInfo(String phoneNo, String groupId);
+
+    /**
+     * 修改组信息
+     * @param phoneNo
+     * @param dto
+     * @return
+     */
+    ServiceResult<GroupInfoDto> modifyGroupInfo(String phoneNo, GroupInfoDto dto);
+
+    /**
+     * 删除组信息
+     * @param phoneNo
+     * @param groupId
+     * @return
+     */
+    ServiceResult<GroupInfoDto> deleteGroupInfo(String phoneNo, String groupId);
 }
