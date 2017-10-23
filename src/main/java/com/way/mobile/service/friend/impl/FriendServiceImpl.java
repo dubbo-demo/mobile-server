@@ -260,4 +260,18 @@ public class FriendServiceImpl implements FriendService {
         return ServiceResult.newSuccess();
     }
 
+    /**
+     * 将好友添加到分组
+     * @param phoneNo
+     * @param groupId
+     * @param friendPhoneNo
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> moveFriendToGroup(String phoneNo, String groupId, String friendPhoneNo) {
+
+
+        return null;
+    }
+
 }

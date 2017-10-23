@@ -440,4 +440,33 @@ public class FriendController {
         }
         return serviceResult;
     }
+
+    /**
+     * 将好友添加到分组
+     * @param request
+     * @param groupId
+     * @return
+     */
+    @RequestMapping(value = "/moveFriendToGroup", method = RequestMethod.POST)
+    public ServiceResult<Object> moveFriendToGroup(HttpServletRequest request, @ModelAttribute String groupId, @ModelAttribute String friendPhoneNo){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(groupId)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 将好友添加到分组
+            serviceResult = friendService.moveFriendToGroup(phoneNo, groupId, friendPhoneNo);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "将好友添加到分组失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+        } finally {
+            WayLogger.access("将好友添加到分组：/moveFriendToGroup.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+        }
+        return serviceResult;
+    }
 }
