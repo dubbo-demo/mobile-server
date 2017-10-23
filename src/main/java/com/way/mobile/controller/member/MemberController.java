@@ -3,7 +3,6 @@ package com.way.mobile.controller.member;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
 import com.way.common.util.Validater;
-import com.way.member.friend.dto.FriendsInfoDto;
 import com.way.member.member.dto.MemberDto;
 import com.way.mobile.service.member.MemberService;
 import org.apache.commons.lang3.StringUtils;
@@ -82,6 +81,63 @@ public class MemberController {
             WayLogger.error(e, "根据手机号搜索用户失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
         } finally {
             WayLogger.access("根据手机号搜索用户：/searchUserByPhoneNo.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+        }
+        return serviceResult;
+    }
+
+    /**
+     * 查看个人信息
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/getMemberInfo", method = RequestMethod.POST)
+    public ServiceResult<MemberDto> getMemberInfo(HttpServletRequest request){
+        ServiceResult<MemberDto> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 查看个人信息
+            serviceResult = memberService.getMemberInfo(phoneNo);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "查看个人信息失败," + "请求参数：phoneNo：" + phoneNo);
+        } finally {
+            WayLogger.access("查看个人信息：/getMemberInfo.do,参数：phoneNo：" + phoneNo);
+        }
+        return serviceResult;
+    }
+
+    /**
+     * 修改个人信息
+     * @param request
+     * @param headPic
+     * @param nickName
+     * @param age
+     * @return
+     */
+    @RequestMapping(value = "/modifyMemberInfo", method = RequestMethod.POST)
+    public ServiceResult<Object> modifyMemberInfo(HttpServletRequest request, @ModelAttribute MemberDto dto){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(dto.getHeadPic()) && StringUtils.isBlank(dto.getNickName())
+                    && StringUtils.isBlank(dto.getAge()) && StringUtils.isBlank(dto.getGender())) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 修改个人信息
+            serviceResult = memberService.modifyMemberInfo(dto);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "修改个人信息失败," + "请求参数：phoneNo：" + phoneNo + ",MemberDto：" + dto);
+        } finally {
+            WayLogger.access("修改个人信息：/modifyMemberInfo.do,参数：phoneNo：" + phoneNo + ",MemberDto：" + dto);
         }
         return serviceResult;
     }

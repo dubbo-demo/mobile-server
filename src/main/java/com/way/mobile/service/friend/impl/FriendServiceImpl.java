@@ -12,12 +12,11 @@ import com.way.member.friend.service.GroupInfoService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.service.MemberInfoService;
 import com.way.mobile.service.friend.FriendService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 功能描述：好友ServiceImpl
@@ -47,7 +46,37 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<Object> getFriendsAndGroups(String phoneNo) {
-        return null;
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        Map<String, Object> data = new HashMap<String, Object>();
+        // 非组成员好友
+        List<FriendsInfoDto> notGroupFriendslist = new ArrayList<FriendsInfoDto>();
+        Set<String> groupIds = new TreeSet<String>();
+        List<GroupInfoDto> groupInfoDtos = new ArrayList<GroupInfoDto>();
+        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendList(phoneNo);
+        for(FriendsInfoDto dto : friendsInfoDtos){
+            if(StringUtils.isBlank(dto.getGroupName())){
+                notGroupFriendslist.add(dto);
+            }else{
+                // 收集组信息
+                groupIds.add(dto.getGroupId());
+            }
+        }
+        data.put("friends", notGroupFriendslist);
+        friendsInfoDtos.removeAll(notGroupFriendslist);
+        for(String groupId : groupIds){
+            GroupInfoDto groupInfoDto = new GroupInfoDto();
+            List<FriendsInfoDto> groupFriendslist = new ArrayList<FriendsInfoDto>();
+            for(FriendsInfoDto dto : friendsInfoDtos){
+                if(groupId.equals(dto.getGroupId())){
+                    groupFriendslist.add(dto);
+                }
+            }
+            groupInfoDto.setFriends(groupFriendslist);
+            groupInfoDtos.add(groupInfoDto);
+        }
+        data.put("groups", groupInfoDtos);
+        serviceResult.setData(data);
+        return serviceResult;
     }
 
     /**
