@@ -269,9 +269,15 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<Object> moveFriendToGroup(String phoneNo, String groupId, String friendPhoneNo) {
-
-
-        return null;
+        // 根据组id查出组信息
+        GroupInfoDto groupInfoDto = groupInfoService.getGroupInfo(groupId);
+        if(null != groupInfoDto){
+            groupInfoDto.setGroupId(groupId);
+            groupInfoDto.setPhoneNo(phoneNo);
+            // 将好友添加到分组
+            friendsInfoService.moveFriendToGroup(friendPhoneNo, groupInfoDto);
+        }
+        return ServiceResult.newSuccess();
     }
 
 }
