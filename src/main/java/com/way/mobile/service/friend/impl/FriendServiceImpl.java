@@ -280,4 +280,16 @@ public class FriendServiceImpl implements FriendService {
         return ServiceResult.newSuccess();
     }
 
+    /**
+     * 将好友从分组中移除
+     * @param phoneNo
+     * @param groupId
+     * @param friendPhoneNo
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> removeFriendFromGroup(String phoneNo, String groupId, String friendPhoneNo) {
+        return friendsInfoService.removeFriendFromGroup(phoneNo, friendPhoneNo);
+    }
+
 }

@@ -132,4 +132,13 @@ public interface FriendService {
      * @return
      */
     ServiceResult<Object> moveFriendToGroup(String phoneNo, String groupId, String friendPhoneNo);
+
+    /**
+     * 将好友从分组中移除
+     * @param phoneNo
+     * @param groupId
+     * @param friendPhoneNo
+     * @return
+     */
+    ServiceResult<Object> removeFriendFromGroup(String phoneNo, String groupId, String friendPhoneNo);
 }
