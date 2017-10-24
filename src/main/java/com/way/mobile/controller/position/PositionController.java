@@ -53,27 +53,30 @@ public class PositionController {
      * 根据手机号获取用户实时坐标
      */
     @RequestMapping(value = "/getRealtimePositionByPhoneNo", method = RequestMethod.POST)
-    public ServiceResult<Object> getRealtimePositionByPhoneNo(HttpServletRequest request, @ModelAttribute String phoneNo){
+    public ServiceResult<Object> getRealtimePositionByPhoneNo(HttpServletRequest request, @ModelAttribute String friendPhoneNo){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String memberId = (String) request.getAttribute("phoneNo");
+        String phoneNo = (String) request.getAttribute("phoneNo");
         try {
             // 校验token
-            if (StringUtils.isBlank(memberId)) {
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(friendPhoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 校验手机号格式是否正确
-            if (!Validater.isMobileNew(phoneNo)) {
+            if (!Validater.isMobileNew(friendPhoneNo)) {
                 serviceResult.setCode(ServiceResult.ERROR_CODE);
                 serviceResult.setMessage("手机号不正确");
                 return serviceResult;
             }
             // 根据手机号获取用户实时坐标
-            serviceResult = positionService.getRealtimePositionByPhoneNo(phoneNo);
+            serviceResult = positionService.getRealtimePositionByPhoneNo(friendPhoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
-            WayLogger.error(e, "根据手机号获取用户实时坐标失败," + "请求参数：" + phoneNo);
+            WayLogger.error(e, "根据手机号获取用户实时坐标失败," + "请求参数：friendPhoneNo:" + friendPhoneNo);
         } finally {
-            WayLogger.access("根据手机号获取用户实时坐标：/getRealtimePositionByPhoneNo.do,参数：" + phoneNo);
+            WayLogger.access("根据手机号获取用户实时坐标：/getRealtimePositionByPhoneNo.do,参数：friendPhoneNo:" + friendPhoneNo);
         }
         return serviceResult;
     }

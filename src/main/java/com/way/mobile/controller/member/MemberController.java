@@ -31,27 +31,32 @@ public class MemberController {
      * 校验邀请人手机号是否存在
      */
     @RequestMapping(value = "/checkPhone", method = RequestMethod.POST)
-    public ServiceResult<String> checkPhone(@ModelAttribute String phoneNo){
+    public ServiceResult<String> checkPhone(HttpServletRequest request, @ModelAttribute String friendPhoneNo){
         ServiceResult<String> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
         try {
-            if (StringUtils.isBlank(phoneNo)) { // 手机号为空
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(friendPhoneNo)) { // 手机号为空
                 serviceResult.setCode(ServiceResult.ERROR_CODE);
                 serviceResult.setMessage("请输入邀请人手机号");
                 return serviceResult;
             }
             // 校验手机号格式是否正确
-            if (!Validater.isMobileNew(phoneNo)) {
+            if (!Validater.isMobileNew(friendPhoneNo)) {
                 serviceResult.setCode(ServiceResult.ERROR_CODE);
                 serviceResult.setMessage("邀请人手机号不正确");
                 return serviceResult;
             }
             // 校验邀请人手机号是否存在
-            serviceResult = memberService.checkPhone(phoneNo);
+            serviceResult = memberService.checkPhone(friendPhoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
-            WayLogger.error(e, "校验邀请人手机号是否存在失败," + "请求参数：" + phoneNo);
+            WayLogger.error(e, "校验邀请人手机号是否存在失败," + "请求参数：friendPhoneNo：" + friendPhoneNo);
         } finally {
-            WayLogger.access("校验邀请人手机号是否存在：/checkPhone.do,参数：" + phoneNo);
+            WayLogger.access("校验邀请人手机号是否存在：/checkPhone.do,参数：friendPhoneNo：" + friendPhoneNo);
         }
         return serviceResult;
     }
@@ -113,9 +118,7 @@ public class MemberController {
     /**
      * 修改个人信息
      * @param request
-     * @param headPic
-     * @param nickName
-     * @param age
+     * @param dto
      * @return
      */
     @RequestMapping(value = "/modifyMemberInfo", method = RequestMethod.POST)
