@@ -8,9 +8,7 @@ import com.way.mobile.service.member.MemberService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,14 +29,10 @@ public class MemberController {
      * 校验邀请人手机号是否存在
      */
     @RequestMapping(value = "/checkPhone", method = RequestMethod.POST)
-    public ServiceResult<String> checkPhone(HttpServletRequest request, @ModelAttribute String friendPhoneNo){
+    @ResponseBody
+    public ServiceResult<String> checkPhone(HttpServletRequest request, String friendPhoneNo){
         ServiceResult<String> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
         try {
-            // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
-                return ServiceResult.newFailure("必传参数不能为空");
-            }
             if (StringUtils.isBlank(friendPhoneNo)) { // 手机号为空
                 serviceResult.setCode(ServiceResult.ERROR_CODE);
                 serviceResult.setMessage("请输入邀请人手机号");
@@ -68,6 +62,7 @@ public class MemberController {
      * @return
      */
     @RequestMapping(value = "/searchUserByPhoneNo", method = RequestMethod.POST)
+    @ResponseBody
     public ServiceResult<MemberDto> searchUserByPhoneNo(HttpServletRequest request, @ModelAttribute String friendPhoneNo){
         ServiceResult<MemberDto> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
@@ -96,6 +91,7 @@ public class MemberController {
      * @return
      */
     @RequestMapping(value = "/getMemberInfo", method = RequestMethod.POST)
+    @ResponseBody
     public ServiceResult<MemberDto> getMemberInfo(HttpServletRequest request){
         ServiceResult<MemberDto> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
@@ -122,6 +118,7 @@ public class MemberController {
      * @return
      */
     @RequestMapping(value = "/modifyMemberInfo", method = RequestMethod.POST)
+    @ResponseBody
     public ServiceResult<Object> modifyMemberInfo(HttpServletRequest request, @ModelAttribute MemberDto dto){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");

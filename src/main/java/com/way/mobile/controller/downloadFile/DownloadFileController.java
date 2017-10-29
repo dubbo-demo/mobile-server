@@ -6,7 +6,6 @@ import com.way.mobile.service.downloadFile.DownloadFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +35,7 @@ public class DownloadFileController {
      */
     @RequestMapping("/downLoadPic")
     @ResponseBody
-    public void downLoadPic(HttpServletResponse resp, HttpServletRequest request, @RequestParam String fileId) {
+    public void downLoadPic(HttpServletResponse resp, HttpServletRequest request, String fileId) {
         OutputStream stream = null;
         try {
             // 根据图片ID下载图片信息

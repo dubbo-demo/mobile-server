@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,6 +31,7 @@ public class PositionController {
      * 上传坐标
      */
     @RequestMapping(value = "/uploadPosition", method = RequestMethod.POST)
+    @ResponseBody
     public ServiceResult<String> uploadPosition(HttpServletRequest request, @ModelAttribute PositionInfoDto positionInfoDto){
         ServiceResult<String> serviceResult = ServiceResult.newSuccess();
         String memberId = (String) request.getAttribute("phoneNo");
@@ -53,7 +55,8 @@ public class PositionController {
      * 根据手机号获取用户实时坐标
      */
     @RequestMapping(value = "/getRealtimePositionByPhoneNo", method = RequestMethod.POST)
-    public ServiceResult<Object> getRealtimePositionByPhoneNo(HttpServletRequest request, @ModelAttribute String friendPhoneNo){
+    @ResponseBody
+    public ServiceResult<Object> getRealtimePositionByPhoneNo(HttpServletRequest request, String friendPhoneNo){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -87,6 +90,7 @@ public class PositionController {
      * @return
      */
     @RequestMapping(value = "/getPositionsBeforeExit", method = RequestMethod.POST)
+    @ResponseBody
     public ServiceResult<Object> getPositionsBeforeExit(HttpServletRequest request){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
@@ -112,7 +116,8 @@ public class PositionController {
      * @return
      */
     @RequestMapping(value = "/getRealtimePositionByGroupId", method = RequestMethod.POST)
-    public ServiceResult<Object> getRealtimePositionByGroupId(HttpServletRequest request, @ModelAttribute String groupId){
+    @ResponseBody
+    public ServiceResult<Object> getRealtimePositionByGroupId(HttpServletRequest request, String groupId){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {

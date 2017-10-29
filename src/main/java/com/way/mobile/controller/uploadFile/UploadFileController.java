@@ -7,6 +7,7 @@ import com.way.mobile.service.uploadFile.UploadFileService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -36,7 +37,7 @@ public class UploadFileController {
      */
     @RequestMapping(value = "/uploadHeadPic", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> uploadHeadPic(MultipartFile file, HttpServletRequest request){
+    public ServiceResult<Object> uploadHeadPic(@ModelAttribute MultipartFile file, HttpServletRequest request){
         String phoneNo = "";
         String fileId = "";
         try {

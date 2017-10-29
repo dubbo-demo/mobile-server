@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -32,6 +33,7 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/getFriendsAndGroups", method = RequestMethod.POST)
+    @ResponseBody
     public ServiceResult<Object> getFriendsAndGroups(HttpServletRequest request){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
@@ -58,7 +60,8 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/cancelGetFriendPosition", method = RequestMethod.POST)
-    public ServiceResult<Object> cancelGetFriendPosition(HttpServletRequest request, @ModelAttribute String friendPhoneNo){
+    @ResponseBody
+    public ServiceResult<Object> cancelGetFriendPosition(HttpServletRequest request, String friendPhoneNo){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -84,7 +87,8 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/cancelGetGroupPosition", method = RequestMethod.POST)
-    public ServiceResult<Object> cancelGetGroupPosition(HttpServletRequest request, @ModelAttribute String groupId){
+    @ResponseBody
+    public ServiceResult<Object> cancelGetGroupPosition(HttpServletRequest request, String groupId){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -110,7 +114,8 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/getPhoneContactStatus", method = RequestMethod.POST)
-    public ServiceResult<Object> getPhoneContactStatus(HttpServletRequest request, @ModelAttribute String friendPhoneNo){
+    @ResponseBody
+    public ServiceResult<Object> getPhoneContactStatus(HttpServletRequest request, String friendPhoneNo){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -135,6 +140,7 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/getFriendList", method = RequestMethod.POST)
+    @ResponseBody
     public ServiceResult<Object> getFriendList(HttpServletRequest request){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
@@ -162,7 +168,8 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/applyForAddFriend", method = RequestMethod.POST)
-    public ServiceResult<Object> applyForAddFriend(HttpServletRequest request, @ModelAttribute String friendPhoneNo, @ModelAttribute String applyInfo){
+    @ResponseBody
+    public ServiceResult<Object> applyForAddFriend(HttpServletRequest request, String friendPhoneNo, String applyInfo){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -193,6 +200,7 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/getApplicationRecordOfFriend", method = RequestMethod.POST)
+    @ResponseBody
     public ServiceResult<Object> getApplicationRecordOfFriend(HttpServletRequest request){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
@@ -221,7 +229,8 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/agreeToAddFriend", method = RequestMethod.POST)
-    public ServiceResult<Object> agreeToAddFriend(HttpServletRequest request, @ModelAttribute String friendPhoneNo, @ModelAttribute String isApprove, @ModelAttribute String applicationId){
+    @ResponseBody
+    public ServiceResult<Object> agreeToAddFriend(HttpServletRequest request, String friendPhoneNo, String isApprove, String applicationId){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -250,6 +259,7 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/modifyFriendInfo", method = RequestMethod.POST)
+    @ResponseBody
     public ServiceResult<Object> modifyFriendInfo(HttpServletRequest request, @ModelAttribute FriendsInfoDto dto){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
@@ -291,7 +301,8 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/deleteFriend", method = RequestMethod.POST)
-    public ServiceResult<Object> deleteFriend(HttpServletRequest request, @ModelAttribute String friendPhoneNo){
+    @ResponseBody
+    public ServiceResult<Object> deleteFriend(HttpServletRequest request, String friendPhoneNo){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -320,7 +331,8 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/addGroupInfo", method = RequestMethod.POST)
-    public ServiceResult<Object> addGroupInfo(HttpServletRequest request, @ModelAttribute String groupName){
+    @ResponseBody
+    public ServiceResult<Object> addGroupInfo(HttpServletRequest request, String groupName){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -349,7 +361,8 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/getGroupInfo", method = RequestMethod.POST)
-    public ServiceResult<GroupInfoDto> getGroupInfo(HttpServletRequest request, @ModelAttribute String groupId){
+    @ResponseBody
+    public ServiceResult<GroupInfoDto> getGroupInfo(HttpServletRequest request, String groupId){
         ServiceResult<GroupInfoDto> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -378,6 +391,7 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/modifyGroupInfo", method = RequestMethod.POST)
+    @ResponseBody
     public ServiceResult<GroupInfoDto> modifyGroupInfo(HttpServletRequest request, @ModelAttribute GroupInfoDto dto){
         ServiceResult<GroupInfoDto> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
@@ -419,7 +433,8 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/deleteGroupInfo", method = RequestMethod.POST)
-    public ServiceResult<GroupInfoDto> deleteGroupInfo(HttpServletRequest request, @ModelAttribute String groupId){
+    @ResponseBody
+    public ServiceResult<GroupInfoDto> deleteGroupInfo(HttpServletRequest request, String groupId){
         ServiceResult<GroupInfoDto> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -448,7 +463,8 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/moveFriendToGroup", method = RequestMethod.POST)
-    public ServiceResult<Object> moveFriendToGroup(HttpServletRequest request, @ModelAttribute String groupId, @ModelAttribute String friendPhoneNo){
+    @ResponseBody
+    public ServiceResult<Object> moveFriendToGroup(HttpServletRequest request, String groupId, String friendPhoneNo){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -481,7 +497,8 @@ public class FriendController {
      * @return
      */
     @RequestMapping(value = "/removeFriendFromGroup", method = RequestMethod.POST)
-    public ServiceResult<Object> removeFriendFromGroup(HttpServletRequest request, @ModelAttribute String groupId, @ModelAttribute String friendPhoneNo){
+    @ResponseBody
+    public ServiceResult<Object> removeFriendFromGroup(HttpServletRequest request, String groupId, String friendPhoneNo){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
