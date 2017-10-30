@@ -89,24 +89,22 @@ public class CommonControllerAspect {
                 newToken = mulReq.getParameter("token");
                 if (null == newToken) {
 					WayLogger.debug("token是空");
-                    return ServiceResult.newFailure(Constants.TOKEN_EXPIRED_OVERTIME, "账号已过期，请重新登录");
+                    return ServiceResult.newFailure(Constants.INVALID, "token不能为空");
                 }
 
                 if (newToken.length() < 30) {
-					WayLogger.debug("token是空");
+					WayLogger.debug("无效的token");
                     return ServiceResult.newFailure(Constants.INVALID, "无效的token");
                 }
                 // 验证token
                 LoginTokenInfo tokenInfo = TokenJedisUtils.getTokenInfo(newToken);
-                if (tokenInfo != null) {
-                    if (tokenInfo.getStatus() == Constants.INVALID) {
-                        return ServiceResult.newFailure(Constants.OKEN_EXPIRED_OTHERLOGIN, "该账户已在其他设备登录，请注意安全");
-                    }
-                } else {
+                if(tokenInfo == null){
                     return ServiceResult.newFailure(Constants.TOKEN_EXPIRED_OVERTIME, "账号已过期，请重新登录");
                 }
-                phoneNo = tokenInfo.getPhoneNo();
-                mulReq.setAttribute("phoneNo", phoneNo);
+                if(tokenInfo.getStatus() == Constants.INVALID){
+                    return ServiceResult.newFailure(Constants.OKEN_EXPIRED_OTHERLOGIN, "该账户已在其他设备登录，请注意安全");
+                }
+                mulReq.setAttribute("phoneNo", tokenInfo.getPhoneNo());
                 // 校验文件大小
 				ServiceResult serviceResult = verificationFile(mulReq);
                 if(Constants.INVALID == serviceResult.getCode()){
@@ -118,9 +116,24 @@ public class CommonControllerAspect {
                 paramRequest = request;
                 // 获取token
                 newToken = request.getParameter("token");
-                if (null != newToken) {
-                    phoneNo = TokenJedisUtils.getMemberIdByToken(newToken);
+                if (null == newToken) {
+                    WayLogger.debug("token是空");
+                    return ServiceResult.newFailure(Constants.INVALID, "token不能为空");
                 }
+
+                if (newToken.length() < 30) {
+                    WayLogger.debug("无效的token");
+                    return ServiceResult.newFailure(Constants.INVALID, "无效的token");
+                }
+                // 验证token
+                LoginTokenInfo tokenInfo = TokenJedisUtils.getTokenInfo(newToken);
+                if(tokenInfo == null){
+                    return ServiceResult.newFailure(Constants.TOKEN_EXPIRED_OVERTIME, "账号已过期，请重新登录");
+                }
+                if(tokenInfo.getStatus() == Constants.INVALID){
+                    return ServiceResult.newFailure(Constants.OKEN_EXPIRED_OTHERLOGIN, "该账户已在其他设备登录，请注意安全");
+                }
+                paramRequest.setAttribute("phoneNo", tokenInfo.getPhoneNo());
             }
 
 //            if (null != newToken && null != memberId) {
