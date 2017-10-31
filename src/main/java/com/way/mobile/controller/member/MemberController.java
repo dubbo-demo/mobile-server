@@ -132,6 +132,7 @@ public class MemberController {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 修改个人信息
+            dto.setPhoneNo(phoneNo);
             serviceResult = memberService.modifyMemberInfo(dto);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
