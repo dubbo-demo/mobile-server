@@ -63,7 +63,7 @@ public class MemberController {
      */
     @RequestMapping(value = "/searchUserByPhoneNo", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<MemberDto> searchUserByPhoneNo(HttpServletRequest request, @ModelAttribute String friendPhoneNo){
+    public ServiceResult<MemberDto> searchUserByPhoneNo(HttpServletRequest request, String friendPhoneNo){
         ServiceResult<MemberDto> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
