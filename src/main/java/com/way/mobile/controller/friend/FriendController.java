@@ -180,9 +180,9 @@ public class FriendController {
             if (StringUtils.isBlank(friendPhoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(applyInfo)) {
-                return ServiceResult.newFailure("必传参数不能为空");
-            }
+//            if (StringUtils.isBlank(applyInfo)) {
+//                return ServiceResult.newFailure("必传参数不能为空");
+//            }
             // 申请添加好友
             serviceResult = friendService.applyForAddFriend(phoneNo, friendPhoneNo, applyInfo);
         } catch (Exception e) {
