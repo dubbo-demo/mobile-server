@@ -70,11 +70,12 @@ public interface FriendService {
      * 同意/拒绝添加好友申请
      *
      * @param phoneNo
-     * @param phoneNo
      * @param friendPhoneNo
+     * @param isApprove
+     * @param applicationId
      * @return
      */
-    ServiceResult<Object> agreeToAddFriend(String phoneNo, String friendPhoneNo, String isApprove);
+    ServiceResult<Object> agreeToAddFriend(String phoneNo, String friendPhoneNo, String isApprove, String applicationId);
 
     /**
      * 修改好友信息

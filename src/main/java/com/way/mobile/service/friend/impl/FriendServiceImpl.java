@@ -3,7 +3,6 @@ package com.way.mobile.service.friend.impl;
 import com.way.common.constant.Constants;
 import com.way.common.constant.NumberConstants;
 import com.way.common.result.ServiceResult;
-import com.way.common.util.DateUtils;
 import com.way.member.friend.dto.FriendsInfoDto;
 import com.way.member.friend.dto.GroupInfoDto;
 import com.way.member.friend.service.ApplyFriendInfoService;
@@ -186,11 +185,12 @@ public class FriendServiceImpl implements FriendService {
      * @param phoneNo
      * @param friendPhoneNo
      * @param isApprove
+     * @param applicationId
      * @return
      */
     @Override
-    public ServiceResult<Object> agreeToAddFriend(String phoneNo, String friendPhoneNo, String isApprove) {
-        return applyFriendInfoService.agreeToAddFriend(phoneNo, friendPhoneNo, isApprove);
+    public ServiceResult<Object> agreeToAddFriend(String phoneNo, String friendPhoneNo, String isApprove, String applicationId) {
+        return applyFriendInfoService.agreeToAddFriend(phoneNo, friendPhoneNo, isApprove, applicationId);
     }
 
     /**

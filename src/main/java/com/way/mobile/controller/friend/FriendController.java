@@ -242,7 +242,7 @@ public class FriendController {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 同意/拒绝添加好友申请
-            serviceResult = friendService.agreeToAddFriend(phoneNo, friendPhoneNo, isApprove);
+            serviceResult = friendService.agreeToAddFriend(phoneNo, friendPhoneNo, isApprove, applicationId);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             WayLogger.error(e, "同意/拒绝添加好友申请失败," + "请求参数：phoneNo：" + phoneNo);
