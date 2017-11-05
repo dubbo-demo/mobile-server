@@ -253,6 +253,36 @@ public class FriendController {
     }
 
     /**
+     * 查看好友信息
+     * @param request
+     * @param friendPhoneNo
+     * @return
+     */
+    @RequestMapping(value = "/getFriendInfo", method = RequestMethod.POST)
+    @ResponseBody
+    public ServiceResult<FriendsInfoDto> getFriendInfo(HttpServletRequest request, String friendPhoneNo){
+        ServiceResult<FriendsInfoDto> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(friendPhoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 查看好友信息
+            serviceResult = friendService.getFriendInfo(phoneNo, friendPhoneNo);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "查看好友信息失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+        } finally {
+            WayLogger.access("查看好友信息：/getFriendInfo.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+        }
+        return serviceResult;
+    }
+
+    /**
      * 修改好友信息
      * @param request
      * @param dto

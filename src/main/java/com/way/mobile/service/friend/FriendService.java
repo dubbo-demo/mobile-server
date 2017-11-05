@@ -110,6 +110,14 @@ public interface FriendService {
     ServiceResult<GroupInfoDto> getGroupInfo(String phoneNo, String groupId);
 
     /**
+     * 查看好友信息
+     * @param phoneNo
+     * @param friendPhoneNo
+     * @return
+     */
+    ServiceResult<FriendsInfoDto> getFriendInfo(String phoneNo, String friendPhoneNo);
+
+    /**
      * 修改组信息
      * @param phoneNo
      * @param dto
@@ -142,4 +150,5 @@ public interface FriendService {
      * @return
      */
     ServiceResult<Object> removeFriendFromGroup(String phoneNo, String groupId, String friendPhoneNo);
+
 }

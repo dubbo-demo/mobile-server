@@ -253,6 +253,17 @@ public class FriendServiceImpl implements FriendService {
     }
 
     /**
+     * 查看好友信息
+     * @param phoneNo
+     * @param friendPhoneNo
+     * @return
+     */
+    @Override
+    public ServiceResult<FriendsInfoDto> getFriendInfo(String phoneNo, String friendPhoneNo) {
+        return friendsInfoService.getFriendInfo(phoneNo, friendPhoneNo);
+    }
+
+    /**
      * 修改组信息
      * @param phoneNo
      * @param dto
