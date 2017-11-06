@@ -63,14 +63,13 @@ public class FriendServiceImpl implements FriendService {
         data.put("friends", notGroupFriendslist);
         friendsInfoDtos.removeAll(notGroupFriendslist);
         for(GroupInfoDto groupInfoDto : groups){
-//            GroupInfoDto groupInfoDto = new GroupInfoDto();
-            List<FriendsInfoDto> groupFriendslist = new ArrayList<FriendsInfoDto>();
+            List<FriendsInfoDto> groupFriendsList = new ArrayList<FriendsInfoDto>();
             for(FriendsInfoDto dto : friendsInfoDtos){
                 if(groupInfoDto.getGroupId().equals(dto.getGroupId())){
-                    groupFriendslist.add(dto);
+                    groupFriendsList.add(dto);
                 }
             }
-            groupInfoDto.setFriends(groupFriendslist);
+            groupInfoDto.setFriends(groupFriendsList);
             groupInfoDtos.add(groupInfoDto);
         }
         data.put("groups", groupInfoDtos);
