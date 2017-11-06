@@ -34,12 +34,13 @@ public class PositionController {
     @ResponseBody
     public ServiceResult<String> uploadPosition(HttpServletRequest request, @ModelAttribute PositionInfoDto positionInfoDto){
         ServiceResult<String> serviceResult = ServiceResult.newSuccess();
-        String memberId = (String) request.getAttribute("phoneNo");
+        String phoneNo = (String) request.getAttribute("phoneNo");
         try {
             // 校验token
-            if (StringUtils.isBlank(memberId)) {
+            if (StringUtils.isBlank(phoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
+            positionInfoDto.setPhoneNo(phoneNo);
             // 上传坐标
             serviceResult = positionService.uploadPosition(positionInfoDto);
         } catch (Exception e) {

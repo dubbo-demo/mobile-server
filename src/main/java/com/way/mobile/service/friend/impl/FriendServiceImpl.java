@@ -3,6 +3,7 @@ package com.way.mobile.service.friend.impl;
 import com.way.common.constant.Constants;
 import com.way.common.constant.NumberConstants;
 import com.way.common.result.ServiceResult;
+import com.way.common.util.PingYinUtil;
 import com.way.member.friend.dto.FriendsInfoDto;
 import com.way.member.friend.dto.GroupInfoDto;
 import com.way.member.friend.service.ApplyFriendInfoService;
@@ -49,24 +50,23 @@ public class FriendServiceImpl implements FriendService {
         Map<String, Object> data = new HashMap<String, Object>();
         // 非组成员好友
         List<FriendsInfoDto> notGroupFriendslist = new ArrayList<FriendsInfoDto>();
-        Set<String> groupIds = new TreeSet<String>();
         List<GroupInfoDto> groupInfoDtos = new ArrayList<GroupInfoDto>();
+        // 查询好友列表
         List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendList(phoneNo);
+        // 查询组信息
+        List<GroupInfoDto> groups = groupInfoService.getGroupInfoListByPhoneNo(phoneNo);
         for(FriendsInfoDto dto : friendsInfoDtos){
             if(StringUtils.isBlank(dto.getGroupName())){
                 notGroupFriendslist.add(dto);
-            }else{
-                // 收集组信息
-                groupIds.add(dto.getGroupId());
             }
         }
         data.put("friends", notGroupFriendslist);
         friendsInfoDtos.removeAll(notGroupFriendslist);
-        for(String groupId : groupIds){
-            GroupInfoDto groupInfoDto = new GroupInfoDto();
+        for(GroupInfoDto groupInfoDto : groups){
+//            GroupInfoDto groupInfoDto = new GroupInfoDto();
             List<FriendsInfoDto> groupFriendslist = new ArrayList<FriendsInfoDto>();
             for(FriendsInfoDto dto : friendsInfoDtos){
-                if(groupId.equals(dto.getGroupId())){
+                if(groupInfoDto.getGroupId().equals(dto.getGroupId())){
                     groupFriendslist.add(dto);
                 }
             }
@@ -142,7 +142,7 @@ public class FriendServiceImpl implements FriendService {
         Map<String, List<FriendsInfoDto>> map = new HashMap<String, List<FriendsInfoDto>>();
         List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendList(phoneNo);
         for(FriendsInfoDto friendsInfoDto : friendsInfoDtos){
-            friendsInfoDto.setRemarkFirstLetter(friendsInfoDto.getFriendRemarkName().substring(0, 1));
+            friendsInfoDto.setRemarkFirstLetter(PingYinUtil.getPingYin(friendsInfoDto.getFriendRemarkName()).substring(0, 1));
         }
         map.put("friends", friendsInfoDtos);
         serviceResult.setData(map);
@@ -260,6 +260,7 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<FriendsInfoDto> getFriendInfo(String phoneNo, String friendPhoneNo) {
+
         return friendsInfoService.getFriendInfo(phoneNo, friendPhoneNo);
     }
 

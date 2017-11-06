@@ -1,5 +1,6 @@
 package com.way.mobile.controller.friend;
 
+import com.way.common.constant.Constants;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
 import com.way.member.friend.dto.FriendsInfoDto;
@@ -180,9 +181,6 @@ public class FriendController {
             if (StringUtils.isBlank(friendPhoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-//            if (StringUtils.isBlank(applyInfo)) {
-//                return ServiceResult.newFailure("必传参数不能为空");
-//            }
             // 申请添加好友
             serviceResult = friendService.applyForAddFriend(phoneNo, friendPhoneNo, applyInfo);
         } catch (Exception e) {
@@ -304,14 +302,29 @@ public class FriendController {
             if (StringUtils.isBlank(dto.getFriendRemarkName())) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(dto.getAccreditStartTime())) {
-                return ServiceResult.newFailure("必传参数不能为空");
-            }
-            if (StringUtils.isBlank(dto.getAccreditEndTime())) {
-                return ServiceResult.newFailure("必传参数不能为空");
-            }
             if (null == dto.getIsAccreditVisible()) {
                 return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if(Constants.YES.equals(dto.getIsAccreditVisible())){
+                if (StringUtils.isBlank(dto.getAccreditStartTime())) {
+                    return ServiceResult.newFailure("必传参数不能为空");
+                }
+                if (StringUtils.isBlank(dto.getAccreditEndTime())) {
+                    return ServiceResult.newFailure("必传参数不能为空");
+                }
+                if (StringUtils.isBlank(dto.getAccreditWeeks())) {
+                    return ServiceResult.newFailure("必传参数不能为空");
+                }
+            }else{
+                if (StringUtils.isNotBlank(dto.getAccreditStartTime())) {
+                    dto.setAccreditStartTime("");
+                }
+                if (StringUtils.isBlank(dto.getAccreditEndTime())) {
+                    dto.setAccreditEndTime("");
+                }
+                if (StringUtils.isBlank(dto.getAccreditWeeks())) {
+                    dto.setAccreditWeeks("");
+                }
             }
             // 修改好友信息
             serviceResult = friendService.modifyFriendInfo(phoneNo, dto);
