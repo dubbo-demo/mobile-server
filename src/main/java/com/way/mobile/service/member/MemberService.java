@@ -21,10 +21,12 @@ public interface MemberService {
 
     /**
      * 根据手机号搜索用户
+     *
      * @param phoneNo
+     * @param friendPhoneNo
      * @return
      */
-    ServiceResult<MemberDto> searchUserByPhoneNo(String phoneNo);
+    ServiceResult<MemberDto> searchUserByPhoneNo(String phoneNo, String friendPhoneNo);
 
     /**
      * 查看个人信息

@@ -1,6 +1,9 @@
 package com.way.mobile.service.member.impl;
 
+import com.way.common.constant.Constants;
 import com.way.common.result.ServiceResult;
+import com.way.member.friend.dto.FriendsInfoDto;
+import com.way.member.friend.service.FriendsInfoService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.service.MemberInfoService;
 import com.way.mobile.service.member.MemberService;
@@ -19,6 +22,9 @@ public class MemberServiceImpl implements MemberService {
 
     @Autowired
     private MemberInfoService memberInfoService;
+
+    @Autowired
+    private FriendsInfoService friendsInfoService;
 
     /**
      * 校验邀请人手机号是否存在
@@ -39,12 +45,24 @@ public class MemberServiceImpl implements MemberService {
 
     /**
      * 根据手机号搜索用户
+     *
      * @param phoneNo
+     * @param friendPhoneNo
      * @return
      */
     @Override
-    public ServiceResult<MemberDto> searchUserByPhoneNo(String phoneNo) {
-        return memberInfoService.searchUserByPhoneNo(phoneNo);
+    public ServiceResult<MemberDto> searchUserByPhoneNo(String phoneNo, String friendPhoneNo) {
+        ServiceResult<MemberDto> serviceResult = memberInfoService.searchUserByPhoneNo(friendPhoneNo);
+        if(serviceResult.getData() != null){
+            // 判断用户是否为好友
+            ServiceResult<FriendsInfoDto> friendsInfoDto = friendsInfoService.getFriendInfo(phoneNo, friendPhoneNo);
+            if(null != friendsInfoDto.getData()){
+                serviceResult.getData().setIsFriend(Constants.YES);
+            }else{
+                serviceResult.getData().setIsFriend(Constants.NO);
+            }
+        }
+        return serviceResult;
     }
 
     /**

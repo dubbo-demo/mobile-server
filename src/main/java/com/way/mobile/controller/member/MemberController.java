@@ -75,7 +75,7 @@ public class MemberController {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 根据手机号搜索用户
-            serviceResult = memberService.searchUserByPhoneNo(friendPhoneNo);
+            serviceResult = memberService.searchUserByPhoneNo(phoneNo, friendPhoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             WayLogger.error(e, "根据手机号搜索用户失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);

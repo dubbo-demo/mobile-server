@@ -1,19 +1,21 @@
 package com.way.mobile.controller.position;
 
+import com.alibaba.fastjson.JSON;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
-import com.way.common.util.Validater;
 import com.way.member.position.dto.PositionInfoDto;
 import com.way.mobile.service.position.PositionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 功能描述：定位Controller
@@ -57,7 +59,7 @@ public class PositionController {
      */
     @RequestMapping(value = "/getRealtimePositionByPhoneNo", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> getRealtimePositionByPhoneNo(HttpServletRequest request, String friendPhoneNo){
+    public ServiceResult<Object> getRealtimePositionByPhoneNo(HttpServletRequest request, String positionInfoDtos){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -65,22 +67,20 @@ public class PositionController {
             if (StringUtils.isBlank(phoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(friendPhoneNo)) {
+            if(StringUtils.isBlank(positionInfoDtos)){
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            // 校验手机号格式是否正确
-            if (!Validater.isMobileNew(friendPhoneNo)) {
-                serviceResult.setCode(ServiceResult.ERROR_CODE);
-                serviceResult.setMessage("手机号不正确");
-                return serviceResult;
+            List<PositionInfoDto> list = JSON.parseArray(positionInfoDtos, PositionInfoDto.class);
+            if(CollectionUtils.isEmpty(list)){
+                return ServiceResult.newFailure("必传参数不能为空");
             }
             // 根据手机号获取用户实时坐标
-            serviceResult = positionService.getRealtimePositionByPhoneNo(friendPhoneNo);
+            serviceResult = positionService.getRealtimePositionByPhoneNo(phoneNo, list);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
-            WayLogger.error(e, "根据手机号获取用户实时坐标失败," + "请求参数：friendPhoneNo:" + friendPhoneNo);
+            WayLogger.error(e, "根据手机号获取用户实时坐标失败," + "请求参数：positionInfoDto:" + positionInfoDtos);
         } finally {
-            WayLogger.access("根据手机号获取用户实时坐标：/getRealtimePositionByPhoneNo.do,参数：friendPhoneNo:" + friendPhoneNo);
+            WayLogger.access("根据手机号获取用户实时坐标：/getRealtimePositionByPhoneNo.do,参数：positionInfoDto:" + positionInfoDtos);
         }
         return serviceResult;
     }
@@ -101,7 +101,7 @@ public class PositionController {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 获取退出前查看的用户实时坐标
-            serviceResult = positionService.getPositionsBeforeExit(phoneNo);
+            serviceResult = positionService.getUserViewBeforeExit(phoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             WayLogger.error(e, "获取退出前查看的用户实时坐标失败," + "请求参数：" + phoneNo);
@@ -137,4 +137,34 @@ public class PositionController {
         return serviceResult;
     }
 
+    /**
+     * 查询用户历史轨迹坐标
+     * @param request
+     * @param friendPhoneNo
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @RequestMapping(value = "/getMemberHistoryPositions", method = RequestMethod.POST)
+    @ResponseBody
+    public ServiceResult<Object> getMemberHistoryPositions(HttpServletRequest request, String friendPhoneNo, String startTime, String endTime){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo) || StringUtils.isBlank(friendPhoneNo) || StringUtils.isBlank(startTime) || StringUtils.isBlank(endTime)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 查询用户历史轨迹坐标
+            serviceResult = positionService.getMemberHistoryPositions(phoneNo, friendPhoneNo, startTime, endTime);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "查询用户历史轨迹坐标失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo
+                    + "，startTime：" + startTime + "，endTime：" + endTime);
+        } finally {
+            WayLogger.access("查询用户历史轨迹坐标：/getMemberHistoryPositions.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo
+                    + "，startTime：" + startTime + "，endTime：" + endTime);
+        }
+        return serviceResult;
+    }
 }

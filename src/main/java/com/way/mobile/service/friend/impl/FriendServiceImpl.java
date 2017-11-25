@@ -15,6 +15,7 @@ import com.way.mobile.service.friend.FriendService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -64,9 +65,17 @@ public class FriendServiceImpl implements FriendService {
         friendsInfoDtos.removeAll(notGroupFriendslist);
         for(GroupInfoDto groupInfoDto : groups){
             List<FriendsInfoDto> groupFriendsList = new ArrayList<FriendsInfoDto>();
+            boolean flag = true;
             for(FriendsInfoDto dto : friendsInfoDtos){
                 if(groupInfoDto.getGroupId().equals(dto.getGroupId())){
                     groupFriendsList.add(dto);
+                }
+                if(flag && dto.getIsCheckBeforeExit() == 1){
+                    groupInfoDto.setIsCheckBeforeExit(1);
+                }
+                if(dto.getIsCheckBeforeExit() == 2){
+                    groupInfoDto.setIsCheckBeforeExit(2);
+                    flag = false;
                 }
             }
             groupInfoDto.setFriends(groupFriendsList);
@@ -80,12 +89,13 @@ public class FriendServiceImpl implements FriendService {
     /**
      * 取消查看好友实时坐标
      * @param phoneNo
-     * @param friendPhoneNo
+     * @param friendPhoneNos
      * @return
      */
     @Override
-    public ServiceResult<Object> cancelGetFriendPosition(String phoneNo, String friendPhoneNo) {
-        friendsInfoService.updateIsCheckBeforeExitByFriendPhoneNo(phoneNo, friendPhoneNo, Constants.NO_INT);
+    public ServiceResult<Object> cancelGetFriendPosition(String phoneNo, List<String> friendPhoneNos) {
+        // 标记好友退出前查看为否：2
+        friendsInfoService.updateIsCheckBeforeExitByFriendPhoneNos(phoneNo, friendPhoneNos, Constants.NO_INT);
         return ServiceResult.newSuccess();
     }
 
@@ -97,6 +107,7 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<Object> cancelGetGroupPosition(String phoneNo, String groupId) {
+        // 标记组好友退出前查看为否：2
         friendsInfoService.updateIsCheckBeforeExitByGroupId(phoneNo, groupId, Constants.NO_INT);
         return ServiceResult.newSuccess();
     }
@@ -157,7 +168,7 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<Object> applyForAddFriend(String phoneNo, String friendPhoneNo, String applyInfo) {
-        // 增加被申请记录
+        // 申请添加好友
         applyFriendInfoService.applyForAddFriend(phoneNo, friendPhoneNo, applyInfo);
         return ServiceResult.newSuccess();
     }
@@ -199,6 +210,7 @@ public class FriendServiceImpl implements FriendService {
      * @return
      */
     @Override
+    @Transactional
     public ServiceResult<Object> modifyFriendInfo(String phoneNo, FriendsInfoDto dto) {
         // 修改好友信息
         friendsInfoService.modifyFriendInfo(phoneNo, dto);
@@ -279,6 +291,7 @@ public class FriendServiceImpl implements FriendService {
             friendsInfoDto.setIsAccreditVisible(dto.getIsAccreditVisible());
             friendsInfoDto.setAccreditStartTime(dto.getAccreditStartTime());
             friendsInfoDto.setAccreditEndTime(dto.getAccreditEndTime());
+            friendsInfoDto.setAccreditWeeks(dto.getAccreditWeeks());
             // 修改好友信息
             modifyFriendInfo(phoneNo, friendsInfoDto);
         }
@@ -292,6 +305,7 @@ public class FriendServiceImpl implements FriendService {
      * @return
      */
     @Override
+    @Transactional
     public ServiceResult<GroupInfoDto> deleteGroupInfo(String phoneNo, String groupId) {
         // 将好友组信息清空
         friendsInfoService.updateFriendsGroupInfo(phoneNo, groupId);

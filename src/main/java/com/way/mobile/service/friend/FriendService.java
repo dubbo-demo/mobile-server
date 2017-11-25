@@ -4,6 +4,8 @@ import com.way.common.result.ServiceResult;
 import com.way.member.friend.dto.FriendsInfoDto;
 import com.way.member.friend.dto.GroupInfoDto;
 
+import java.util.List;
+
 /**
  * 功能描述：好友Service
  *
@@ -22,10 +24,10 @@ public interface FriendService {
     /**
      * 取消查看好友实时坐标
      * @param phoneNo
-     * @param friendPhoneNo
+     * @param friendPhoneNos
      * @return
      */
-    ServiceResult<Object> cancelGetFriendPosition(String phoneNo, String friendPhoneNo);
+    ServiceResult<Object> cancelGetFriendPosition(String phoneNo, List<String> friendPhoneNos);
 
     /**
      * 取消查看组好友实时坐标

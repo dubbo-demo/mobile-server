@@ -9,12 +9,14 @@ import com.way.mobile.service.friend.FriendService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 功能描述：好友Controller
@@ -57,12 +59,12 @@ public class FriendController {
     /**
      * 取消查看好友实时坐标
      * @param request
-     * @param friendPhoneNo
+     * @param friendPhoneNos
      * @return
      */
     @RequestMapping(value = "/cancelGetFriendPosition", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> cancelGetFriendPosition(HttpServletRequest request, String friendPhoneNo){
+    public ServiceResult<Object> cancelGetFriendPosition(HttpServletRequest request, List<String> friendPhoneNos){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -70,13 +72,16 @@ public class FriendController {
             if (StringUtils.isBlank(phoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
+            if(CollectionUtils.isEmpty(friendPhoneNos)){
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
             // 取消查看好友实时坐标
-            serviceResult = friendService.cancelGetFriendPosition(phoneNo, friendPhoneNo);
+            serviceResult = friendService.cancelGetFriendPosition(phoneNo, friendPhoneNos);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
-            WayLogger.error(e, "取消查看好友实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+            WayLogger.error(e, "取消查看好友实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
         } finally {
-            WayLogger.access("取消查看好友实时坐标：/cancelGetFriendPosition.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+            WayLogger.access("取消查看好友实时坐标：/cancelGetFriendPosition.do,参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
         }
         return serviceResult;
     }
@@ -305,7 +310,7 @@ public class FriendController {
             if (null == dto.getIsAccreditVisible()) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if(Constants.YES.equals(dto.getIsAccreditVisible())){
+            if(Constants.YES_INT == dto.getIsAccreditVisible()){
                 if (StringUtils.isBlank(dto.getAccreditStartTime())) {
                     return ServiceResult.newFailure("必传参数不能为空");
                 }
@@ -316,7 +321,7 @@ public class FriendController {
                     return ServiceResult.newFailure("必传参数不能为空");
                 }
             }else{
-                if (StringUtils.isNotBlank(dto.getAccreditStartTime())) {
+                if (StringUtils.isBlank(dto.getAccreditStartTime())) {
                     dto.setAccreditStartTime("");
                 }
                 if (StringUtils.isBlank(dto.getAccreditEndTime())) {
