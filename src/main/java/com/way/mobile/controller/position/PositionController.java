@@ -86,13 +86,13 @@ public class PositionController {
     }
 
     /**
-     * 获取退出前查看的用户实时坐标
+     * 获取退出前查看的用户
      * @param request
      * @return
      */
-    @RequestMapping(value = "/getPositionsBeforeExit", method = RequestMethod.POST)
+    @RequestMapping(value = "/getUserViewBeforeExit", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> getPositionsBeforeExit(HttpServletRequest request){
+    public ServiceResult<Object> getUserViewBeforeExit(HttpServletRequest request){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
