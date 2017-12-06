@@ -6,6 +6,7 @@ import com.way.member.friend.dto.FriendsInfoDto;
 import com.way.member.friend.service.FriendsInfoService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.service.MemberInfoService;
+import com.way.member.rewardScore.dto.RewardScoreDto;
 import com.way.mobile.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,5 +84,23 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public ServiceResult<Object> modifyMemberInfo(MemberDto dto) {
         return memberInfoService.modifyMemberInfo(dto);
+    }
+
+    /**
+     * 查看积分明细
+     * @param phoneNo
+     * @param pageNumber
+     * @return
+     */
+    @Override
+    public ServiceResult<RewardScoreDto> getRewardScoreDetail(String phoneNo, String pageNumber) {
+        // 查询总积分
+
+        // 分页查询
+
+        // 查询总页数
+
+
+        return null;
     }
 }
