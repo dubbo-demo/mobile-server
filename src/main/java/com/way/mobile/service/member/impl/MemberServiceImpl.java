@@ -7,9 +7,14 @@ import com.way.member.friend.service.FriendsInfoService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.service.MemberInfoService;
 import com.way.member.rewardScore.dto.RewardScoreDto;
+import com.way.member.rewardScore.service.RewardScoreService;
 import com.way.mobile.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName: MemberServiceImpl
@@ -27,6 +32,8 @@ public class MemberServiceImpl implements MemberService {
     @Autowired
     private FriendsInfoService friendsInfoService;
 
+    @Autowired
+    private RewardScoreService rewardScoreService;
     /**
      * 校验邀请人手机号是否存在
      * @param phoneNo
@@ -93,14 +100,62 @@ public class MemberServiceImpl implements MemberService {
      * @return
      */
     @Override
-    public ServiceResult<RewardScoreDto> getRewardScoreDetail(String phoneNo, String pageNumber) {
+    public ServiceResult<Object> getRewardScoreDetail(String phoneNo, Integer pageNumber) {
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         // 查询总积分
-
-        // 分页查询
-
+        ServiceResult<MemberDto> memberDto = getMemberInfo(phoneNo);
         // 查询总页数
+        Integer count = rewardScoreService.getRewardScoreDetailCount(phoneNo);
+        // 分页查询
+        List<RewardScoreDto> details = rewardScoreService.getRewardScoreDetailList(phoneNo, pageNumber - 1);
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("totalRewardScore", memberDto.getData().getRewardScore());
+        data.put("pageCount", count);
+        data.put("pageNumber", pageNumber);
+        data.put("details", details);
+        serviceResult.setData(data);
+        return serviceResult;
+    }
 
+    /**
+     * 积分购买会员
+     * @param phoneNo
+     * @param validityDurationType
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> buyMemberByRewardScore(String phoneNo, String validityDurationType) {
+        // 根据会员有效期类型获取所需积分
+        String rewardScore = getRewardScore(validityDurationType);
+        // 查询会员积分
+        ServiceResult<MemberDto> memberDto = getMemberInfo(phoneNo);
+        if(memberDto.getData().getRewardScore().compareTo(rewardScore) < 0){
+            return ServiceResult.newFailure("积分不够");
+        }
+        // 扣除积分并且给用户设置为会员
 
+        // 积分明细增加记录
         return null;
+    }
+
+    /**
+     * 积分购买会员
+     * @param validityDurationType
+     * @return
+     */
+    private String getRewardScore(String validityDurationType) {
+        if("1".equals(validityDurationType)){
+            return "10";
+        }
+        if("2".equals(validityDurationType)){
+            return "30";
+        }
+        if("3".equals(validityDurationType)){
+            return "100";
+        }
+        if("4".equals(validityDurationType)){
+            return "300";
+        }
+        return "99999999999999";
     }
 }

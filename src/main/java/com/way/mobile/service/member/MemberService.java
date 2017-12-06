@@ -2,7 +2,6 @@ package com.way.mobile.service.member;
 
 import com.way.common.result.ServiceResult;
 import com.way.member.member.dto.MemberDto;
-import com.way.member.rewardScore.dto.RewardScoreDto;
 
 /**
  * @ClassName: MemberService
@@ -49,5 +48,13 @@ public interface MemberService {
      * @param pageNumber
      * @return
      */
-    ServiceResult<RewardScoreDto> getRewardScoreDetail(String phoneNo, String pageNumber);
+    ServiceResult<Object> getRewardScoreDetail(String phoneNo, Integer pageNumber);
+
+    /**
+     * 积分购买会员
+     * @param phoneNo
+     * @param validityDurationType
+     * @return
+     */
+    ServiceResult<Object> buyMemberByRewardScore(String phoneNo, String validityDurationType);
 }

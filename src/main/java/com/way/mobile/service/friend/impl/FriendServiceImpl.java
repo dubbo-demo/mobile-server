@@ -89,13 +89,13 @@ public class FriendServiceImpl implements FriendService {
     /**
      * 取消查看好友实时坐标
      * @param phoneNo
-     * @param friendPhoneNos
+     * @param friendPhoneNoList
      * @return
      */
     @Override
-    public ServiceResult<Object> cancelGetFriendPosition(String phoneNo, List<String> friendPhoneNos) {
+    public ServiceResult<Object> cancelGetFriendPosition(String phoneNo, List<String> friendPhoneNoList) {
         // 标记好友退出前查看为否：2
-        friendsInfoService.updateIsCheckBeforeExitByFriendPhoneNos(phoneNo, friendPhoneNos, Constants.NO_INT);
+        friendsInfoService.updateIsCheckBeforeExitByFriendPhoneNos(phoneNo, friendPhoneNoList, Constants.NO_INT);
         return ServiceResult.newSuccess();
     }
 

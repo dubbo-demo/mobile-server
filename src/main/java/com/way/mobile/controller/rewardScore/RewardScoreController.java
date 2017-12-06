@@ -2,7 +2,6 @@ package com.way.mobile.controller.rewardScore;
 
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
-import com.way.member.rewardScore.dto.RewardScoreDto;
 import com.way.mobile.service.member.MemberService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +32,16 @@ public class RewardScoreController {
      */
     @RequestMapping(value = "/getRewardScoreDetail", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<RewardScoreDto> getRewardScoreDetail(HttpServletRequest request, String pageNumber){
-        ServiceResult<RewardScoreDto> serviceResult = ServiceResult.newSuccess();
+    public ServiceResult<Object> getRewardScoreDetail(HttpServletRequest request, Integer pageNumber){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
             // 校验token
             if (StringUtils.isBlank(phoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(pageNumber)) { // 第几页为空
-                return ServiceResult.newFailure("必传参数不能为空");
+            if (null == pageNumber) { // 第几页为空
+                pageNumber = 1;
             }
             // 查看积分明细
             serviceResult = memberService.getRewardScoreDetail(phoneNo, pageNumber);
@@ -51,6 +50,37 @@ public class RewardScoreController {
             WayLogger.error(e, "查看积分明细失败," + "请求参数：phoneNo：" + phoneNo + "pageNumber：" + pageNumber);
         } finally {
             WayLogger.access("查看积分明细：/getRewardScoreDetail.do,参数：phoneNo：" + phoneNo + "pageNumber：" + pageNumber);
+        }
+        return serviceResult;
+    }
+
+    /**
+     * 积分购买会员
+     * @param request
+     * @param validityDurationType
+     * @return
+     */
+    @RequestMapping(value = "/buyMemberByRewardScore", method = RequestMethod.POST)
+    @ResponseBody
+    public ServiceResult<Object> buyMemberByRewardScore(HttpServletRequest request, String validityDurationType){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 校验token
+            if (StringUtils.isBlank(validityDurationType)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 积分购买会员
+            serviceResult = memberService.buyMemberByRewardScore(phoneNo, validityDurationType);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "积分购买会员失败," + "请求参数：phoneNo：" + phoneNo + "validityDurationType：" + validityDurationType);
+        } finally {
+            WayLogger.access("积分购买会员：/buyMemberByRewardScore.do,参数：phoneNo：" + phoneNo + "validityDurationType：" + validityDurationType);
         }
         return serviceResult;
     }

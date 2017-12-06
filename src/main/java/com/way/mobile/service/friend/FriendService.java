@@ -24,10 +24,10 @@ public interface FriendService {
     /**
      * 取消查看好友实时坐标
      * @param phoneNo
-     * @param friendPhoneNos
+     * @param friendPhoneNoList
      * @return
      */
-    ServiceResult<Object> cancelGetFriendPosition(String phoneNo, List<String> friendPhoneNos);
+    ServiceResult<Object> cancelGetFriendPosition(String phoneNo, List<String> friendPhoneNoList);
 
     /**
      * 取消查看组好友实时坐标

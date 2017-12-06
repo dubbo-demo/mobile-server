@@ -135,7 +135,7 @@ public class PositionServiceImpl implements PositionService {
         List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendsInfoBeforeExit(phoneNo);
 
         for(FriendsInfoDto dto : friendsInfoDtos){
-            if(StringUtils.isBlank(dto.getGroupName())){
+            if(StringUtils.isBlank(dto.getGroupId())){
                 notGroupFriendslist.add(dto);
             }else{
                 // 收集组信息

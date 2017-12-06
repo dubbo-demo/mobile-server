@@ -1,5 +1,6 @@
 package com.way.mobile.controller.friend;
 
+import com.alibaba.fastjson.JSON;
 import com.way.common.constant.Constants;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
@@ -9,7 +10,6 @@ import com.way.mobile.service.friend.FriendService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -64,7 +64,7 @@ public class FriendController {
      */
     @RequestMapping(value = "/cancelGetFriendPosition", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> cancelGetFriendPosition(HttpServletRequest request, List<String> friendPhoneNos){
+    public ServiceResult<Object> cancelGetFriendPosition(HttpServletRequest request, String friendPhoneNos){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -72,11 +72,17 @@ public class FriendController {
             if (StringUtils.isBlank(phoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if(CollectionUtils.isEmpty(friendPhoneNos)){
+            if (StringUtils.isBlank(friendPhoneNos)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
+            List<String> friendPhoneNoList = JSON.parseArray(friendPhoneNos, String.class);
+            for(String friendPhoneNo : friendPhoneNoList){
+                if (StringUtils.isBlank(friendPhoneNo)) {
+                    return ServiceResult.newFailure("必传参数不能为空");
+                }
+            }
             // 取消查看好友实时坐标
-            serviceResult = friendService.cancelGetFriendPosition(phoneNo, friendPhoneNos);
+            serviceResult = friendService.cancelGetFriendPosition(phoneNo, friendPhoneNoList);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             WayLogger.error(e, "取消查看好友实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
