@@ -2,6 +2,7 @@ package com.way.mobile.service.member.impl;
 
 import com.way.common.constant.Constants;
 import com.way.common.result.ServiceResult;
+import com.way.common.util.DateUtils;
 import com.way.member.friend.dto.FriendsInfoDto;
 import com.way.member.friend.service.FriendsInfoService;
 import com.way.member.member.dto.MemberDto;
@@ -12,6 +13,7 @@ import com.way.mobile.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,16 +128,100 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public ServiceResult<Object> buyMemberByRewardScore(String phoneNo, String validityDurationType) {
         // 根据会员有效期类型获取所需积分
-        String rewardScore = getRewardScore(validityDurationType);
+        Integer rewardScore = getRewardScore(validityDurationType);
+        String name = getRewardName(validityDurationType);
         // 查询会员积分
         ServiceResult<MemberDto> memberDto = getMemberInfo(phoneNo);
-        if(memberDto.getData().getRewardScore().compareTo(rewardScore) < 0){
+        if(Integer.valueOf(memberDto.getData().getRewardScore()) - rewardScore < 0){
             return ServiceResult.newFailure("积分不够");
         }
-        // 扣除积分并且给用户设置为会员
+        // 获取会员有效期开始时间
+        Date startTime = new Date();
+        if(null != memberDto.getData().getMemberEndTime()){
+            startTime = memberDto.getData().getMemberEndTime();
+        }
+        // 根据会员类型计算充值后会员有效期
+        Date endTime = DateUtils.addWeeks(startTime,3);// TODO
 
-        // 积分明细增加记录
-        return null;
+        if(null != memberDto.getData().getMemberStartTime()){
+            startTime = memberDto.getData().getMemberStartTime();
+        }
+        // 积分购买会员
+        memberInfoService.buyMemberByRewardScore(phoneNo, rewardScore, startTime, endTime, name);
+        return ServiceResult.newSuccess();
+    }
+
+    /**
+     * 积分购买增值服务
+     * @param phoneNo
+     * @param validityDurationType
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> buyValueAddedServiceByRewardScore(String phoneNo, String validityDurationType) {
+        // 根据会员有效期类型获取所需积分
+        Integer rewardScore = getRewardScore(validityDurationType);
+        String name = getRewardName(validityDurationType);
+        // 查询会员积分
+        ServiceResult<MemberDto> memberDto = getMemberInfo(phoneNo);
+        if(Integer.valueOf(memberDto.getData().getRewardScore()) - rewardScore < 0){
+            return ServiceResult.newFailure("积分不够");
+        }
+        // 获取会员有效期开始时间
+        Date startTime = new Date();
+        if(null != memberDto.getData().getValueAddedServiceEndTime()){
+            startTime = memberDto.getData().getValueAddedServiceEndTime();
+        }
+        // 根据会员类型计算充值后会员有效期
+        Date endTime = DateUtils.addWeeks(startTime,3);// TODO
+//        if(endTime.){
+//
+//        }
+        if(null != memberDto.getData().getMemberStartTime()){
+            startTime = memberDto.getData().getMemberStartTime();
+        }
+        // 积分购买增值服务
+        memberInfoService.buyValueAddedServiceByRewardScore(phoneNo, rewardScore, startTime, endTime, name);
+        return ServiceResult.newSuccess();
+    }
+
+    /**
+     * 积分转增
+     * @param phoneNo
+     * @param rewardScore
+     * @param friendPhoneNo
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> transferRewardScoreToFriend(String phoneNo, Integer rewardScore, String friendPhoneNo) {
+        // 查询会员积分
+        ServiceResult<MemberDto> memberDto = getMemberInfo(phoneNo);
+        if(Integer.valueOf(memberDto.getData().getRewardScore()) - rewardScore < 0){
+            return ServiceResult.newFailure("积分不够");
+        }
+        // 查询该手机号是否存在
+        if(null == memberInfoService.searchUserByPhoneNo(friendPhoneNo).getData()){
+            return ServiceResult.newFailure("该手机号不存在");
+        }
+        // 积分转增
+        memberInfoService.transferRewardScoreToFriend(phoneNo, rewardScore, friendPhoneNo);
+        return ServiceResult.newSuccess();
+    }
+
+    private String getRewardName(String validityDurationType) {
+        if("1".equals(validityDurationType)){
+            return "一周";
+        }
+        if("2".equals(validityDurationType)){
+            return "一个月";
+        }
+        if("3".equals(validityDurationType)){
+            return "一个季度";
+        }
+        if("4".equals(validityDurationType)){
+            return "一年";
+        }
+        return "";
     }
 
     /**
@@ -143,19 +229,19 @@ public class MemberServiceImpl implements MemberService {
      * @param validityDurationType
      * @return
      */
-    private String getRewardScore(String validityDurationType) {
+    private Integer getRewardScore(String validityDurationType) {
         if("1".equals(validityDurationType)){
-            return "10";
+            return 10;
         }
         if("2".equals(validityDurationType)){
-            return "30";
+            return 30;
         }
         if("3".equals(validityDurationType)){
-            return "100";
+            return 100;
         }
         if("4".equals(validityDurationType)){
-            return "300";
+            return 300;
         }
-        return "99999999999999";
+        return 999999999;
     }
 }

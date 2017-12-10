@@ -57,4 +57,21 @@ public interface MemberService {
      * @return
      */
     ServiceResult<Object> buyMemberByRewardScore(String phoneNo, String validityDurationType);
+
+    /**
+     * 积分购买增值服务
+     * @param phoneNo
+     * @param validityDurationType
+     * @return
+     */
+    ServiceResult<Object> buyValueAddedServiceByRewardScore(String phoneNo, String validityDurationType);
+
+    /**
+     * 积分转增
+     * @param phoneNo
+     * @param rewardScore
+     * @param friendPhoneNo
+     * @return
+     */
+    ServiceResult<Object> transferRewardScoreToFriend(String phoneNo, Integer rewardScore, String friendPhoneNo);
 }
