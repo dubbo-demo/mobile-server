@@ -14,10 +14,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * 功能描述：
+ * 功能描述：积分Controller
  *
  * @Author：xinpei.xu
- * @Date：2017年12月06日 17:13
  */
 @Controller
 public class RewardScoreController {
@@ -89,7 +88,6 @@ public class RewardScoreController {
     /**
      * 积分购买增值服务
      * @param request
-     * @param validityDurationType
      * @return
      */
     @RequestMapping(value = "/buyValueAddedServiceByRewardScore", method = RequestMethod.POST)

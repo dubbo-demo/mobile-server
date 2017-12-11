@@ -82,4 +82,12 @@ public interface MemberService {
      * @return
      */
     ServiceResult<Object> withdrawalRewardScore(String phoneNo, WithdrawalInfoDto withdrawalInfoDto);
+
+    /**
+     * 查看充值记录
+     * @param phoneNo
+     * @param pageNumber
+     * @return
+     */
+    ServiceResult<Object> getRechargeInfo(String phoneNo, Integer pageNumber);
 }

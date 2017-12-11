@@ -38,6 +38,9 @@ public class MemberServiceImpl implements MemberService {
 
     @Autowired
     private RewardScoreService rewardScoreService;
+
+    @Autowired
+    private RechargeInfoService rechargeInfoService;
     /**
      * 校验邀请人手机号是否存在
      * @param phoneNo
@@ -221,6 +224,27 @@ public class MemberServiceImpl implements MemberService {
         withdrawalInfoDto.setPhoneNo(phoneNo);
         memberInfoService.withdrawalRewardScore(withdrawalInfoDto);
         return ServiceResult.newSuccess();
+    }
+
+    /**
+     * 查看充值记录
+     * @param phoneNo
+     * @param pageNumber
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> getRechargeInfo(String phoneNo, Integer pageNumber) {
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        // 查询总页数
+        Integer count = rechargeInfoService.getRechargeInfoCount(phoneNo);
+        // 分页查询
+        List<RewardScoreDto> details = rechargeInfoService.getRechargeInfoList(phoneNo, pageNumber - 1);
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("pageCount", count);
+        data.put("pageNumber", pageNumber);
+        data.put("details", details);
+        serviceResult.setData(data);
+        return serviceResult;
     }
 
     private String getRewardName(String validityDurationType) {
