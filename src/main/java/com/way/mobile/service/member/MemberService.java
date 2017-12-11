@@ -1,6 +1,7 @@
 package com.way.mobile.service.member;
 
 import com.way.common.result.ServiceResult;
+import com.way.member.withdrawal.dto.WithdrawalInfoDto;
 import com.way.member.member.dto.MemberDto;
 
 /**
@@ -61,10 +62,9 @@ public interface MemberService {
     /**
      * 积分购买增值服务
      * @param phoneNo
-     * @param validityDurationType
      * @return
      */
-    ServiceResult<Object> buyValueAddedServiceByRewardScore(String phoneNo, String validityDurationType);
+    ServiceResult<Object> buyValueAddedServiceByRewardScore(String phoneNo);
 
     /**
      * 积分转增
@@ -73,5 +73,13 @@ public interface MemberService {
      * @param friendPhoneNo
      * @return
      */
-    ServiceResult<Object> transferRewardScoreToFriend(String phoneNo, Integer rewardScore, String friendPhoneNo);
+    ServiceResult<Object> transferRewardScoreToFriend(String phoneNo, Double rewardScore, String friendPhoneNo);
+
+    /**
+     * 积分提现
+     * @param phoneNo
+     * @param withdrawalInfoDto
+     * @return
+     */
+    ServiceResult<Object> withdrawalRewardScore(String phoneNo, WithdrawalInfoDto withdrawalInfoDto);
 }
