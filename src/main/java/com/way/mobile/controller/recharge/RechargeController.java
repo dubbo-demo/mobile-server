@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
  * @Author：xinpei.xu
  */
 @Controller
-public class RechargeScoreController {
+public class RechargeController {
 
     @Autowired
     private MemberService memberService;

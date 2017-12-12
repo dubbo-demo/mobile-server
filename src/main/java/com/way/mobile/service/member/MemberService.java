@@ -90,4 +90,19 @@ public interface MemberService {
      * @return
      */
     ServiceResult<Object> getRechargeInfo(String phoneNo, Integer pageNumber);
+
+    /**
+     * 充值购买会员
+     * @param phoneNo
+     * @param validityDurationType
+     * @return
+     */
+    ServiceResult<Object> buyMemberByRecharge(String phoneNo, String validityDurationType);
+
+    /**
+     * 充值购买增值服务
+     * @param phoneNo
+     * @return
+     */
+    ServiceResult<Object> buyValueAddedServiceByRecharge(String phoneNo);
 }

@@ -3,13 +3,15 @@ package com.way.mobile.service.member.impl;
 import com.way.common.constant.Constants;
 import com.way.common.result.ServiceResult;
 import com.way.common.util.DateUtils;
-import com.way.member.withdrawal.dto.WithdrawalInfoDto;
 import com.way.member.friend.dto.FriendsInfoDto;
 import com.way.member.friend.service.FriendsInfoService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.service.MemberInfoService;
+import com.way.member.recharge.dto.RechargeInfoDto;
+import com.way.member.recharge.service.RechargeInfoService;
 import com.way.member.rewardScore.dto.RewardScoreDto;
 import com.way.member.rewardScore.service.RewardScoreService;
+import com.way.member.withdrawal.dto.WithdrawalInfoDto;
 import com.way.mobile.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Autowired
     private RechargeInfoService rechargeInfoService;
+
     /**
      * 校验邀请人手机号是否存在
      * @param phoneNo
@@ -146,7 +149,7 @@ public class MemberServiceImpl implements MemberService {
             startTime = memberDto.getData().getMemberEndTime();
         }
         // 根据会员类型计算充值后会员有效期
-        Date endTime = DateUtils.addDays(DateUtils.addWeeks(startTime,3), 1);
+        Date endTime = DateUtils.dayEnd(DateUtils.addDays(DateUtils.addMonths(startTime,3), 1));
 
         if(null != memberDto.getData().getMemberStartTime()){
             startTime = memberDto.getData().getMemberStartTime();
@@ -174,7 +177,7 @@ public class MemberServiceImpl implements MemberService {
             startTime = memberDto.getData().getValueAddedServiceEndTime();
         }
         // 获取会员结束时间
-        Date endTime = memberDto.getData().getValueAddedServiceEndTime();
+        Date endTime = memberDto.getData().getMemberEndTime();
         // 计算开始时间和结束时间所差的天数
         int day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
 
@@ -238,7 +241,7 @@ public class MemberServiceImpl implements MemberService {
         // 查询总页数
         Integer count = rechargeInfoService.getRechargeInfoCount(phoneNo);
         // 分页查询
-        List<RewardScoreDto> details = rechargeInfoService.getRechargeInfoList(phoneNo, pageNumber - 1);
+        List<RechargeInfoDto> details = rechargeInfoService.getRechargeInfoList(phoneNo, pageNumber - 1);
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("pageCount", count);
         data.put("pageNumber", pageNumber);
@@ -247,17 +250,57 @@ public class MemberServiceImpl implements MemberService {
         return serviceResult;
     }
 
+    /**
+     * 充值购买会员
+     * @param phoneNo
+     * @param validityDurationType
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> buyMemberByRecharge(String phoneNo, String validityDurationType) {
+
+        // 根据会员有效期类型获取所需积分
+        Double rewardScore = getRewardScore(validityDurationType);
+        String name = getRewardName(validityDurationType);
+        // 查询会员积分
+        ServiceResult<MemberDto> memberDto = getMemberInfo(phoneNo);
+        if(memberDto.getData().getRewardScore() - rewardScore < 0){
+            return ServiceResult.newFailure("积分不够");
+        }
+        // 获取会员有效期开始时间
+        Date startTime = new Date();
+        if(null != memberDto.getData().getMemberEndTime()){
+            startTime = memberDto.getData().getMemberEndTime();
+        }
+        // 根据会员类型计算充值后会员有效期
+        Date endTime = DateUtils.addDays(DateUtils.addWeeks(startTime,3), 1);
+
+        if(null != memberDto.getData().getMemberStartTime()){
+            startTime = memberDto.getData().getMemberStartTime();
+        }
+        // 积分购买会员
+        memberInfoService.buyMemberByRewardScore(phoneNo, rewardScore, startTime, endTime, name);
+        return ServiceResult.newSuccess();
+    }
+
+    /**
+     * 充值购买增值服务
+     * @param phoneNo
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> buyValueAddedServiceByRecharge(String phoneNo) {
+        return null;
+    }
+
     private String getRewardName(String validityDurationType) {
         if("1".equals(validityDurationType)){
-            return "一周";
+            return "三个月";
         }
         if("2".equals(validityDurationType)){
-            return "一个月";
+            return "半年";
         }
         if("3".equals(validityDurationType)){
-            return "一个季度";
-        }
-        if("4".equals(validityDurationType)){
             return "一年";
         }
         return "";
@@ -277,9 +320,6 @@ public class MemberServiceImpl implements MemberService {
         }
         if("3".equals(validityDurationType)){
             return 100.0;
-        }
-        if("4".equals(validityDurationType)){
-            return 300.0;
         }
         return 999999999.0;
     }
