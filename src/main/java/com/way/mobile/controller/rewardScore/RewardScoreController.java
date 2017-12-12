@@ -92,7 +92,7 @@ public class RewardScoreController {
      */
     @RequestMapping(value = "/buyValueAddedServiceByRewardScore", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> buyValueAddedServiceByRewardScore(HttpServletRequest request){
+    public ServiceResult<Object> buyValueAddedServiceByRewardScore(HttpServletRequest request, String type){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -100,13 +100,16 @@ public class RewardScoreController {
             if (StringUtils.isBlank(phoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
+            if (StringUtils.isBlank(type)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
             // 积分购买增值服务
-            serviceResult = memberService.buyValueAddedServiceByRewardScore(phoneNo);
+            serviceResult = memberService.buyValueAddedServiceByRewardScore(phoneNo, type);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
-            WayLogger.error(e, "积分购买增值服务失败," + "请求参数：phoneNo：" + phoneNo);
+            WayLogger.error(e, "积分购买增值服务失败," + "请求参数：phoneNo：" + phoneNo + "type：" + type);
         } finally {
-            WayLogger.access("积分购买增值服务：/buyValueAddedServiceByRewardScore.do,参数：phoneNo：" + phoneNo);
+            WayLogger.access("积分购买增值服务：/buyValueAddedServiceByRewardScore.do,参数：phoneNo：" + phoneNo + "type：" + type);
         }
         return serviceResult;
     }

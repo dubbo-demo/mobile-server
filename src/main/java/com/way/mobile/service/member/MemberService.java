@@ -62,9 +62,10 @@ public interface MemberService {
     /**
      * 积分购买增值服务
      * @param phoneNo
+     * @param type
      * @return
      */
-    ServiceResult<Object> buyValueAddedServiceByRewardScore(String phoneNo);
+    ServiceResult<Object> buyValueAddedServiceByRewardScore(String phoneNo, String type);
 
     /**
      * 积分转增

@@ -162,16 +162,17 @@ public class MemberServiceImpl implements MemberService {
     /**
      * 积分购买增值服务
      * @param phoneNo
+     * @param type
      * @return
      */
     @Override
-    public ServiceResult<Object> buyValueAddedServiceByRewardScore(String phoneNo) {
+    public ServiceResult<Object> buyValueAddedServiceByRewardScore(String phoneNo, String type) {
         // 查询会员积分
         ServiceResult<MemberDto> memberDto = getMemberInfo(phoneNo);
         if(!memberDto.getData().getMemberType().equals("2")){
             return ServiceResult.newFailure("您还不是正式会员");
         }
-        // 获取会员有效期开始时间
+        // 获取增值服务有效期开始时间
         Date startTime = new Date();
         if(null != memberDto.getData().getValueAddedServiceEndTime()){
             startTime = memberDto.getData().getValueAddedServiceEndTime();
@@ -180,7 +181,10 @@ public class MemberServiceImpl implements MemberService {
         Date endTime = memberDto.getData().getMemberEndTime();
         // 计算开始时间和结束时间所差的天数
         int day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
-
+        if(day <= 0){
+            return ServiceResult.newFailure("增值服务已达最大使用期限，无需购买");
+        }
+//        double amount = (type);TODO
         // 根据会员有效期类型获取所需积分
         Double rewardScore = new BigDecimal(day).multiply(new BigDecimal(0.5)).doubleValue();
         if(memberDto.getData().getRewardScore() - rewardScore < 0){
@@ -189,7 +193,7 @@ public class MemberServiceImpl implements MemberService {
         String name = day + "天增值服务";
 
         // 积分购买增值服务
-        memberInfoService.buyValueAddedServiceByRewardScore(phoneNo, rewardScore, startTime, endTime, name);
+        memberInfoService.buyValueAddedServiceByRewardScore(phoneNo, rewardScore, startTime, endTime, name, type);
         return ServiceResult.newSuccess();
     }
 
