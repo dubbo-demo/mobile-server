@@ -11,6 +11,8 @@ import com.way.member.recharge.dto.RechargeInfoDto;
 import com.way.member.recharge.service.RechargeInfoService;
 import com.way.member.rewardScore.dto.RewardScoreDto;
 import com.way.member.rewardScore.service.RewardScoreService;
+import com.way.member.valueAdded.dto.MemberValueAddedInfoDto;
+import com.way.member.valueAdded.service.MemberValueAddedInfoService;
 import com.way.member.withdrawal.dto.WithdrawalInfoDto;
 import com.way.mobile.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,9 @@ public class MemberServiceImpl implements MemberService {
 
     @Autowired
     private RechargeInfoService rechargeInfoService;
+
+    @Autowired
+    private MemberValueAddedInfoService memberValueAddedInfoService;
 
     /**
      * 校验邀请人手机号是否存在
@@ -155,7 +160,7 @@ public class MemberServiceImpl implements MemberService {
             startTime = memberDto.getData().getMemberStartTime();
         }
         // 积分购买会员
-        memberInfoService.buyMemberByRewardScore(phoneNo, rewardScore, startTime, endTime, name);
+        memberInfoService.buyMemberByRewardScore(phoneNo, memberDto.getData().getInvitationCode(), rewardScore, startTime, endTime, name);
         return ServiceResult.newSuccess();
     }
 
@@ -168,21 +173,28 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public ServiceResult<Object> buyValueAddedServiceByRewardScore(String phoneNo, String type) {
         // 查询会员积分
-        ServiceResult<MemberDto> memberDto = getMemberInfo(phoneNo);
+        ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
         if(!memberDto.getData().getMemberType().equals("2")){
             return ServiceResult.newFailure("您还不是正式会员");
         }
+        // 根据增值服务类型获取用户增值服务信息
+        MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(phoneNo, type);
+        int day = 0;
         // 获取增值服务有效期开始时间
         Date startTime = new Date();
-        if(null != memberDto.getData().getValueAddedServiceEndTime()){
-            startTime = memberDto.getData().getValueAddedServiceEndTime();
-        }
         // 获取会员结束时间
         Date endTime = memberDto.getData().getMemberEndTime();
-        // 计算开始时间和结束时间所差的天数
-        int day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
-        if(day <= 0){
-            return ServiceResult.newFailure("增值服务已达最大使用期限，无需购买");
+        if(null == memberValueAddedInfoDto){
+            // 计算开始时间和结束时间所差的天数
+            day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
+        }
+        if(null != memberValueAddedInfoDto && memberValueAddedInfoDto.getIsOpen() == 1){
+            day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
+            // 判断增值服务是否需要购买
+            if(day == 0){
+                return ServiceResult.newFailure("增值服务已达最大使用期限，无需购买");
+            }
+            startTime = memberValueAddedInfoDto.getStartTime();
         }
 //        double amount = (type);TODO
         // 根据会员有效期类型获取所需积分
@@ -193,7 +205,7 @@ public class MemberServiceImpl implements MemberService {
         String name = day + "天增值服务";
 
         // 积分购买增值服务
-        memberInfoService.buyValueAddedServiceByRewardScore(phoneNo, rewardScore, startTime, endTime, name, type);
+        memberInfoService.buyValueAddedServiceByRewardScore(phoneNo, memberDto.getData().getInvitationCode(), rewardScore, startTime, endTime, name, type, memberValueAddedInfoDto);
         return ServiceResult.newSuccess();
     }
 
@@ -267,7 +279,7 @@ public class MemberServiceImpl implements MemberService {
         Double rewardScore = getRewardScore(validityDurationType);
         String name = getRewardName(validityDurationType);
         // 查询会员积分
-        ServiceResult<MemberDto> memberDto = getMemberInfo(phoneNo);
+        ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
         if(memberDto.getData().getRewardScore() - rewardScore < 0){
             return ServiceResult.newFailure("积分不够");
         }
@@ -283,7 +295,7 @@ public class MemberServiceImpl implements MemberService {
             startTime = memberDto.getData().getMemberStartTime();
         }
         // 积分购买会员
-        memberInfoService.buyMemberByRewardScore(phoneNo, rewardScore, startTime, endTime, name);
+        memberInfoService.buyMemberByRewardScore(phoneNo,memberDto.getData().getInvitationCode(), rewardScore, startTime, endTime, name);
         return ServiceResult.newSuccess();
     }
 
