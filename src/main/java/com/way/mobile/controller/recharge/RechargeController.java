@@ -1,7 +1,9 @@
 package com.way.mobile.controller.recharge;
 
+import com.alibaba.fastjson.JSON;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
+import com.way.common.util.ResponseUtils;
 import com.way.mobile.service.member.MemberService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 功能描述：充值Controller
@@ -120,4 +123,29 @@ public class RechargeController {
         return serviceResult;
     }
 
+    /**
+     * 支付回调
+     */
+    @RequestMapping(value = "BeeCloudCallBack", method = RequestMethod.POST)
+    public void BeeCloudCallBack(HttpServletRequest request, HttpServletResponse response, String billNo) {
+        try {
+            // 验签
+            if (StringUtils.isEmpty(billNo)) {
+                WayLogger.error("获得生成合同后的服务费协议失败............", "参数借款编号为空");
+                ResponseUtils.beeCloudResponse(response, "fail");
+                return;
+            }
+            // 解析入库
+
+
+            // 异步推送订单信息
+            asyncPushOrderInfoService.pushOrderInfo(billNo);
+
+            response.getWriter().write(JSON.toJSONString("success"));
+            response.getWriter().flush();
+        } catch (Exception e) {
+            WayLogger.error("入库失败", "", e);
+            ResponseUtils.beeCloudResponse(response, "fail");
+        }
+    }
 }
