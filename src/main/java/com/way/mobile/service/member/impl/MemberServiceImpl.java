@@ -18,6 +18,7 @@ import com.way.member.valueAdded.dto.MemberValueAddedInfoDto;
 import com.way.member.valueAdded.service.MemberValueAddedInfoService;
 import com.way.member.withdrawal.dto.WithdrawalInfoDto;
 import com.way.mobile.service.member.MemberService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -326,7 +327,7 @@ public class MemberServiceImpl implements MemberService {
         memberOrderInfoDto.setOrderNumber(orderNumber);
         memberOrderInfoDto.setPhoneNo(phoneNo);
         memberOrderInfoDto.setType(Integer.valueOf(type));
-        memberOrderInfoDto.setValidityDurationType(null != validityDurationType ? Integer.valueOf(validityDurationType) : null);
+        memberOrderInfoDto.setValidityDurationType(StringUtils.isBlank(validityDurationType) ? null : Integer.valueOf(validityDurationType));
         memberOrderInfoDto.setAmount(amount);
         memberOrderInfoDto.setStatus(0);
         memberOrderInfoDto.setCreateTime(new Date());

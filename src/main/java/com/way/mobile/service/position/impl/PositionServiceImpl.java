@@ -186,13 +186,10 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public ServiceResult<Object> getMemberHistoryPositions(String phoneNo, String friendPhoneNo, String startTime, String endTime) {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        Date now = new Date();
         // 查询用户信息
         ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
         // 判断用户是否开通增值服务
-        if("2".equals(memberDto.getData().getValueAddedService()) || null == memberDto.getData().getValueAddedServiceStartTime()
-                || null == memberDto.getData().getValueAddedServiceEndTime() || now.after(memberDto.getData().getValueAddedServiceStartTime())
-                ||memberDto.getData().getValueAddedServiceEndTime().after(now)){
+        if("2".equals(memberDto.getData().getTrajectoryService())){
             return ServiceResult.newFailure("您没有开通增值服务");
         }
         // 如果被查询用户不是自己
@@ -205,10 +202,7 @@ public class PositionServiceImpl implements PositionService {
             // 判断用户是否开通增值服务
             ServiceResult<MemberDto> searchMemberDto = memberService.getMemberInfo(phoneNo);
             // 判断用户是否开通增值服务
-            if(null== searchMemberDto.getData() ||"2".equals(searchMemberDto.getData().getValueAddedService())
-                    || null == searchMemberDto.getData().getValueAddedServiceStartTime() || null == searchMemberDto.getData().getValueAddedServiceEndTime()
-                    || now.after(searchMemberDto.getData().getValueAddedServiceStartTime())
-                    ||searchMemberDto.getData().getValueAddedServiceEndTime().after(now)){
+            if(null== searchMemberDto.getData() ||"2".equals(searchMemberDto.getData().getTrajectoryService())){
                 return ServiceResult.newFailure("该用户没有开通增值服务");
             }
             // 查询好友轨迹

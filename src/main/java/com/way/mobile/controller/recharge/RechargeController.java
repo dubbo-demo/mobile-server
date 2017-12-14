@@ -1,6 +1,7 @@
 package com.way.mobile.controller.recharge;
 
 import com.alibaba.fastjson.JSON;
+import com.way.base.beeCloud.dto.BeeCloudMessageDetailDto;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
 import com.way.common.util.ResponseUtils;
@@ -127,11 +128,36 @@ public class RechargeController {
      * 支付回调
      */
     @RequestMapping(value = "BeeCloudCallBack", method = RequestMethod.POST)
-    public void BeeCloudCallBack(HttpServletRequest request, HttpServletResponse response, String billNo) {
+    public void BeeCloudCallBack(HttpServletRequest request, HttpServletResponse response, BeeCloudMessageDetailDto message_detail) {
         try {
             // 验签
-            if (StringUtils.isEmpty(billNo)) {
-                WayLogger.error("获得生成合同后的服务费协议失败............", "参数借款编号为空");
+            if (StringUtils.isBlank(message_detail.getTransaction_id())) {
+                WayLogger.error("微信交易号为空");
+                ResponseUtils.beeCloudResponse(response, "fail");
+                return;
+            }
+            if (StringUtils.isBlank(message_detail.getOut_trade_no())) {
+                WayLogger.error("商家内部交易号为空");
+                ResponseUtils.beeCloudResponse(response, "fail");
+                return;
+            }
+            if (StringUtils.isBlank(message_detail.getTotal_fee())) {
+                WayLogger.error("商品总价（单位为分）为空");
+                ResponseUtils.beeCloudResponse(response, "fail");
+                return;
+            }
+            if (StringUtils.isBlank(message_detail.getCash_fee())) {
+                WayLogger.error("现金付款额为空");
+                ResponseUtils.beeCloudResponse(response, "fail");
+                return;
+            }
+            if (StringUtils.isBlank(message_detail.getAppid())) {
+                WayLogger.error("买家的openid为空");
+                ResponseUtils.beeCloudResponse(response, "fail");
+                return;
+            }
+            if ("f40dfec0-1a82-47c9-83a3-847735097111".equals(message_detail.getAppid())) {
+                WayLogger.error("买家的openid有误");
                 ResponseUtils.beeCloudResponse(response, "fail");
                 return;
             }
@@ -139,7 +165,7 @@ public class RechargeController {
 
 
             // 异步推送订单信息
-            asyncPushOrderInfoService.pushOrderInfo(billNo);
+//            asyncPushOrderInfoService.pushOrderInfo(billNo);
 
             response.getWriter().write(JSON.toJSONString("success"));
             response.getWriter().flush();

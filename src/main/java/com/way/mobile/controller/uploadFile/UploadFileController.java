@@ -2,7 +2,6 @@ package com.way.mobile.controller.uploadFile;
 
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
-import com.way.mobile.common.util.TokenJedisUtils;
 import com.way.mobile.service.uploadFile.UploadFileService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +37,11 @@ public class UploadFileController {
     @RequestMapping(value = "/uploadHeadPic", method = RequestMethod.POST)
     @ResponseBody
     public ServiceResult<Object> uploadHeadPic(@ModelAttribute MultipartFile file, HttpServletRequest request){
-        String phoneNo = "";
+//        String phoneNo = (String) request.getAttribute("phoneNo");
+        String phoneNo = "15651010836";
         String fileId = "";
         try {
             ServiceResult result = ServiceResult.newSuccess();
-            // 获取用户手机号
-            phoneNo = TokenJedisUtils.getMemberIdByToken(request.getParameter("token"));
             // 校验参数
             if (StringUtils.isBlank(phoneNo) || null == file ) {
                 return ServiceResult.newFailure("必传参数不能为空");
