@@ -2,11 +2,14 @@ package com.way.mobile.service.member.impl;
 
 import com.way.common.constant.Constants;
 import com.way.common.result.ServiceResult;
+import com.way.common.util.BeanUtils;
 import com.way.common.util.DateUtils;
 import com.way.member.friend.dto.FriendsInfoDto;
 import com.way.member.friend.service.FriendsInfoService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.service.MemberInfoService;
+import com.way.member.order.dto.MemberOrderInfoDto;
+import com.way.member.order.service.MemberOrderInfoService;
 import com.way.member.recharge.dto.RechargeInfoDto;
 import com.way.member.recharge.service.RechargeInfoService;
 import com.way.member.rewardScore.dto.RewardScoreDto;
@@ -48,6 +51,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Autowired
     private MemberValueAddedInfoService memberValueAddedInfoService;
+
+    @Autowired
+    private MemberOrderInfoService memberOrderInfoService;
+
 
     /**
      * 校验邀请人手机号是否存在
@@ -267,6 +274,72 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
+     * APP获取购买订单号
+     * @param phoneNo
+     * @param type
+     * @param validityDurationType
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> getOrderNumber(String phoneNo, String type, String validityDurationType) {
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        Map<String, String> map = new HashMap<String, String>();
+        String orderNumber = BeanUtils.getUUID();
+        // 计算出需要的费用
+        Double amount = 0.0;
+        if("0".equals(type)){
+            amount = 30.0;
+        }else{
+            // 查询会员积分
+            ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
+            if(!memberDto.getData().getMemberType().equals("2")){
+                return ServiceResult.newFailure("您还不是正式会员");
+            }
+            // 根据增值服务类型获取用户增值服务信息
+            MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(phoneNo, type);
+            int day = 0;
+            // 获取增值服务有效期开始时间
+            Date startTime = new Date();
+            // 获取会员结束时间
+            Date endTime = memberDto.getData().getMemberEndTime();
+            if(null == memberValueAddedInfoDto){
+                // 计算开始时间和结束时间所差的天数
+                day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
+            }
+            if(null != memberValueAddedInfoDto && memberValueAddedInfoDto.getIsOpen() == 1){
+                day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
+                // 判断增值服务是否需要购买
+                if(day == 0){
+                    return ServiceResult.newFailure("增值服务已达最大使用期限，无需购买");
+                }
+            }
+            if("1".equals(type)){
+                amount = day * 0.5;
+            }
+            if("2".equals(type)){
+                amount = day * 1.0;
+            }
+        }
+
+        // 生成订单信息
+        MemberOrderInfoDto memberOrderInfoDto = new MemberOrderInfoDto();
+        memberOrderInfoDto.setOrderNumber(orderNumber);
+        memberOrderInfoDto.setPhoneNo(phoneNo);
+        memberOrderInfoDto.setType(Integer.valueOf(type));
+        memberOrderInfoDto.setValidityDurationType(null != validityDurationType ? Integer.valueOf(validityDurationType) : null);
+        memberOrderInfoDto.setAmount(amount);
+        memberOrderInfoDto.setStatus(0);
+        memberOrderInfoDto.setCreateTime(new Date());
+        memberOrderInfoDto.setModifyTime(new Date());
+        // 保存订单信息
+        memberOrderInfoService.saveMemberOrderInfo(memberOrderInfoDto);
+        map.put("orderNumber", orderNumber);
+        map.put("amount", String.valueOf(amount));
+        serviceResult.setData(map);
+        return serviceResult;
+    }
+
+    /**
      * 充值购买会员
      * @param phoneNo
      * @param validityDurationType
@@ -297,16 +370,6 @@ public class MemberServiceImpl implements MemberService {
         // 积分购买会员
         memberInfoService.buyMemberByRewardScore(phoneNo,memberDto.getData().getInvitationCode(), rewardScore, startTime, endTime, name);
         return ServiceResult.newSuccess();
-    }
-
-    /**
-     * 充值购买增值服务
-     * @param phoneNo
-     * @return
-     */
-    @Override
-    public ServiceResult<Object> buyValueAddedServiceByRecharge(String phoneNo) {
-        return null;
     }
 
     private String getRewardName(String validityDurationType) {

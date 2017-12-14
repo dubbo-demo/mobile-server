@@ -54,6 +54,42 @@ public class RechargeController {
     }
 
     /**
+     * APP获取购买订单号
+     * @param request
+     * @param type
+     * @param validityDurationType
+     * @return
+     */
+    @RequestMapping(value = "/getOrderNumber", method = RequestMethod.POST)
+    @ResponseBody
+    public ServiceResult<Object> getOrderNumber(HttpServletRequest request, String type, String validityDurationType){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 校验token
+            if (StringUtils.isBlank(type)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 校验token
+            if ("0".equals(type) && StringUtils.isBlank(validityDurationType)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // APP获取购买订单号
+            serviceResult = memberService.getOrderNumber(phoneNo, type, validityDurationType);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "APP获取购买订单号失败," + "请求参数：phoneNo：" + phoneNo + "type：" + type + "validityDurationType：" + validityDurationType);
+        } finally {
+            WayLogger.access("APP获取购买订单号：/getOrderNumber.do,参数：phoneNo：" + phoneNo + "type：" + type + "validityDurationType：" + validityDurationType);
+        }
+        return serviceResult;
+    }
+
+    /**
      * 充值购买会员
      * @param request
      * @param validityDurationType
@@ -80,32 +116,6 @@ public class RechargeController {
             WayLogger.error(e, "充值购买会员失败," + "请求参数：phoneNo：" + phoneNo + "validityDurationType：" + validityDurationType);
         } finally {
             WayLogger.access("充值购买会员：/buyMemberByRecharge.do,参数：phoneNo：" + phoneNo + "validityDurationType：" + validityDurationType);
-        }
-        return serviceResult;
-    }
-
-    /**
-     * 充值购买增值服务
-     * @param request
-     * @return
-     */
-    @RequestMapping(value = "/buyValueAddedServiceByRecharge", method = RequestMethod.POST)
-    @ResponseBody
-    public ServiceResult<Object> buyValueAddedServiceByRecharge(HttpServletRequest request){
-        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
-        try {
-            // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
-                return ServiceResult.newFailure("必传参数不能为空");
-            }
-            // 充值购买增值服务
-            serviceResult = memberService.buyValueAddedServiceByRecharge(phoneNo);
-        } catch (Exception e) {
-            serviceResult.setCode(ServiceResult.ERROR_CODE);
-            WayLogger.error(e, "充值购买增值服务失败," + "请求参数：phoneNo：" + phoneNo);
-        } finally {
-            WayLogger.access("充值购买增值服务：/buyValueAddedServiceByRecharge.do,参数：phoneNo：" + phoneNo);
         }
         return serviceResult;
     }

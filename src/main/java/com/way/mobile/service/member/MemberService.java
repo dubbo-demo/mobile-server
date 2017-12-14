@@ -93,6 +93,15 @@ public interface MemberService {
     ServiceResult<Object> getRechargeInfo(String phoneNo, Integer pageNumber);
 
     /**
+     * APP获取购买订单号
+     * @param phoneNo
+     * @param type
+     * @param validityDurationType
+     * @return
+     */
+    ServiceResult<Object> getOrderNumber(String phoneNo, String type, String validityDurationType);
+
+    /**
      * 充值购买会员
      * @param phoneNo
      * @param validityDurationType
@@ -100,10 +109,4 @@ public interface MemberService {
      */
     ServiceResult<Object> buyMemberByRecharge(String phoneNo, String validityDurationType);
 
-    /**
-     * 充值购买增值服务
-     * @param phoneNo
-     * @return
-     */
-    ServiceResult<Object> buyValueAddedServiceByRecharge(String phoneNo);
 }
