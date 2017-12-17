@@ -254,6 +254,21 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
+     * 获取积分提现记录
+     * @param phoneNo
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> getWithdrawalRewardScoreInfo(String phoneNo) {
+        ServiceResult serviceResult = ServiceResult.newSuccess();
+        Map<String, Object> map = new HashMap<String, Object>();
+        List<WithdrawalInfoDto> withdrawalInfoDto = memberInfoService.getWithdrawalRewardScoreInfo(phoneNo);
+        map.put("info", withdrawalInfoDto);
+        serviceResult.setData(map);
+        return serviceResult;
+    }
+
+    /**
      * 查看充值记录
      * @param phoneNo
      * @param pageNumber
@@ -318,7 +333,7 @@ public class MemberServiceImpl implements MemberService {
                 amount = day * 0.5;
             }
             if("2".equals(type)){
-                amount = day * 1.0;
+                amount = day * 0.5;
             }
         }
 
@@ -341,35 +356,70 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
-     * 充值购买会员
+     * 充值购买会员/增值服务
      * @param phoneNo
+     * @param type
      * @param validityDurationType
      * @return
      */
     @Override
-    public ServiceResult<Object> buyMemberByRecharge(String phoneNo, String validityDurationType) {
-
-        // 根据会员有效期类型获取所需积分
-        Double rewardScore = getRewardScore(validityDurationType);
-        String name = getRewardName(validityDurationType);
-        // 查询会员积分
-        ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
-        if(memberDto.getData().getRewardScore() - rewardScore < 0){
-            return ServiceResult.newFailure("积分不够");
-        }
-        // 获取会员有效期开始时间
+    public ServiceResult<Object> buyServiceByRecharge(String phoneNo, Integer type, Integer validityDurationType) {
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        Map<String, String> map = new HashMap<String, String>();
+        // 计算出需要的费用
+        Double amount = 0.0;
+        String name = null;
+        // 获取增值服务有效期开始时间
         Date startTime = new Date();
-        if(null != memberDto.getData().getMemberEndTime()){
-            startTime = memberDto.getData().getMemberEndTime();
+        // 获取会员结束时间
+        Date endTime = null;
+        // 查询会员
+        ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
+        if("0".equals(type)){
+            amount = 30.0;
+            if("1".equals(validityDurationType)){
+                name = "三个月会员";
+                endTime = DateUtils.addMonths(startTime,3);
+            }
+            if("2".equals(validityDurationType)){
+                name = "半年会员";
+                endTime = DateUtils.addMonths(startTime,6);
+            }
+            if("3".equals(validityDurationType)){
+                name = "一年会员";
+                endTime = DateUtils.addMonths(startTime,12);
+            }
+        }else{
+            if(!memberDto.getData().getMemberType().equals("2")){
+                return ServiceResult.newFailure("您还不是正式会员");
+            }
+            // 根据增值服务类型获取用户增值服务信息
+            MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(phoneNo, String.valueOf(type));
+            int day = 0;
+            // 获取会员结束时间
+            endTime = memberDto.getData().getMemberEndTime();
+            if(null == memberValueAddedInfoDto){
+                // 计算开始时间和结束时间所差的天数
+                day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
+            }
+            if(null != memberValueAddedInfoDto && memberValueAddedInfoDto.getIsOpen() == 1){
+                day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
+                // 判断增值服务是否需要购买
+                if(day == 0){
+                    return ServiceResult.newFailure("增值服务已达最大使用期限，无需购买");
+                }
+            }
+            if("1".equals(type)){
+                amount = day * 0.5;
+                name = day + "天轨迹回放服务";
+            }
+            if("2".equals(type)){
+                amount = day * 0.5;
+                name = day + "天电子围栏服务";
+            }
         }
-        // 根据会员类型计算充值后会员有效期
-        Date endTime = DateUtils.addDays(DateUtils.addWeeks(startTime,3), 1);
-
-        if(null != memberDto.getData().getMemberStartTime()){
-            startTime = memberDto.getData().getMemberStartTime();
-        }
-        // 积分购买会员
-        memberInfoService.buyMemberByRewardScore(phoneNo,memberDto.getData().getInvitationCode(), rewardScore, startTime, endTime, name);
+        // 充值购买会员/增值服务
+        memberInfoService.buyServiceByRecharge(phoneNo, String.valueOf(type), memberDto.getData().getInvitationCode(), amount, startTime, endTime, name);
         return ServiceResult.newSuccess();
     }
 

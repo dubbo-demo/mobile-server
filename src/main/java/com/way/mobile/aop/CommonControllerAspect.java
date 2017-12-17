@@ -80,37 +80,7 @@ public class CommonControllerAspect {
         String phoneNo = null;
         HttpServletRequest paramRequest = null;
         if (null != params && params.length > 0) {
-        	// 文件上传相关请求
-            if (params[0] instanceof MultipartHttpServletRequest) {
-                MultipartHttpServletRequest mulReq = (DefaultMultipartHttpServletRequest) params[0];
-                // 请求对象参数
-                paramRequest = mulReq;
-                // 获取token
-                newToken = mulReq.getParameter("token");
-                if (null == newToken) {
-					WayLogger.debug("token是空");
-                    return ServiceResult.newFailure(Constants.INVALID, "token不能为空");
-                }
-
-                if (newToken.length() < 30) {
-					WayLogger.debug("无效的token");
-                    return ServiceResult.newFailure(Constants.INVALID, "无效的token");
-                }
-                // 验证token
-                LoginTokenInfo tokenInfo = TokenJedisUtils.getTokenInfo(newToken);
-                if(tokenInfo == null){
-                    return ServiceResult.newFailure(Constants.TOKEN_EXPIRED_OVERTIME, "账号已过期，请重新登录");
-                }
-                if(tokenInfo.getStatus() == Constants.INVALID){
-                    return ServiceResult.newFailure(Constants.OKEN_EXPIRED_OTHERLOGIN, "该账户已在其他设备登录，请注意安全");
-                }
-                mulReq.setAttribute("phoneNo", tokenInfo.getPhoneNo());
-                // 校验文件大小
-				ServiceResult serviceResult = verificationFile(mulReq);
-                if(Constants.INVALID == serviceResult.getCode()){
-                	 return serviceResult;
-                }
-            } else if (params[0] instanceof HttpServletRequest) {
+            if (params[0] instanceof HttpServletRequest) {
                 HttpServletRequest request = (HttpServletRequest) params[0];
                 // 请求对象参数
                 paramRequest = request;
@@ -144,11 +114,40 @@ public class CommonControllerAspect {
                     }
                     paramRequest.setAttribute("phoneNo", tokenInfo.getPhoneNo());
                 }
+            // 文件上传相关请求
+            } else if (params[1] instanceof MultipartHttpServletRequest) {
+                MultipartHttpServletRequest mulReq = (DefaultMultipartHttpServletRequest) params[1];
+                // 请求对象参数
+                paramRequest = mulReq;
+                // 获取token
+                newToken = mulReq.getParameter("token");
+                if (null == newToken) {
+                    WayLogger.debug("token是空");
+                    return ServiceResult.newFailure(Constants.INVALID, "token不能为空");
+                }
+
+                if (newToken.length() < 30) {
+                    WayLogger.debug("无效的token");
+                    return ServiceResult.newFailure(Constants.INVALID, "无效的token");
+                }
+                // 验证token
+                LoginTokenInfo tokenInfo = TokenJedisUtils.getTokenInfo(newToken);
+                if(tokenInfo == null){
+                    return ServiceResult.newFailure(Constants.TOKEN_EXPIRED_OVERTIME, "账号已过期，请重新登录");
+                }
+                if(tokenInfo.getStatus() == Constants.INVALID){
+                    return ServiceResult.newFailure(Constants.OKEN_EXPIRED_OTHERLOGIN, "该账户已在其他设备登录，请注意安全");
+                }
+                mulReq.setAttribute("phoneNo", tokenInfo.getPhoneNo());
+                // 校验文件大小
+//                ServiceResult serviceResult = verificationFile(mulReq);
+//                if(Constants.INVALID == serviceResult.getCode()){
+//                    return serviceResult;
+//                }
+            }
 //            if (null != newToken && null != memberId) {
 //                TokenJedisUtils.expireTokenInfo(newToken, memberId);
 //            }
-            }
-
         }
         
 		if (paramRequest != null) {

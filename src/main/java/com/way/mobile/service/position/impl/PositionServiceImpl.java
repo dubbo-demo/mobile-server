@@ -200,18 +200,22 @@ public class PositionServiceImpl implements PositionService {
                 return ServiceResult.newFailure("该用户不是您的好友");
             }
             // 判断用户是否开通增值服务
-            ServiceResult<MemberDto> searchMemberDto = memberService.getMemberInfo(phoneNo);
+            ServiceResult<MemberDto> searchMemberDto = memberService.getMemberInfo(friendPhoneNo);
             // 判断用户是否开通增值服务
             if(null== searchMemberDto.getData() ||"2".equals(searchMemberDto.getData().getTrajectoryService())){
                 return ServiceResult.newFailure("该用户没有开通增值服务");
             }
             // 查询好友轨迹
             List<PositionInfoDto> positionInfoDtos = positionInfoService.getMemberHistoryPositions(friendPhoneNo, startTime, endTime);
-            serviceResult.setData(positionInfoDtos);
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("positions", positionInfoDtos);
+            serviceResult.setData(map);
         }else{
             // 查询自己轨迹
             List<PositionInfoDto> positionInfoDtos =  positionInfoService.getMemberHistoryPositions(phoneNo, startTime, endTime);
-            serviceResult.setData(positionInfoDtos);
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("positions", positionInfoDtos);
+            serviceResult.setData(map);
         }
         return serviceResult;
     }

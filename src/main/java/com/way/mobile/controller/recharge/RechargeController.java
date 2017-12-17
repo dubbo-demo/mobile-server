@@ -1,20 +1,27 @@
 package com.way.mobile.controller.recharge;
 
 import com.alibaba.fastjson.JSON;
+import com.way.base.beeCloud.dto.BeeCloudDto;
 import com.way.base.beeCloud.dto.BeeCloudMessageDetailDto;
+import com.way.base.beeCloud.service.BeeCloudMessageDetailService;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
 import com.way.common.util.ResponseUtils;
+import com.way.common.util.WayMD5;
+import com.way.mobile.service.member.AsyncPushBeeCloudMessageService;
 import com.way.mobile.service.member.MemberService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
+import java.util.Enumeration;
 
 /**
  * 功能描述：充值Controller
@@ -26,6 +33,12 @@ public class RechargeController {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private BeeCloudMessageDetailService beeCloudMessageDetailService;
+
+    @Autowired
+    private AsyncPushBeeCloudMessageService asyncPushBeeCloudMessageService;
 
     /**
      * 查看充值记录
@@ -94,43 +107,31 @@ public class RechargeController {
     }
 
     /**
-     * 充值购买会员
-     * @param request
-     * @param validityDurationType
-     * @return
-     */
-    @RequestMapping(value = "/buyMemberByRecharge", method = RequestMethod.POST)
-    @ResponseBody
-    public ServiceResult<Object> buyMemberByRecharge(HttpServletRequest request, String validityDurationType){
-        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
-        try {
-            // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
-                return ServiceResult.newFailure("必传参数不能为空");
-            }
-            // 校验token
-            if (StringUtils.isBlank(validityDurationType)) {
-                return ServiceResult.newFailure("必传参数不能为空");
-            }
-            // 充值购买会员
-            serviceResult = memberService.buyMemberByRecharge(phoneNo, validityDurationType);
-        } catch (Exception e) {
-            serviceResult.setCode(ServiceResult.ERROR_CODE);
-            WayLogger.error(e, "充值购买会员失败," + "请求参数：phoneNo：" + phoneNo + "validityDurationType：" + validityDurationType);
-        } finally {
-            WayLogger.access("充值购买会员：/buyMemberByRecharge.do,参数：phoneNo：" + phoneNo + "validityDurationType：" + validityDurationType);
-        }
-        return serviceResult;
-    }
-
-    /**
      * 支付回调
      */
-    @RequestMapping(value = "BeeCloudCallBack", method = RequestMethod.POST)
-    public void BeeCloudCallBack(HttpServletRequest request, HttpServletResponse response, BeeCloudMessageDetailDto message_detail) {
+    @RequestMapping(value = "beeCloudCallBack", method = RequestMethod.POST)
+    public void beeCloudCallBack(HttpServletRequest request, HttpServletResponse response, @RequestBody BeeCloudDto<BeeCloudMessageDetailDto> dto) {
+        WayLogger.error(dto.toString());
         try {
+            if(dto == null){
+                WayLogger.error("入参为空");
+                ResponseUtils.beeCloudResponse(response, "fail");
+                return;
+            }
             // 验签
+            String md5 = WayMD5.encode(dto.getApp_id() + dto.getTransaction_id() + dto.getTransaction_type() + dto.getChannel_type() +
+                    dto.getTransaction_fee() + dto.getMaster_secret());
+            if(!md5.equals(dto.getSignature())){
+                WayLogger.error("验签失败");
+                ResponseUtils.beeCloudResponse(response, "fail");
+                return;
+            }
+            BeeCloudMessageDetailDto message_detail = dto.getMessage_detail();
+            if(message_detail == null){
+                WayLogger.error("入参为空");
+                ResponseUtils.beeCloudResponse(response, "fail");
+                return;
+            }
             if (StringUtils.isBlank(message_detail.getTransaction_id())) {
                 WayLogger.error("微信交易号为空");
                 ResponseUtils.beeCloudResponse(response, "fail");
@@ -162,11 +163,22 @@ public class RechargeController {
                 return;
             }
             // 解析入库
+            // 查询BeeCloud回参记录
+            BeeCloudMessageDetailDto record = beeCloudMessageDetailService.getBeeCloudMessageDetailDto(message_detail);
+            if(null == record){
+                message_detail.setFlag(2);
+                message_detail.setCreateTime(new Date());
+                message_detail.setModifyTime(new Date());
+                // 保存BeeCloud回参信息
+                beeCloudMessageDetailService.saveBeeCloudMessageDetailDto(message_detail);
 
-
-            // 异步推送订单信息
-//            asyncPushOrderInfoService.pushOrderInfo(billNo);
-
+                // 异步推送BeeCloud回参信息
+                asyncPushBeeCloudMessageService.pushBeeCloudMessage(message_detail);
+            }
+            if(null != record && 2 == record.getFlag()){
+                // 异步推送BeeCloud回参信息
+                asyncPushBeeCloudMessageService.pushBeeCloudMessage(message_detail);
+            }
             response.getWriter().write(JSON.toJSONString("success"));
             response.getWriter().flush();
         } catch (Exception e) {
@@ -174,4 +186,5 @@ public class RechargeController {
             ResponseUtils.beeCloudResponse(response, "fail");
         }
     }
+
 }

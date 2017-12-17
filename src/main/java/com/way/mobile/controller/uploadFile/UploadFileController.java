@@ -37,8 +37,8 @@ public class UploadFileController {
     @RequestMapping(value = "/uploadHeadPic", method = RequestMethod.POST)
     @ResponseBody
     public ServiceResult<Object> uploadHeadPic(@ModelAttribute MultipartFile file, HttpServletRequest request){
-//        String phoneNo = (String) request.getAttribute("phoneNo");
-        String phoneNo = "15651010836";
+        String phoneNo = (String) request.getAttribute("phoneNo");
+//        String phoneNo = "15651010836";
         String fileId = "";
         try {
             ServiceResult result = ServiceResult.newSuccess();

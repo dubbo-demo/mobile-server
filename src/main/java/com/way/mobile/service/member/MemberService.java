@@ -102,11 +102,18 @@ public interface MemberService {
     ServiceResult<Object> getOrderNumber(String phoneNo, String type, String validityDurationType);
 
     /**
-     * 充值购买会员
+     * 充值购买会员/增值服务
      * @param phoneNo
+     * @param type
      * @param validityDurationType
      * @return
      */
-    ServiceResult<Object> buyMemberByRecharge(String phoneNo, String validityDurationType);
+    ServiceResult<Object> buyServiceByRecharge(String phoneNo, Integer type, Integer validityDurationType);
 
+    /**
+     * 获取积分提现记录
+     * @param phoneNo
+     * @return
+     */
+    ServiceResult<Object> getWithdrawalRewardScoreInfo(String phoneNo);
 }

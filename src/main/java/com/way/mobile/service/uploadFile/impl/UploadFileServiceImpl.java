@@ -65,6 +65,7 @@ public class UploadFileServiceImpl implements UploadFileService {
             }else{
                 String originalFilename = file.getOriginalFilename();
                 String[] fileItems = originalFilename.split("\\.");
+                dto.setPhoneNo(phoneNo);// 手机号
                 // 文件名称
                 dto.setFileName(originalFilename);// 文件名
                 if (fileItems.length >= 2) {
@@ -73,12 +74,14 @@ public class UploadFileServiceImpl implements UploadFileService {
                 }
                 dto.setFileSize(file.getSize());// 文件大小
                 dto.setFileStream(file.getBytes());// 文件二进制流
+                fileUuid = BeanUtils.getUUID();
+                dto.setFileUuid(fileUuid);// 文件UUID
                 dto.setModifyTime(new Date());// 修改时间
                 // 根据手机号更新用户头像
                 fileInfoService.updateFileInfo(dto);
-                fileUuid = dto.getFileUuid();
+                // 根据手机号更新用户头像id
+                memberInfoService.updateHeadPicIdByPhoneNo(phoneNo, fileUuid);
             }
-
             return fileUuid;
         } catch (Exception e) {
             WayLogger.error(e, "文件上传异常,入参:{}", phoneNo);
