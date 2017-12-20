@@ -113,7 +113,8 @@ public interface MemberService {
     /**
      * 获取积分提现记录
      * @param phoneNo
+     * @param pageNumber
      * @return
      */
-    ServiceResult<Object> getWithdrawalRewardScoreInfo(String phoneNo);
+    ServiceResult<Object> getWithdrawalRewardScoreInfo(String phoneNo, Integer pageNumber);
 }

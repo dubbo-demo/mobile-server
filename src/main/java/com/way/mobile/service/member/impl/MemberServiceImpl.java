@@ -130,7 +130,7 @@ public class MemberServiceImpl implements MemberService {
         // 查询总页数
         Integer count = rewardScoreService.getRewardScoreDetailCount(phoneNo);
         // 分页查询
-        List<RewardScoreDto> details = rewardScoreService.getRewardScoreDetailList(phoneNo, pageNumber - 1);
+        List<RewardScoreDto> details = rewardScoreService.getRewardScoreDetailList(phoneNo, (pageNumber - 1) * 10);
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("totalRewardScore", memberDto.getData().getRewardScore());
         data.put("pageCount", count);
@@ -256,15 +256,21 @@ public class MemberServiceImpl implements MemberService {
     /**
      * 获取积分提现记录
      * @param phoneNo
+     * @param pageNumber
      * @return
      */
     @Override
-    public ServiceResult<Object> getWithdrawalRewardScoreInfo(String phoneNo) {
+    public ServiceResult<Object> getWithdrawalRewardScoreInfo(String phoneNo, Integer pageNumber) {
         ServiceResult serviceResult = ServiceResult.newSuccess();
-        Map<String, Object> map = new HashMap<String, Object>();
-        List<WithdrawalInfoDto> withdrawalInfoDto = memberInfoService.getWithdrawalRewardScoreInfo(phoneNo);
-        map.put("info", withdrawalInfoDto);
-        serviceResult.setData(map);
+        // 查询总页数
+        Integer count = memberInfoService.getWithdrawalRewardScoreCount(phoneNo);
+        // 分页查询
+        List<WithdrawalInfoDto> details = memberInfoService.getWithdrawalRewardScoreInfo(phoneNo, (pageNumber - 1) * 10);
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("pageCount", count);
+        data.put("pageNumber", pageNumber);
+        data.put("details", details);
+        serviceResult.setData(data);
         return serviceResult;
     }
 
@@ -280,7 +286,7 @@ public class MemberServiceImpl implements MemberService {
         // 查询总页数
         Integer count = rechargeInfoService.getRechargeInfoCount(phoneNo);
         // 分页查询
-        List<RechargeInfoDto> details = rechargeInfoService.getRechargeInfoList(phoneNo, pageNumber - 1);
+        List<RechargeInfoDto> details = rechargeInfoService.getRechargeInfoList(phoneNo, (pageNumber - 1) * 10);
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("pageCount", count);
         data.put("pageNumber", pageNumber);

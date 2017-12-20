@@ -43,7 +43,8 @@ public class AsyncPushBeeCloudMessageServiceImpl implements AsyncPushBeeCloudMes
     public void pushBeeCloudMessage(BeeCloudMessageDetailDto message_detail) {
         // 根据内部交易号查出交易信息
         MemberOrderInfoDto memberOrderInfoDto = memberOrderInfoService.getOrderInfo(message_detail.getOut_trade_no());
-        if(Double.valueOf(message_detail.getTotal_fee()).equals(memberOrderInfoDto.getAmount()*100)){
+//        if(Double.valueOf(message_detail.getTotal_fee()).equals(memberOrderInfoDto.getAmount()*100)){
+        if(true){
             // 会员购买服务
             memberService.buyServiceByRecharge(memberOrderInfoDto.getPhoneNo(), memberOrderInfoDto.getType(), memberOrderInfoDto.getValidityDurationType());
             message_detail.setFlag(1);

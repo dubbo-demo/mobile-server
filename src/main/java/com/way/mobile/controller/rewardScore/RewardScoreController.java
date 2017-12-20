@@ -186,7 +186,7 @@ public class RewardScoreController {
      */
     @RequestMapping(value = "/getWithdrawalRewardScoreInfo", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> getWithdrawalRewardScoreInfo(HttpServletRequest request){
+    public ServiceResult<Object> getWithdrawalRewardScoreInfo(HttpServletRequest request, Integer pageNumber){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -194,13 +194,16 @@ public class RewardScoreController {
             if (StringUtils.isBlank(phoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
+            if (null == pageNumber) { // 第几页为空
+                pageNumber = 1;
+            }
             // 获取积分提现记录
-            serviceResult = memberService.getWithdrawalRewardScoreInfo(phoneNo);
+            serviceResult = memberService.getWithdrawalRewardScoreInfo(phoneNo, pageNumber);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
-            WayLogger.error(e, "积分提现失败," + "请求参数：phoneNo：" + phoneNo);
+            WayLogger.error(e, "积分提现失败," + "请求参数：phoneNo：" + phoneNo + "pageNumber：" + pageNumber);
         } finally {
-            WayLogger.access("积分提现：/withdrawalRewardScore.do,参数：phoneNo：" + phoneNo);
+            WayLogger.access("积分提现：/withdrawalRewardScore.do,参数：phoneNo：" + phoneNo + "pageNumber：" + pageNumber);
         }
         return serviceResult;
     }

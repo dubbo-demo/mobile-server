@@ -47,7 +47,7 @@ public class DownloadFileController {
             stream.flush();
             stream.close();
         } catch (Exception e) {
-            WayLogger.error("下载图片失败");
+            WayLogger.error(e, "下载图片失败");
         } finally {
             WayLogger.access(IpUtil.getIpAddr(request) + "下载图片：/downLoadPic.do" + ",参数：" + fileId);
 		}
