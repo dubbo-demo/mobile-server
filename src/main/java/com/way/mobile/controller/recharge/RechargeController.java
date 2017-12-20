@@ -6,6 +6,7 @@ import com.way.base.beeCloud.dto.BeeCloudMessageDetailDto;
 import com.way.base.beeCloud.service.BeeCloudMessageDetailService;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
+import com.way.common.util.CommonUtils;
 import com.way.common.util.ResponseUtils;
 import com.way.common.util.WayMD5;
 import com.way.mobile.service.member.AsyncPushBeeCloudMessageService;
@@ -126,7 +127,7 @@ public class RechargeController {
                 ResponseUtils.beeCloudResponse(response, "fail");
                 return;
             }
-            BeeCloudMessageDetailDto message_detail = dto.getMessage_detail();
+            BeeCloudMessageDetailDto message_detail = CommonUtils.transform(dto.getMessage_detail(), BeeCloudMessageDetailDto.class);
             if(message_detail == null){
                 WayLogger.error("入参为空");
                 ResponseUtils.beeCloudResponse(response, "fail");

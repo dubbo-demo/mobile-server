@@ -375,17 +375,17 @@ public class MemberServiceImpl implements MemberService {
         Date endTime = null;
         // 查询会员
         ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
-        if("0".equals(type)){
+        if(0 == type){
             amount = 30.0;
-            if("1".equals(validityDurationType)){
+            if(1 == validityDurationType){
                 name = "三个月会员";
                 endTime = DateUtils.addMonths(startTime,3);
             }
-            if("2".equals(validityDurationType)){
+            if(2 == validityDurationType){
                 name = "半年会员";
                 endTime = DateUtils.addMonths(startTime,6);
             }
-            if("3".equals(validityDurationType)){
+            if(3 == validityDurationType){
                 name = "一年会员";
                 endTime = DateUtils.addMonths(startTime,12);
             }
@@ -409,11 +409,11 @@ public class MemberServiceImpl implements MemberService {
                     return ServiceResult.newFailure("增值服务已达最大使用期限，无需购买");
                 }
             }
-            if("1".equals(type)){
+            if(1 == type){
                 amount = day * 0.5;
                 name = day + "天轨迹回放服务";
             }
-            if("2".equals(type)){
+            if(2 == type){
                 amount = day * 0.5;
                 name = day + "天电子围栏服务";
             }
