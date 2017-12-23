@@ -81,7 +81,8 @@ public class RegistServiceImpl implements RegistService {
 		}
 		// 生成6位随机数
 		Random random = new Random();
-		String code = (random.nextDouble() + "").substring(2, 8);
+//		String code = (random.nextDouble() + "").substring(2, 8).replace("4", "9");
+		String code = "888888";
 		// 验证码存到redis中
 		CacheService.StringKey.set(key, code, RedisRootNameSpace.UnitEnum.FIFTEEN_MIN);
 		return ServiceResult.newSuccess(code);
