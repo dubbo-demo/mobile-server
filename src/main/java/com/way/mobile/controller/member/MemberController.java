@@ -142,4 +142,35 @@ public class MemberController {
         }
         return serviceResult;
     }
+
+    /**
+     * 查看用户增值服务时间
+     * @param request
+     * @param type
+     * @return
+     */
+    @RequestMapping(value = "/getMemberValueAddedTime", method = RequestMethod.POST)
+    @ResponseBody
+    public ServiceResult<Object> getMemberValueAddedTime(HttpServletRequest request, String type){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            // 校验type
+            if (!"1".equals(type) && !"2".equals(type) ) {
+                return ServiceResult.newFailure("必传参数有误");
+            }
+            // 查看用户增值服务时间
+            serviceResult = memberService.getMemberValueAddedTime(phoneNo, type);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "查看用户增值服务时间失败," + "请求参数：phoneNo：" + phoneNo + "type：" + type);
+        } finally {
+            WayLogger.access("查看用户增值服务时间：/getMemberValueAddedTime.do,参数：phoneNo：" + phoneNo + "type：" + type);
+        }
+        return serviceResult;
+    }
 }

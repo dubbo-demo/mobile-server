@@ -429,6 +429,27 @@ public class MemberServiceImpl implements MemberService {
         return ServiceResult.newSuccess();
     }
 
+
+    /**
+     * 查看用户增值服务时间
+     * @param phoneNo
+     * @param type
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> getMemberValueAddedTime(String phoneNo, String type) {
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        Map<String ,Object> data = new HashMap<String ,Object>();
+        // 根据增值服务类型获取用户增值服务信息
+        MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(phoneNo, type);
+        if(null != memberValueAddedInfoDto){
+            data.put("startTime", memberValueAddedInfoDto.getStartTime());
+            data.put("endTime", memberValueAddedInfoDto.getEndTime());
+            serviceResult.setData(data);
+        }
+        return serviceResult;
+    }
+
     private String getRewardName(String validityDurationType) {
         if("1".equals(validityDurationType)){
             return "三个月";

@@ -117,4 +117,12 @@ public interface MemberService {
      * @return
      */
     ServiceResult<Object> getWithdrawalRewardScoreInfo(String phoneNo, Integer pageNumber);
+
+    /**
+     * 查看用户增值服务时间
+     * @param phoneNo
+     * @param type
+     * @return
+     */
+    ServiceResult<Object> getMemberValueAddedTime(String phoneNo, String type);
 }
