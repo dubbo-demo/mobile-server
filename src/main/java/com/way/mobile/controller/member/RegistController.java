@@ -150,8 +150,8 @@ public class RegistController {
 	 */
 	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
 	@ResponseBody
-	public ServiceResult<String> resetPassword(HttpServletRequest request, @ModelAttribute MemberDto memberDto) {
-		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
+	public ServiceResult<MemberDto> resetPassword(HttpServletRequest request, @ModelAttribute MemberDto memberDto) {
+		ServiceResult<MemberDto> serviceResult = ServiceResult.newSuccess();
 		try {
 			// 校验参数
 			if (StringUtils.isEmpty(memberDto.getPhoneNo()) || StringUtils.isEmpty(memberDto.getPassword())
@@ -163,6 +163,11 @@ public class RegistController {
 			if (serviceResult.getCode() == ServiceResult.SUCCESS_CODE) {
 				// 密码修改成功，删除redis中登录失败的记录
 				CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhoneNo());
+				// 生成新token
+				String newToken = TokenJedisUtils.putTokenInfoExpire(memberDto.getPhoneNo());
+				// dto
+				memberDto.setToken(newToken);
+				serviceResult.setData(memberDto);
 			}
 		} catch (DataValidateException e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);

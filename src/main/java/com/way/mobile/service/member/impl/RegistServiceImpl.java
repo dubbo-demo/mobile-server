@@ -1,7 +1,6 @@
 package com.way.mobile.service.member.impl;
 
 import com.way.common.cache.RedisRootNameSpace;
-import com.way.common.constant.Constants;
 import com.way.common.exception.DataValidateException;
 import com.way.common.redis.CacheService;
 import com.way.common.result.ServiceResult;
@@ -119,9 +118,9 @@ public class RegistServiceImpl implements RegistService {
 	/**
 	 * 忘记密码
 	 * @param memberDto
-	 * @throws DataValidateException 
+	 * @throws DataValidateException
 	 */
-	public  ServiceResult<String> resetPassword(MemberDto memberDto) throws DataValidateException {
+	public ServiceResult<MemberDto> resetPassword(MemberDto memberDto) throws DataValidateException {
 		String phoneNo = memberDto.getPhoneNo();
 		// 校验手机号
 		if (!Validater.isMobileNew(phoneNo))

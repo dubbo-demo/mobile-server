@@ -93,7 +93,7 @@ public class PositionServiceImpl implements PositionService {
                 // 根据被授权开始时间、被授权结束时间、被授权星期计算出是否被授权可见
                 String[] authorizedWeeks = friendsInfoDto.getAuthorizedWeeks().split(",");
                 if(friendsInfoDto.getIsAuthorizedVisible() == 1 && ArrayUtils.contains(authorizedWeeks,week) &&
-                        now.compareTo(friendsInfoDto.getAuthorizedAccreditStartTime()) >= 0 && now.compareTo(friendsInfoDto.getAuthorizedAccreditStartTime()) < 0){
+                        now.compareTo(friendsInfoDto.getAuthorizedAccreditStartTime()) >= 0 && now.compareTo(friendsInfoDto.getAuthorizedAccreditEndTime()) < 0){
                     // 根据手机号获取用户实时坐标
                     ServiceResult<PositionInfoDto> positionInfoDto = positionInfoService.getRealtimePositionByPhoneNo(dto.getPhoneNo(), dto.getModifyTime());
                     if(null != positionInfoDto.getData()){

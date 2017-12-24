@@ -3,7 +3,6 @@ package com.way.mobile.service.member;
 import com.way.common.exception.DataValidateException;
 import com.way.common.result.ServiceResult;
 import com.way.member.member.dto.MemberDto;
-import com.way.member.member.dto.MemberResetPasswordDto;
 
 /**
  * 
@@ -37,7 +36,7 @@ public interface RegistService {
 	 * @return: void
 	 * @throws DataValidateException 
 	 */
-	public ServiceResult<String> resetPassword(MemberDto memberDto) throws DataValidateException;
+	public ServiceResult<MemberDto> resetPassword(MemberDto memberDto) throws DataValidateException;
 	
 	/**
 	 * 重置密码
