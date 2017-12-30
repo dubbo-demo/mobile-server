@@ -5,6 +5,7 @@ import com.way.common.exception.DataValidateException;
 import com.way.common.redis.CacheService;
 import com.way.common.result.ServiceResult;
 import com.way.common.util.DateUtils;
+import com.way.common.util.PingYinUtil;
 import com.way.common.util.Validater;
 import com.way.member.member.service.MemberInfoService;
 import com.way.member.member.service.PasswordService;
@@ -94,6 +95,7 @@ public class RegistServiceImpl implements RegistService {
 	 * @throws DataValidateException
 	 */
 	public ServiceResult<MemberDto> regist(MemberDto memberDto) throws DataValidateException {
+		memberDto.setNickSpell(PingYinUtil.getPingYin(memberDto.getNickName()));
 		String phoneNo = memberDto.getPhoneNo();
 		String key = ConstantsConfig.JEDIS_HEADER_REGIST_CODE + phoneNo;
 		String code = CacheService.StringKey.getObject(key, String.class);

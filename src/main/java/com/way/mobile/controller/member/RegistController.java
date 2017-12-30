@@ -117,6 +117,16 @@ public class RegistController {
 				serviceResult.setMessage("手机号不正确");
 				return serviceResult;
 			}
+			if(StringUtils.isBlank(memberDto.getNickName())){
+				serviceResult.setCode(ServiceResult.ERROR_CODE);
+				serviceResult.setMessage("昵称不能为空");
+				return serviceResult;
+			}
+			if(memberDto.getNickName().length() > 10){
+				serviceResult.setCode(ServiceResult.ERROR_CODE);
+				serviceResult.setMessage("昵称不能超过10位");
+				return serviceResult;
+			}
 			/** 调用户中心用户注册接口 */
 			ServiceResult<MemberDto> result = registService.regist(memberDto);
 			MemberDto dto = result.getData();
