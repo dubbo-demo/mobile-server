@@ -113,6 +113,40 @@ public class FriendServiceImpl implements FriendService {
     }
 
     /**
+     * 设置好友为退出前可见
+     * @param phoneNo
+     * @param friendPhoneNoList
+     * @return
+     */
+    @Override
+    public ServiceResult<Object> setFriendsVisibleBeforeExiting(String phoneNo, List<String> friendPhoneNoList) {
+        // 查出退出前查看的好友信息
+        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendsInfoBeforeExit(phoneNo);
+        List<String> visibleFriendsList = new ArrayList<String>();
+        for(FriendsInfoDto friendsInfoDto : friendsInfoDtos){
+            visibleFriendsList.add(friendsInfoDto.getFriendPhoneNo());
+        }
+        // 需要设置为退出前不可见的好友手机号
+        List<String> setVisibleFriendsList = new ArrayList<String>();
+        // 已经设为退出前可见的好友
+        List<String> setInvisibleFriendsList = new ArrayList<String>();
+        for(String friendPhone : visibleFriendsList) {
+            if(friendPhoneNoList.contains(friendPhone)){
+                // 已经设为退出前可见的好友
+                setVisibleFriendsList.add(friendPhone);
+            }else{
+                // 需要设为退出前不可见的好友
+                setInvisibleFriendsList.add(friendPhone);
+            }
+        }
+        // 需要设为退出前可见的好友
+        friendPhoneNoList.removeAll(setVisibleFriendsList);
+        // 设置好友为退出前可见
+        friendsInfoService.setFriendsVisibleBeforeExiting(phoneNo, setVisibleFriendsList, friendPhoneNoList);
+        return ServiceResult.newSuccess();
+    }
+
+    /**
      * 查询手机联系人状态
      * @param phoneNo
      * @param friendPhoneNo
@@ -152,8 +186,23 @@ public class FriendServiceImpl implements FriendService {
         Map<String, List<FriendsInfoDto>> map = new HashMap<String, List<FriendsInfoDto>>();
         List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendList(phoneNo);
         for(FriendsInfoDto friendsInfoDto : friendsInfoDtos){
-            friendsInfoDto.setRemarkFirstLetter(PingYinUtil.getPingYin(friendsInfoDto.getFriendRemarkName()).substring(0, 1));
+            friendsInfoDto.setFriendRemarkNameSpell(PingYinUtil.getPingYin(friendsInfoDto.getFriendRemarkName()));
+            friendsInfoDto.setRemarkFirstLetter(friendsInfoDto.getFriendRemarkNameSpell().substring(0, 1));
         }
+        // 根据姓名拼音升序排列
+        Collections.sort(friendsInfoDtos, new Comparator<FriendsInfoDto>(){
+            @Override
+            public int compare(FriendsInfoDto friend1, FriendsInfoDto friend2) {
+                if(friend1.getFriendRemarkNameSpell().compareTo(friend2.getFriendRemarkNameSpell()) > 0){
+                    return 1;
+                }else if (friend1.getFriendRemarkNameSpell().compareTo(friend2.getFriendRemarkNameSpell()) < 0) {
+                    return -1;
+                }else{
+                    return friend1.getFriendPhoneNo().compareTo(friend2.getFriendPhoneNo());
+                }
+            }
+        });
+
         map.put("friends", friendsInfoDtos);
         serviceResult.setData(map);
         return serviceResult;
@@ -168,6 +217,11 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<Object> applyForAddFriend(String phoneNo, String friendPhoneNo, String applyInfo) {
+        // 判断是否为好友
+        ServiceResult<FriendsInfoDto> friendsInfoDto = friendsInfoService.getFriendInfo(phoneNo, friendPhoneNo);
+        if(null != friendsInfoDto.getData()){
+            return ServiceResult.newFailure("该用户已经是你的好友");
+        }
         // 申请添加好友
         applyFriendInfoService.applyForAddFriend(phoneNo, friendPhoneNo, applyInfo);
         return ServiceResult.newSuccess();

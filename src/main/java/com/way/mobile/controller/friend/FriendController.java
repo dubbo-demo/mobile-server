@@ -120,6 +120,42 @@ public class FriendController {
     }
 
     /**
+     * 设置好友为退出前可见
+     * @param request
+     * @param friendPhoneNos
+     * @return
+     */
+    @RequestMapping(value = "/setFriendsVisibleBeforeExiting", method = RequestMethod.POST)
+    @ResponseBody
+    public ServiceResult<Object> setFriendsVisibleBeforeExiting(HttpServletRequest request, String friendPhoneNos){
+        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        String phoneNo = (String) request.getAttribute("phoneNo");
+        try {
+            // 校验token
+            if (StringUtils.isBlank(phoneNo)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            if (StringUtils.isBlank(friendPhoneNos)) {
+                return ServiceResult.newFailure("必传参数不能为空");
+            }
+            List<String> friendPhoneNoList = JSON.parseArray(friendPhoneNos, String.class);
+            for(String friendPhoneNo : friendPhoneNoList){
+                if (StringUtils.isBlank(friendPhoneNo)) {
+                    return ServiceResult.newFailure("必传参数不能为空");
+                }
+            }
+            // 设置好友为退出前可见
+            serviceResult = friendService.setFriendsVisibleBeforeExiting(phoneNo, friendPhoneNoList);
+        } catch (Exception e) {
+            serviceResult.setCode(ServiceResult.ERROR_CODE);
+            WayLogger.error(e, "设置好友为退出前可见失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
+        } finally {
+            WayLogger.access("设置好友为退出前可见：/setFriendsVisibleBeforeExiting.do,参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
+        }
+        return serviceResult;
+    }
+
+    /**
      * 查询手机联系人状态
      * @param request
      * @param friendPhoneNo

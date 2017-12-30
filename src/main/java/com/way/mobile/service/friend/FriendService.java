@@ -38,6 +38,14 @@ public interface FriendService {
     ServiceResult<Object> cancelGetGroupPosition(String phoneNo, String groupId);
 
     /**
+     * 设置好友为退出前可见
+     * @param phoneNo
+     * @param friendPhoneNoList
+     * @return
+     */
+    ServiceResult<Object> setFriendsVisibleBeforeExiting(String phoneNo, List<String> friendPhoneNoList);
+
+    /**
      * 查询手机联系人状态
      * @param phoneNo
      * @param friendPhoneNo
