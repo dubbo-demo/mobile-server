@@ -1,6 +1,5 @@
 package com.way.mobile.aop;
 
-import com.alibaba.fastjson.JSON;
 import com.way.base.versionUpdate.dto.VersionUpdateDto;
 import com.way.common.constant.Constants;
 import com.way.common.constant.IModuleParamConfig;
@@ -10,13 +9,14 @@ import com.way.common.log.WayLogger;
 import com.way.common.redis.utils.NoShardedRedisCacheUtil;
 import com.way.common.result.ServiceResult;
 import com.way.common.spring.Configuration;
-import com.way.common.util.BeanUtils;
 import com.way.common.util.Validater;
+import com.way.member.member.dto.MemberDto;
 import com.way.mobile.common.po.LoginTokenInfo;
 import com.way.mobile.common.util.PropertyConfig;
 import com.way.mobile.common.util.TokenJedisUtils;
 import com.way.mobile.ehcache.service.VersionConfService;
 import com.way.mobile.property.config.PropertyConfigurerWithWhite;
+import com.way.mobile.service.member.MemberService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
@@ -32,6 +32,7 @@ import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequ
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,9 @@ public class CommonControllerAspect {
     @Autowired
     private VersionConfService versionConfService;
 
+    @Autowired
+    private MemberService memberService;
+
     private static Configuration configuration;
 
     public static final String expression = "execution(* com.way.mobile.controller..*.*(..)) and within(@org.springframework.stereotype.Controller *)";
@@ -79,6 +83,7 @@ public class CommonControllerAspect {
         String newToken = null;
         String phoneNo = null;
         HttpServletRequest paramRequest = null;
+        String pathInfoUrl = null;
         if (null != params && params.length > 0) {
             if (params[0] instanceof HttpServletRequest) {
                 HttpServletRequest request = (HttpServletRequest) params[0];
@@ -89,7 +94,7 @@ public class CommonControllerAspect {
                 // 获取链接数组
                 String[] pathArr = paramRequest.getRequestURI().split("/");
                 // 访问链接
-                String pathInfoUrl = pathArr[pathArr.length - 1];
+                pathInfoUrl = pathArr[pathArr.length - 1];
                 WayLogger.debug("校验是否为白名单请求.........普通参数请求");
                 Object o = PropertyConfigurerWithWhite.getProperty(pathInfoUrl);
                 WayLogger.debug("token:" + newToken + ",pathInfoUrl:" + pathInfoUrl);
@@ -113,12 +118,17 @@ public class CommonControllerAspect {
                         return ServiceResult.newFailure(Constants.OKEN_EXPIRED_OTHERLOGIN, "该账户已在其他设备登录，请注意安全");
                     }
                     paramRequest.setAttribute("phoneNo", tokenInfo.getPhoneNo());
+                    phoneNo = tokenInfo.getPhoneNo();
                 }
             // 文件上传相关请求
             } else if (params[1] instanceof MultipartHttpServletRequest) {
                 MultipartHttpServletRequest mulReq = (DefaultMultipartHttpServletRequest) params[1];
                 // 请求对象参数
                 paramRequest = mulReq;
+                // 获取链接数组
+                String[] pathArr = paramRequest.getRequestURI().split("/");
+                // 访问链接
+                pathInfoUrl = pathArr[pathArr.length - 1];
                 // 获取token
                 newToken = mulReq.getParameter("token");
                 if (null == newToken) {
@@ -139,6 +149,7 @@ public class CommonControllerAspect {
                     return ServiceResult.newFailure(Constants.OKEN_EXPIRED_OTHERLOGIN, "该账户已在其他设备登录，请注意安全");
                 }
                 mulReq.setAttribute("phoneNo", tokenInfo.getPhoneNo());
+                phoneNo = tokenInfo.getPhoneNo();
                 // 校验文件大小
 //                ServiceResult serviceResult = verificationFile(mulReq);
 //                if(Constants.INVALID == serviceResult.getCode()){
@@ -151,6 +162,7 @@ public class CommonControllerAspect {
         }
         
 		if (paramRequest != null) {
+            // 版本升级
 			String version = paramRequest.getHeader("version");
 			if (StringUtils.isNotBlank(version)) {
 				version = version.replace(".", "");
@@ -166,6 +178,17 @@ public class CommonControllerAspect {
 					}
 				}
 			}
+			// 判断用户会员
+            if(phoneNo != null && ("buyMemberByRewardScore.do".equals(pathInfoUrl) || "buyMemberByRecharge.do".equals(pathInfoUrl))){
+                // 查询用户信息
+                ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+                Date date = new Date();
+                // 判断用户是否为会员
+                if(!"2".equals(memberDto.getData().getMemberType()) || date.before(memberDto.getData().getMemberStartTime())
+                        || date.after(memberDto.getData().getMemberEndTime())){
+                    return ServiceResult.newFailure(Constants.MEMBERSHIP_EXPIRES, "您还不是会员，请先购买会员");
+                }
+            }
 		}
 
         // 标识 当前请求是否需要防重 过滤
@@ -199,7 +222,6 @@ public class CommonControllerAspect {
         }
     }
     
-    
     /**
      * 功能描述: 版本升级<br>
      * 〈功能详细描述〉
@@ -215,12 +237,12 @@ public class CommonControllerAspect {
 		// 终端系统 1：IOS 2：Android
 		String client = request.getHeader("client");
 		// 若是非强制升级，已提示，客户端本地缓存该标识，用于接口端判断是否需要再提示非强制升级
-		String nonForceFlag = request.getHeader("nonForceFlag");
+		String noForceFlag = request.getHeader("noForceFlag");
 
 		if (StringUtils.isNotEmpty(curVersion) && StringUtils.isNotEmpty(client)) {
 			try {
 				// 从ehcache中获取版本配置信息
-				List<Map<String, Object>> confs = versionConfService.getIosVersionConf();
+				List<VersionUpdateDto> confs = versionConfService.getIosVersionConf();
 				if (StringUtils.equals(NumberConstants.STR_TWO, client)) {
 					confs = versionConfService.getAndroidVersionConf();
 				}
@@ -229,8 +251,7 @@ public class CommonControllerAspect {
 					// 1.获取强制升级的最新版本
                     VersionUpdateDto forceConf = null;
                     VersionUpdateDto newConf = null;
-					for (Map<String, Object> conf : confs) {
-                        VersionUpdateDto confVesion = (VersionUpdateDto) BeanUtils.mapToObject(conf, VersionUpdateDto.class);
+					for (VersionUpdateDto confVesion : confs) {
 						if (newConf == null) {
 							// 最新版本配置信息
 							newConf = confVesion;
@@ -251,13 +272,13 @@ public class CommonControllerAspect {
 							msg.put("isUpdate", NumberConstants.STR_ONE);
 							msg.put("mandatory", StringUtils.EMPTY + newConf.getMandatory());
 							msg.put("comment", newConf.getComment());
-							msg.put("downLoadAddr", newConf.getDownloadAddr());
-                            serviceResult.setData(JSON.toJSONString(msg));
+							msg.put("downLoadAddr", newConf.getDownLoadAddr());
+                            serviceResult.setData(msg);
 							return serviceResult;
 						}
 					}
 					// 当前版本已是最新强制升级版本，取版本列表中最新一条版本信息，根据非强制升级标识判断是否升级
-					if (StringUtils.isEmpty(nonForceFlag) && newConf != null) {
+					if (StringUtils.isEmpty(noForceFlag) && newConf != null) {
 						int compareValue = Integer.parseInt(newConf.getVersionNo().replaceAll("\\.", ""));
 						if (curVerionValue < compareValue) {
 							Map<String, String> msg = new HashMap<String, String>();
@@ -265,8 +286,8 @@ public class CommonControllerAspect {
 							msg.put("isUpdate", NumberConstants.STR_ONE);
 							msg.put("mandatory", StringUtils.EMPTY + newConf.getMandatory());
 							msg.put("comment", newConf.getComment());
-							msg.put("downLoadAddr", newConf.getDownloadAddr());
-                            serviceResult.setData(JSON.toJSONString(msg));
+							msg.put("downLoadAddr", newConf.getDownLoadAddr());
+                            serviceResult.setData(msg);
                             return serviceResult;
 						}
 					}

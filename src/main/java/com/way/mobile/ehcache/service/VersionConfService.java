@@ -1,7 +1,8 @@
 package com.way.mobile.ehcache.service;
 
+import com.way.base.versionUpdate.dto.VersionUpdateDto;
+
 import java.util.List;
-import java.util.Map;
 
 /**
  * 客户端版本服务<br>
@@ -32,7 +33,7 @@ public interface VersionConfService {
      * @see [相关类/方法](可选)
      * @since [产品/模块版本](可选)
      */
-    public List<Map<String, Object>> getIosVersionConf();
+    public List<VersionUpdateDto> getIosVersionConf();
 
     /**
      * 
@@ -43,5 +44,5 @@ public interface VersionConfService {
      * @see [相关类/方法](可选)
      * @since [产品/模块版本](可选)
      */
-    public List<Map<String, Object>> getAndroidVersionConf();
+    public List<VersionUpdateDto> getAndroidVersionConf();
 }

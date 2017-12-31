@@ -43,10 +43,10 @@ public class PositionServiceImpl implements PositionService {
      */
     @Override
     public ServiceResult<String> uploadPosition(PositionInfoDto positionInfoDto) {
-        // 判断用户是否开启增值服务
-        Boolean valueAddedService = true;
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(positionInfoDto.getPhoneNo());
+        // 判断用户是否开启增值服务1是,2否
         // 开启增值服务直接保存
-        if(valueAddedService){
+        if("1".equals(memberDto.getData().getTrajectoryService())){
             positionInfoService.savePosition(positionInfoDto);
         }else{
             // 根据手机号获取用户实时坐标
@@ -113,7 +113,7 @@ public class PositionServiceImpl implements PositionService {
             return ServiceResult.newFailure("必传参数不能为空");
         }
         // 标记好友退出前查看为是：1
-        friendsInfoService.updateIsCheckBeforeExitByFriendPhoneNos(phoneNo, friendPhoneNos, Constants.YES_INT);
+//        friendsInfoService.updateIsCheckBeforeExitByFriendPhoneNos(phoneNo, friendPhoneNos, Constants.YES_INT);
         return serviceResult;
     }
 

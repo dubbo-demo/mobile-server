@@ -139,9 +139,11 @@ public class FriendController {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             List<String> friendPhoneNoList = JSON.parseArray(friendPhoneNos, String.class);
-            for(String friendPhoneNo : friendPhoneNoList){
-                if (StringUtils.isBlank(friendPhoneNo)) {
-                    return ServiceResult.newFailure("必传参数不能为空");
+            if(friendPhoneNoList.size() > 0){
+                for(String friendPhoneNo : friendPhoneNoList){
+                    if (StringUtils.isBlank(friendPhoneNo)) {
+                        return ServiceResult.newFailure("必传参数不能为空");
+                    }
                 }
             }
             // 设置好友为退出前可见
@@ -554,7 +556,7 @@ public class FriendController {
      */
     @RequestMapping(value = "/moveFriendToGroup", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> moveFriendToGroup(HttpServletRequest request, String groupId, String friendPhoneNo){
+    public ServiceResult<Object> moveFriendToGroup(HttpServletRequest request, String groupId, String friendPhoneNos){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -565,16 +567,16 @@ public class FriendController {
             if (StringUtils.isBlank(groupId)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(friendPhoneNo)) {
+            if (StringUtils.isBlank(friendPhoneNos)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 将好友添加到分组
-            serviceResult = friendService.moveFriendToGroup(phoneNo, groupId, friendPhoneNo);
+            serviceResult = friendService.moveFriendToGroup(phoneNo, groupId, friendPhoneNos);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
-            WayLogger.error(e, "将好友添加到分组失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+            WayLogger.error(e, "将好友添加到分组失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);
         } finally {
-            WayLogger.access("将好友添加到分组：/moveFriendToGroup.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+            WayLogger.access("将好友添加到分组：/moveFriendToGroup.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);
         }
         return serviceResult;
     }
@@ -583,12 +585,12 @@ public class FriendController {
      * 将好友从分组中移除
      * @param request
      * @param groupId
-     * @param friendPhoneNo
+     * @param friendPhoneNos
      * @return
      */
     @RequestMapping(value = "/removeFriendFromGroup", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> removeFriendFromGroup(HttpServletRequest request, String groupId, String friendPhoneNo){
+    public ServiceResult<Object> removeFriendFromGroup(HttpServletRequest request, String groupId, String friendPhoneNos){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -599,16 +601,16 @@ public class FriendController {
             if (StringUtils.isBlank(groupId)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(friendPhoneNo)) {
+            if (StringUtils.isBlank(friendPhoneNos)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 将好友从分组中移除
-            serviceResult = friendService.removeFriendFromGroup(phoneNo, groupId, friendPhoneNo);
+            serviceResult = friendService.removeFriendFromGroup(phoneNo, groupId, friendPhoneNos);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
-            WayLogger.error(e, "将好友从分组中移除失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+            WayLogger.error(e, "将好友从分组中移除失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);
         } finally {
-            WayLogger.access("将好友从分组中移除：/removeFriendFromGroup.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+            WayLogger.access("将好友从分组中移除：/removeFriendFromGroup.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);
         }
         return serviceResult;
     }

@@ -142,7 +142,7 @@ public class FriendServiceImpl implements FriendService {
         // 需要设为退出前可见的好友
         friendPhoneNoList.removeAll(setVisibleFriendsList);
         // 设置好友为退出前可见
-        friendsInfoService.setFriendsVisibleBeforeExiting(phoneNo, setVisibleFriendsList, friendPhoneNoList);
+        friendsInfoService.setFriendsVisibleBeforeExiting(phoneNo, setInvisibleFriendsList, friendPhoneNoList);
         return ServiceResult.newSuccess();
     }
 
@@ -372,18 +372,18 @@ public class FriendServiceImpl implements FriendService {
      * 将好友添加到分组
      * @param phoneNo
      * @param groupId
-     * @param friendPhoneNo
+     * @param friendPhoneNos
      * @return
      */
     @Override
-    public ServiceResult<Object> moveFriendToGroup(String phoneNo, String groupId, String friendPhoneNo) {
+    public ServiceResult<Object> moveFriendToGroup(String phoneNo, String groupId, String friendPhoneNos) {
         // 根据组id查出组信息
         GroupInfoDto groupInfoDto = groupInfoService.getGroupInfo(groupId);
         if(null != groupInfoDto){
             groupInfoDto.setGroupId(groupId);
             groupInfoDto.setPhoneNo(phoneNo);
             // 将好友添加到分组
-            friendsInfoService.moveFriendToGroup(friendPhoneNo, groupInfoDto);
+            friendsInfoService.moveFriendToGroup(friendPhoneNos, groupInfoDto);
         }
         return ServiceResult.newSuccess();
     }
@@ -392,12 +392,12 @@ public class FriendServiceImpl implements FriendService {
      * 将好友从分组中移除
      * @param phoneNo
      * @param groupId
-     * @param friendPhoneNo
+     * @param friendPhoneNos
      * @return
      */
     @Override
-    public ServiceResult<Object> removeFriendFromGroup(String phoneNo, String groupId, String friendPhoneNo) {
-        return friendsInfoService.removeFriendFromGroup(phoneNo, friendPhoneNo);
+    public ServiceResult<Object> removeFriendFromGroup(String phoneNo, String groupId, String friendPhoneNos) {
+        return friendsInfoService.removeFriendFromGroup(phoneNo, friendPhoneNos);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.way.mobile.ehcache.service.impl;
 
+import com.way.base.versionUpdate.dto.VersionUpdateDto;
 import com.way.base.versionUpdate.service.VersionUpdateService;
 import com.way.common.result.ServiceResult;
 import com.way.mobile.common.util.PropertyConfig;
@@ -9,6 +10,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,14 +54,14 @@ public class VersionConfServiceImpl implements VersionConfService {
 	public void refreshVersionConf() {
 		versionCache.clear();
 		// 版本升级IOS列表
-		List<Map<String, Object>> iosConfigs = new ArrayList<Map<String, Object>>();
+		List<VersionUpdateDto> iosConfigs = new ArrayList<VersionUpdateDto>();
 		// 版本升级安卓列表
-		List<Map<String, Object>> androidConfigs = new ArrayList<Map<String, Object>>();
+        List<VersionUpdateDto> androidConfigs = new ArrayList<VersionUpdateDto>();
 		// 查询版本升级列表
         ServiceResult<Map<String, Object>> serviceResult = versionUpdateService.versionUpdateList();
 		if (null != serviceResult.getData()) {
-			iosConfigs = (List<Map<String, Object>>) serviceResult.getData().get("ios");
-			androidConfigs = (List<Map<String, Object>>) serviceResult.getData().get("android");
+			iosConfigs = (List<VersionUpdateDto>) serviceResult.getData().get("ios");
+			androidConfigs = (List<VersionUpdateDto>) serviceResult.getData().get("android");
 		}
 		versionCache.put("iosVersionConf", iosConfigs);
 		versionCache.put("androidVersionConf", androidConfigs);
@@ -71,9 +73,9 @@ public class VersionConfServiceImpl implements VersionConfService {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Map<String, Object>> getIosVersionConf() {
+    public List<VersionUpdateDto> getIosVersionConf() {
         ValueWrapper value = versionCache.get("iosVersionConf");
-        return (List<Map<String, Object>>) value.get();
+        return (List<VersionUpdateDto>) value.get();
     }
 
     /**
@@ -82,8 +84,8 @@ public class VersionConfServiceImpl implements VersionConfService {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Map<String, Object>> getAndroidVersionConf() {
+    public List<VersionUpdateDto> getAndroidVersionConf() {
         ValueWrapper value = versionCache.get("androidVersionConf");
-        return (List<Map<String, Object>>) value.get();
+        return (List<VersionUpdateDto>) value.get();
     }
 }

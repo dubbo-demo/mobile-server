@@ -147,18 +147,18 @@ public interface FriendService {
      * 将好友添加到分组
      * @param phoneNo
      * @param groupId
-     * @param friendPhoneNo
+     * @param friendPhoneNos
      * @return
      */
-    ServiceResult<Object> moveFriendToGroup(String phoneNo, String groupId, String friendPhoneNo);
+    ServiceResult<Object> moveFriendToGroup(String phoneNo, String groupId, String friendPhoneNos);
 
     /**
      * 将好友从分组中移除
      * @param phoneNo
      * @param groupId
-     * @param friendPhoneNo
+     * @param friendPhoneNos
      * @return
      */
-    ServiceResult<Object> removeFriendFromGroup(String phoneNo, String groupId, String friendPhoneNo);
+    ServiceResult<Object> removeFriendFromGroup(String phoneNo, String groupId, String friendPhoneNos);
 
 }
