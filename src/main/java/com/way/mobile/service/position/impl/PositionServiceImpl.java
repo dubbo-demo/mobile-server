@@ -78,6 +78,10 @@ public class PositionServiceImpl implements PositionService {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         String week = String.valueOf(cal.get(Calendar.DAY_OF_WEEK) - 1);
+        // 星期日为一周的第一天
+        if("0".equals(week)){
+            week = "7";
+        }
         String hour = String.valueOf(cal.get(Calendar.HOUR_OF_DAY));
         String minute = String.format("%02d", cal.get(Calendar.MINUTE));
         String now = hour.concat(":").concat(minute);

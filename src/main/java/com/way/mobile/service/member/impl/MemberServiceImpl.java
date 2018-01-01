@@ -56,6 +56,20 @@ public class MemberServiceImpl implements MemberService {
     @Autowired
     private MemberOrderInfoService memberOrderInfoService;
 
+    /** 轨迹回放金额/天 */
+    private static final Double TRAJECTORY_AMOUNT = 0.1;
+
+    /** 电子围栏金额/天 */
+    private static final Double FENCE_AMOUNT = 0.1;
+
+    /** 电子围栏金额/天 */
+    private static final Double MEMBER_THREE_MOUNTHS_AMOUNT = 15.0;
+
+    /** 电子围栏金额/天 */
+    private static final Double MEMBER_HALF_YEAR_AMOUNT = 24.0;
+
+    /** 电子围栏金额/天 */
+    private static final Double MEMBER_ONE_YEAR_AMOUNT = 30.0;
 
     /**
      * 校验邀请人手机号是否存在
@@ -204,13 +218,21 @@ public class MemberServiceImpl implements MemberService {
             }
             startTime = memberValueAddedInfoDto.getStartTime();
         }
-//        double amount = (type);TODO
         // 根据会员有效期类型获取所需积分
-        Double rewardScore = new BigDecimal(day).multiply(new BigDecimal(0.5)).doubleValue();
+        Double rewardScore = null;
+        String name = null;
+
+        if("1".equals(type)){
+            rewardScore = new BigDecimal(day).multiply(new BigDecimal(TRAJECTORY_AMOUNT)).doubleValue();
+            name = day + "天轨迹回放服务";
+        }
+        if("2".equals(type)){
+            rewardScore = new BigDecimal(day).multiply(new BigDecimal(FENCE_AMOUNT)).doubleValue();
+            name = day + "天电子围栏服务";
+        }
         if(memberDto.getData().getRewardScore() - rewardScore < 0){
             return ServiceResult.newFailure("积分不够");
         }
-        String name = day + "天增值服务";
 
         // 积分购买增值服务
         memberInfoService.buyValueAddedServiceByRewardScore(phoneNo, memberDto.getData().getInvitationCode(), rewardScore, startTime, endTime, name, type, memberValueAddedInfoDto);
@@ -310,7 +332,7 @@ public class MemberServiceImpl implements MemberService {
         // 计算出需要的费用
         Double amount = 0.0;
         if("0".equals(type)){
-            amount = 30.0;
+            amount = getRewardScore(type);
         }else{
             // 查询会员积分
             ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
@@ -330,16 +352,16 @@ public class MemberServiceImpl implements MemberService {
             }
             if(null != memberValueAddedInfoDto && memberValueAddedInfoDto.getIsOpen() == 1){
                 day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
-                // 判断增值服务是否需要购买
+                // 判断服务是否需要购买
                 if(day == 0){
-                    return ServiceResult.newFailure("增值服务已达最大使用期限，无需购买");
+                    return ServiceResult.newFailure("服务已达最大使用期限，无需购买");
                 }
             }
             if("1".equals(type)){
-                amount = day * 0.5;
+                amount = day * TRAJECTORY_AMOUNT;
             }
             if("2".equals(type)){
-                amount = day * 0.5;
+                amount = day * FENCE_AMOUNT;
             }
         }
 
@@ -382,18 +404,18 @@ public class MemberServiceImpl implements MemberService {
         // 查询会员
         ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
         if(0 == type){
-            amount = 30.0;
+            amount = getRewardScore(String.valueOf(validityDurationType));
             if(1 == validityDurationType){
                 name = "三个月会员";
-                endTime = DateUtils.addMonths(startTime,3);
+                endTime = DateUtils.dayEnd(DateUtils.addMonths(startTime,3));
             }
             if(2 == validityDurationType){
                 name = "半年会员";
-                endTime = DateUtils.addMonths(startTime,6);
+                endTime = DateUtils.dayEnd(DateUtils.addMonths(startTime,6));
             }
             if(3 == validityDurationType){
                 name = "一年会员";
-                endTime = DateUtils.addMonths(startTime,12);
+                endTime = DateUtils.dayEnd(DateUtils.addMonths(startTime,12));
             }
         }else{
             if(!memberDto.getData().getMemberType().equals("2")){
@@ -416,11 +438,11 @@ public class MemberServiceImpl implements MemberService {
                 }
             }
             if(1 == type){
-                amount = day * 0.5;
+                amount = day * TRAJECTORY_AMOUNT;
                 name = day + "天轨迹回放服务";
             }
             if(2 == type){
-                amount = day * 0.5;
+                amount = day * FENCE_AMOUNT;
                 name = day + "天电子围栏服务";
             }
         }
@@ -470,13 +492,13 @@ public class MemberServiceImpl implements MemberService {
      */
     private Double getRewardScore(String validityDurationType) {
         if("1".equals(validityDurationType)){
-            return 10.0;
+            return MEMBER_THREE_MOUNTHS_AMOUNT;
         }
         if("2".equals(validityDurationType)){
-            return 30.0;
+            return MEMBER_HALF_YEAR_AMOUNT;
         }
         if("3".equals(validityDurationType)){
-            return 100.0;
+            return MEMBER_ONE_YEAR_AMOUNT;
         }
         return 999999999.0;
     }

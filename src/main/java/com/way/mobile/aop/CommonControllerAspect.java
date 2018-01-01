@@ -179,7 +179,8 @@ public class CommonControllerAspect {
 				}
 			}
 			// 判断用户会员
-            if(phoneNo != null && ("buyMemberByRewardScore.do".equals(pathInfoUrl) || "buyMemberByRecharge.do".equals(pathInfoUrl))){
+            if(phoneNo != null && (!"buyMemberByRewardScore.do".equals(pathInfoUrl) && !"buyMemberByRecharge.do".equals(pathInfoUrl)
+                && !"getMemberInfo.do".equals(pathInfoUrl))){
                 // 查询用户信息
                 ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
                 Date date = new Date();
