@@ -332,7 +332,7 @@ public class MemberServiceImpl implements MemberService {
         // 计算出需要的费用
         Double amount = 0.0;
         if("0".equals(type)){
-            amount = getRewardScore(type);
+            amount = getRewardScore(validityDurationType);
         }else{
             // 查询会员积分
             ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
