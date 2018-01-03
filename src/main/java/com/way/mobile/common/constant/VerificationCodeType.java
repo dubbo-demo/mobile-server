@@ -17,4 +17,10 @@ public interface VerificationCodeType {
 	/** 登录 */
 	String LOGIN = "2";
 
+	/** 积分转赠*/
+	String TRANSFE_RREWARDSCORE = "3";
+
+	/** 积分提现*/
+	String WITHDRAWAL_REWARDSCORE = "4";
+
 }

@@ -110,7 +110,7 @@ public class RechargeController {
     /**
      * 支付回调
      */
-    @RequestMapping(value = "beeCloudCallBack", method = RequestMethod.POST)
+    @RequestMapping(value = "/beeCloudCallBack", method = RequestMethod.POST)
     public void beeCloudCallBack(HttpServletRequest request, HttpServletResponse response, @RequestBody BeeCloudDto<BeeCloudMessageDetailDto> dto) {
         WayLogger.error(dto.toString());
         try {

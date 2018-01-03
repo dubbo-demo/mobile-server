@@ -164,8 +164,7 @@ public class RewardScoreController {
             }
             // 校验token
             if (StringUtils.isBlank(withdrawalInfoDto.getBankName()) || StringUtils.isBlank(withdrawalInfoDto.getBankNumber()) ||
-                    StringUtils.isBlank(withdrawalInfoDto.getName()) || StringUtils.isBlank(withdrawalInfoDto.getBankBranch()) ||
-                    null == withdrawalInfoDto.getRewardScore()) {
+                    StringUtils.isBlank(withdrawalInfoDto.getName()) || null == withdrawalInfoDto.getRewardScore()) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 积分提现

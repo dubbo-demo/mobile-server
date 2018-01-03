@@ -172,17 +172,21 @@ public class MemberServiceImpl implements MemberService {
         }
         // 获取会员有效期开始时间
         Date startTime = new Date();
-        if(null != memberDto.getData().getMemberEndTime()){
+
+        if("2".equals(memberDto.getData().getMemberType()) && null != memberDto.getData().getMemberStartTime() &&
+                null != memberDto.getData().getMemberEndTime() && startTime.before(memberDto.getData().getMemberEndTime())){
             startTime = memberDto.getData().getMemberEndTime();
         }
         // 根据会员类型计算充值后会员有效期
         Date endTime = DateUtils.dayEnd(DateUtils.addDays(DateUtils.addMonths(startTime,3), 1));
-
-        if(null != memberDto.getData().getMemberStartTime()){
-            startTime = memberDto.getData().getMemberStartTime();
+        if("2".equals(validityDurationType)){
+            endTime = DateUtils.dayEnd(DateUtils.addDays(DateUtils.addMonths(startTime,6), 1));
+        }
+        if("3".equals(validityDurationType)){
+            endTime = DateUtils.dayEnd(DateUtils.addDays(DateUtils.addMonths(startTime,12), 1));
         }
         // 积分购买会员
-        memberInfoService.buyMemberByRewardScore(phoneNo, memberDto.getData().getInvitationCode(), rewardScore, startTime, endTime, name);
+        memberInfoService.buyMemberByRewardScore(phoneNo, memberDto.getData(), rewardScore, startTime, endTime, name);
         return ServiceResult.newSuccess();
     }
 
@@ -199,6 +203,7 @@ public class MemberServiceImpl implements MemberService {
         if(!memberDto.getData().getMemberType().equals("2")){
             return ServiceResult.newFailure("您还不是正式会员");
         }
+
         // 根据增值服务类型获取用户增值服务信息
         MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(phoneNo, type);
         int day = 0;
@@ -210,13 +215,18 @@ public class MemberServiceImpl implements MemberService {
             // 计算开始时间和结束时间所差的天数
             day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
         }
-        if(null != memberValueAddedInfoDto && memberValueAddedInfoDto.getIsOpen() == 1){
-            day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
-            // 判断增值服务是否需要购买
-            if(day == 0){
-                return ServiceResult.newFailure("增值服务已达最大使用期限，无需购买");
+        if(null != memberValueAddedInfoDto){
+            if(memberValueAddedInfoDto.getIsOpen() == 1){
+                day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
+                // 判断增值服务是否需要购买
+                if(day == 0){
+                    return ServiceResult.newFailure("服务已达最大使用期限，无需购买");
+                }
             }
-            startTime = memberValueAddedInfoDto.getStartTime();
+            if(memberValueAddedInfoDto.getIsOpen() == 2){
+                // 计算开始时间和结束时间所差的天数
+                day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
+            }
         }
         // 根据会员有效期类型获取所需积分
         Double rewardScore = null;
@@ -235,7 +245,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
         // 积分购买增值服务
-        memberInfoService.buyValueAddedServiceByRewardScore(phoneNo, memberDto.getData().getInvitationCode(), rewardScore, startTime, endTime, name, type, memberValueAddedInfoDto);
+        memberInfoService.buyValueAddedServiceByRewardScore(phoneNo, memberDto.getData(), rewardScore, startTime, endTime, name, type, memberValueAddedInfoDto);
         return ServiceResult.newSuccess();
     }
 
@@ -350,13 +360,20 @@ public class MemberServiceImpl implements MemberService {
                 // 计算开始时间和结束时间所差的天数
                 day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
             }
-            if(null != memberValueAddedInfoDto && memberValueAddedInfoDto.getIsOpen() == 1){
-                day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
-                // 判断服务是否需要购买
-                if(day == 0){
-                    return ServiceResult.newFailure("服务已达最大使用期限，无需购买");
+            if(null != memberValueAddedInfoDto){
+                if(memberValueAddedInfoDto.getIsOpen() == 1){
+                    day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
+                    // 判断增值服务是否需要购买
+                    if(day == 0){
+                        return ServiceResult.newFailure("服务已达最大使用期限，无需购买");
+                    }
+                }
+                if(memberValueAddedInfoDto.getIsOpen() == 2){
+                    // 计算开始时间和结束时间所差的天数
+                    day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
                 }
             }
+
             if("1".equals(type)){
                 amount = day * TRAJECTORY_AMOUNT;
             }
@@ -403,8 +420,13 @@ public class MemberServiceImpl implements MemberService {
         Date endTime = null;
         // 查询会员
         ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
+        if("2".equals(memberDto.getData().getMemberType()) && null != memberDto.getData().getMemberStartTime() &&
+                null != memberDto.getData().getMemberEndTime() && startTime.before(memberDto.getData().getMemberEndTime())){
+            startTime = memberDto.getData().getMemberEndTime();
+        }
         if(0 == type){
             amount = getRewardScore(String.valueOf(validityDurationType));
+
             if(1 == validityDurationType){
                 name = "三个月会员";
                 endTime = DateUtils.dayEnd(DateUtils.addMonths(startTime,3));
@@ -430,11 +452,17 @@ public class MemberServiceImpl implements MemberService {
                 // 计算开始时间和结束时间所差的天数
                 day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
             }
-            if(null != memberValueAddedInfoDto && memberValueAddedInfoDto.getIsOpen() == 1){
-                day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
-                // 判断增值服务是否需要购买
-                if(day == 0){
-                    return ServiceResult.newFailure("增值服务已达最大使用期限，无需购买");
+            if(null != memberValueAddedInfoDto){
+                if(memberValueAddedInfoDto.getIsOpen() == 1){
+                    day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
+                    // 判断增值服务是否需要购买
+                    if(day == 0){
+                        return ServiceResult.newFailure("服务已达最大使用期限，无需购买");
+                    }
+                }
+                if(memberValueAddedInfoDto.getIsOpen() == 2){
+                    // 计算开始时间和结束时间所差的天数
+                    day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
                 }
             }
             if(1 == type){
@@ -447,7 +475,7 @@ public class MemberServiceImpl implements MemberService {
             }
         }
         // 充值购买会员/增值服务
-        memberInfoService.buyServiceByRecharge(phoneNo, String.valueOf(type), memberDto.getData().getInvitationCode(), amount, startTime, endTime, name);
+        memberInfoService.buyServiceByRecharge(phoneNo, String.valueOf(type), memberDto.getData(), amount, startTime, endTime, name);
         return ServiceResult.newSuccess();
     }
 
