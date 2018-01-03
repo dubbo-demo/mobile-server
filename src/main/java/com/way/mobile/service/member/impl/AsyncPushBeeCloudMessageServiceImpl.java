@@ -32,7 +32,7 @@ public class AsyncPushBeeCloudMessageServiceImpl implements AsyncPushBeeCloudMes
     private MemberService memberService;
 
     @Autowired
-    private RechargeInfoService rrechargeInfoService;
+    private RechargeInfoService rechargeInfoService;
 
     /**
      * 异步推送BeeCloud回参信息
@@ -57,7 +57,7 @@ public class AsyncPushBeeCloudMessageServiceImpl implements AsyncPushBeeCloudMes
             dto.setCreateTime(new Date());
             dto.setModifyTime(new Date());
             // 更新充值记录表
-            rrechargeInfoService.addRechargeInfoDto(dto);
+            rechargeInfoService.addRechargeInfoDto(dto);
 
             // 更新BeeCloud回参信息
             beeCloudMessageDetailService.updateFlag(message_detail);

@@ -1,0 +1,200 @@
+
+<!doctype html>
+<html lang="en">
+ <head> 
+  <meta charset="utf-8"> 
+  <!--允许全屏--> 
+  <meta content="yes" name="apple-mobile-web-app-capable"> 
+  <meta content="yes" name="apple-touch-fullscreen"> 
+  <meta content="telephone=no,email=no" name="format-detection">
+  <script type="text/javascript" src="js/flexible_css.js"></script>
+  <script type="text/javascript" src="js/flexible.js"></script>
+  <script type="text/javascript" src="js/jquery-2.1.0.js"></script>
+  <title>way(where are you)下载</title>
+  <style>
+  html,body{
+      background-color: #00a0e7;
+      font-family: 'microsoft yahei',Verdana,Arial,Helvetica,sans-serif;
+  }
+  .html_content{
+    max-width: 10rem;
+    margin:0 auto;
+    position: relative;
+  }
+  a,a:hover{
+    text-decoration: none;
+  }
+  .item-section{padding:.6rem .8rem .6rem .8rem;color:#fff;font-size:12px}
+  [data-dpr="2"] 
+  .item-section{font-size:24px}
+  [data-dpr="3"] 
+  .item-section{font-size:36px}
+
+  .download{
+    text-align: center;
+    margin-top:.16rem;
+    color:#555;
+  }
+  .idinfo{text-align: center;
+    color:#222;
+    position: absolute;
+    bottom: 0;
+    width:100%;
+  }
+  .idinfo img{
+    display: block;
+  }
+  .copyright{
+    position:absolute;
+    bottom: .2rem;
+    left:0;
+    font-size: .35rem;
+    width: 100%;
+  }
+  .logo{
+    float:left;
+    width:3rem;
+    margin-top: -.3rem;
+  }
+  .qinghai{
+    float:right;
+    font-size: .5rem;
+  }
+  .clearfix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+  }
+  .content{
+    text-align: center;
+    padding:.5rem;
+  }
+  .content_top{
+    position: relative;
+  }
+  .app_img{
+    width:2.6rem;
+
+    margin:1rem  auto 0;
+      text-align: center;
+  }
+  .app_name{
+    font-size: .65rem;
+    margin:.2rem 0;
+  }
+  .app_add{
+    font-size: .35rem;
+  }
+  .yun1{
+    position: absolute;
+    left:-1rem;
+    top:0.5rem;
+    width:2rem;
+  }
+  .yun2{
+    position: absolute;
+    right:-1rem;
+    bottom:0.5rem;
+    width:2rem;
+  }
+  .download{
+    margin:.5rem 0;
+  }
+  .download button{
+    display: inline-block;
+    width:100%;
+    padding: 0.1rem 0;
+    height:1rem;
+    line-height: 1rem;
+    margin-bottom: 0;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+    border: 1px solid #fff;
+    border-radius: .2rem;
+    background-color: transparent;
+    color:#fff;
+    font-size: .5rem;
+  }
+  .app_info{
+      margin-top: .5rem;
+    line-height: .4rem;
+    font-size: .1rem;
+    text-align: left;
+  }
+  </style> 
+  <meta content="a1z3i" name="data-spm">
+  <meta content="20140614.a1z3i.meyxt9ed" name="data-scm">
+</head> 
+<body data-spm="meyxt9ed"> 
+  <!-- Item Header Template --> 
+  <div class="html_content">
+    <div class="item-section">
+     
+      <div class="content">
+        <div class="content_top">
+          <img src="images/yun.png" class="yun1">
+          <img src="images/yun.png" class="yun2">
+          <div class="app_img"><img src="images/logo_big.png" width="100%"></div>
+          <div class="app_name">way APP</div>
+        </div>
+        <div class="download">
+          <button onclick="qhDownload()">立即下载</button>
+        </div>
+        <div class="app_info" >
+            <p>在哪儿”(Where Are You)APP是通过GPS、手机信号基站、无线Wifi等方式,基于百度地图实现好友定位、电子围栏报警和轨迹回放等功能的绿色软件，让您随时了解至爱亲友的位置和行踪。世界那么大，尽在方寸间。
+            特色功能：</p>
+            <p>1.位置实时共享：实时显示个人及多位好友的位置信息，相互距离一目了然。</p>
+            <p>2.电子围栏报警：为至爱的人设立电子围栏，一旦超出即时提醒。</p>
+            <p>3.任意轨迹回放：可按任意时间查看自己或好友的轨迹，了解过往的足迹并方便分享。</p>
+            <p>4.七重安全保障：从注册到开始使用，重重安全保障个人信息仅限授权的好友了解和掌握。</p>
+            <p>5.授权方式灵活：既可为家人设立7*24小时的全天候授权，亦可为部门同事设立有限时间范围内的共享，并可随时修改甚至关闭。</p>
+            <p>6.多分享多收益：软件注册必须填写推荐人手机号码，只限好友分享使用。更可获得下二层级好友的分享奖励。今天栽下一棵树苗，明日可成参天大树，累累硕果年年分享。"</p></div>
+      </div>
+
+    </div>
+
+  </div>
+
+ </body>
+</html>
+ <script>
+    $(function(){
+      if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+        if($(window).height()>$(window).width()){
+          $(".idinfo").css("position","absolute");
+        }else{
+          $(".idinfo").css("position","relative");
+        }
+      } else {
+          $(".idinfo").css("position","relative");
+      };
+      console.log($(document).height());
+      console.log($(window).height());
+      console.log($(window).width());
+      console.log($('.item-section').outerHeight(true));
+      if($(document).height()>$(window).height()){
+        $(".html_content").css('height',$(document).height());
+      }else{
+        $(".html_content").css('height',$(window).height());
+      }
+      
+    })
+    function qhDownload(){
+
+        window.location.href = 'http://103.255.178.23:8080/app-release.apk';
+
+    }
+  </script>
