@@ -66,6 +66,18 @@ public class RegistServiceImpl implements RegistService {
 			if (m != null && m.getData() != null) {
 				throw new DataValidateException("手机号码存在");
 			}
+		} else if (VerificationCodeType.TRANSFE_RREWARDSCORE.equals(memberDto.getType())) {// 积分转赠，发送验证码的校验
+			smsCodeType = ConstantsConfig.JEDIS_HEADER_TRANSFE_RREWARDSCORE_CODE;
+			// 校验手机号码是否已注册
+			if (m != null && m.getData() != null) {
+				throw new DataValidateException("手机号码存在");
+			}
+		} else if (VerificationCodeType.WITHDRAWAL_REWARDSCORE.equals(memberDto.getType())) {// 积分提现，发送验证码的校验
+			smsCodeType = ConstantsConfig.JEDIS_HEADER_WITHDRAWAL_REWARDSCORE_CODE;
+			// 校验手机号码是否已注册
+			if (m != null && m.getData() != null) {
+				throw new DataValidateException("手机号码存在");
+			}
 		}
 		String key = smsCodeType + phoneNo;
 		// 校验发送验证码的时间间隔
@@ -76,13 +88,14 @@ public class RegistServiceImpl implements RegistService {
 		}
 
 		if (!memberDto.getType().equals(VerificationCodeType.REGIST)
-				&& !memberDto.getType().equals(VerificationCodeType.FORGET_PASSWORD)) {
+				&& !memberDto.getType().equals(VerificationCodeType.FORGET_PASSWORD)
+				&& !memberDto.getType().equals(VerificationCodeType.TRANSFE_RREWARDSCORE)
+				&& !memberDto.getType().equals(VerificationCodeType.WITHDRAWAL_REWARDSCORE)) {
 			throw new DataValidateException("发送失败，未知的验证码类型，type：" + memberDto.getType());
 		}
 		// 生成6位随机数
 		Random random = new Random();
-//		String code = (random.nextDouble() + "").substring(2, 8).replace("4", "9");
-		String code = "888888";
+		String code = (random.nextDouble() + "").substring(2, 8).replace("4", "9");
 		// 验证码存到redis中
 		CacheService.StringKey.set(key, code, RedisRootNameSpace.UnitEnum.FIFTEEN_MIN);
 		return ServiceResult.newSuccess(code);

@@ -19,7 +19,11 @@ public interface ConstantsConfig {
 	String JEDIS_HEADER_REGIST_CODE = "REGIST_CODE:";
 	/** redis header:忘记密码短信验证码 */
 	String JEDIS_HEADER_FORGET_PASSWORD_CODE = "FORGET_PASSWORD_CODE:";
-	
+	/** redis header:积分转赠验证码 */
+	String JEDIS_HEADER_TRANSFE_RREWARDSCORE_CODE = "TRANSFE_RREWARDSCORE_CODE:";
+	/** redis header:积分提现短信验证码 */
+	String JEDIS_HEADER_WITHDRAWAL_REWARDSCORE_CODE = "WITHDRAWAL_REWARDSCORE_CODE:";
+
 	
 	/*************** 时间间隔单位标记 ***********************/
 	/** 时间单位标记：分钟 */

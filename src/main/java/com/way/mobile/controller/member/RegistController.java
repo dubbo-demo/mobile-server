@@ -1,17 +1,18 @@
 package com.way.mobile.controller.member;
 
 import com.way.base.common.SmsTemplateEnum;
+import com.way.base.sms.service.SmsService;
 import com.way.common.exception.DataValidateException;
 import com.way.common.log.WayLogger;
 import com.way.common.redis.CacheService;
 import com.way.common.result.ServiceResult;
 import com.way.common.util.Validater;
 import com.way.member.member.dto.MemberDto;
+import com.way.member.member.dto.MemberResetPasswordDto;
 import com.way.mobile.common.constant.ConstantsConfig;
 import com.way.mobile.common.patchca.RedisPatchcaStore;
 import com.way.mobile.common.util.TokenJedisUtils;
 import com.way.mobile.service.member.RegistService;
-import com.way.base.sms.service.SmsService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  *
@@ -170,14 +172,31 @@ public class RegistController {
 			}
 			/// 重置密码
 			serviceResult = registService.resetPassword(memberDto);
-			if (serviceResult.getCode() == ServiceResult.SUCCESS_CODE) {
-				// 密码修改成功，删除redis中登录失败的记录
-				CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhoneNo());
-				// 生成新token
-				String newToken = TokenJedisUtils.putTokenInfoExpire(memberDto.getPhoneNo());
-				// dto
-				memberDto.setToken(newToken);
-				serviceResult.setData(memberDto);
+//			if (serviceResult.getCode() == ServiceResult.SUCCESS_CODE) {
+//				// 密码修改成功，删除redis中登录失败的记录
+//				CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhoneNo());
+//				// 生成新token
+//				String newToken = TokenJedisUtils.putTokenInfoExpire(memberDto.getPhoneNo());
+//				// dto
+//				memberDto.setToken(newToken);
+//				serviceResult.setData(memberDto);
+//			}
+
+			// 获取重置密码次数
+			String key = ConstantsConfig.JEDIS_HEADER_RESET_PASSWORD_FAIL + memberDto.getPhoneNo();
+			Object ob = CacheService.StringKey.getObject(key, Object.class);
+			// 临时记录重置密码失败次数
+			int tempFailTimes = registService.checkResetPasswordFailTimes(ob, key);
+			if (ServiceResult.SUCCESS_CODE == serviceResult.getCode()) {
+				// 重置密码成功，则清零重置密码失败次数，视为第一次登录
+				if (null != ob)
+					CacheService.KeyBase.delete(key);
+			} else {
+				// 重置密码失败，重置密码失败次数+1，最后重置密码失败时间改为当前时间
+				MemberResetPasswordDto resetPasswordFailVO = new MemberResetPasswordDto();
+				resetPasswordFailVO.setLastResetPasswordFailTime(new Date().getTime());
+				resetPasswordFailVO.setResetPasswordFailTimes(tempFailTimes+1);
+				CacheService.StringKey.set(key, resetPasswordFailVO);
 			}
 		} catch (DataValidateException e) {
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
