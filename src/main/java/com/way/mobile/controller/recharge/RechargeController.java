@@ -64,6 +64,7 @@ public class RechargeController {
             serviceResult = memberService.getRechargeInfo(phoneNo, pageNumber);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "查看充值记录失败," + "请求参数：phoneNo：" + phoneNo + "pageNumber：" + pageNumber);
         } finally {
             WayLogger.access("查看充值记录：/getRechargeInfo.do,参数：phoneNo：" + phoneNo + "pageNumber：" + pageNumber);
@@ -100,6 +101,7 @@ public class RechargeController {
             serviceResult = memberService.getOrderNumber(phoneNo, type, validityDurationType);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "APP获取购买订单号失败," + "请求参数：phoneNo：" + phoneNo + "type：" + type + "validityDurationType：" + validityDurationType);
         } finally {
             WayLogger.access("APP获取购买订单号：/getOrderNumber.do,参数：phoneNo：" + phoneNo + "type：" + type + "validityDurationType：" + validityDurationType);

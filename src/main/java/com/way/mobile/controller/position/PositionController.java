@@ -47,6 +47,7 @@ public class PositionController {
             serviceResult = positionService.uploadPosition(positionInfoDto);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "传坐标失败," + "请求参数：" + positionInfoDto);
         } finally {
             WayLogger.access("传坐标：/uploadPosition.do,参数：" + positionInfoDto);
@@ -78,6 +79,7 @@ public class PositionController {
             serviceResult = positionService.getRealtimePositionByPhoneNo(phoneNo, list);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "根据手机号获取用户实时坐标失败," + "请求参数：positionInfoDto:" + positionInfoDtos);
         } finally {
             WayLogger.access("根据手机号获取用户实时坐标：/getRealtimePositionByPhoneNo.do,参数：positionInfoDto:" + positionInfoDtos);
@@ -104,6 +106,7 @@ public class PositionController {
             serviceResult = positionService.getUserViewBeforeExit(phoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "获取退出前查看的用户实时坐标失败," + "请求参数：" + phoneNo);
         } finally {
             WayLogger.access("获取退出前查看的用户实时坐标：/getPositionsBeforeExit.do,参数：" + phoneNo);
@@ -130,6 +133,7 @@ public class PositionController {
             serviceResult = positionService.getRealtimePositionByGroupId(phoneNo, groupId);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "根据组ID获取用户实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
         } finally {
             WayLogger.access("根据组ID获取用户实时坐标：/getRealtimePositionByGroupId.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
@@ -159,6 +163,7 @@ public class PositionController {
             serviceResult = positionService.getMemberHistoryPositions(phoneNo, friendPhoneNo, startTime, endTime);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "查询用户历史轨迹坐标失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo
                     + "，startTime：" + startTime + "，endTime：" + endTime);
         } finally {

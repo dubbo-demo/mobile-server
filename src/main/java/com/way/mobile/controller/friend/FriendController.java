@@ -49,6 +49,7 @@ public class FriendController {
             serviceResult = friendService.getFriendsAndGroups(phoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "获取首页好友以及组信息失败," + "请求参数：" + phoneNo);
         } finally {
             WayLogger.access("获取首页好友以及组信息：/getFriendsAndGroups.do,参数：" + phoneNo);
@@ -85,6 +86,7 @@ public class FriendController {
             serviceResult = friendService.cancelGetFriendPosition(phoneNo, friendPhoneNoList);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "取消查看好友实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
         } finally {
             WayLogger.access("取消查看好友实时坐标：/cancelGetFriendPosition.do,参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
@@ -112,6 +114,7 @@ public class FriendController {
             serviceResult = friendService.cancelGetGroupPosition(phoneNo, groupId);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "取消查看组好友实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
         } finally {
             WayLogger.access("取消查看组好友实时坐标：/cancelGetFriendPosition.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
@@ -150,6 +153,7 @@ public class FriendController {
             serviceResult = friendService.setFriendsVisibleBeforeExiting(phoneNo, friendPhoneNoList);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "设置好友为退出前可见失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
         } finally {
             WayLogger.access("设置好友为退出前可见：/setFriendsVisibleBeforeExiting.do,参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
@@ -177,6 +181,7 @@ public class FriendController {
             serviceResult = friendService.getPhoneContactStatus(phoneNo, friendPhoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "查询手机联系人状态失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
         } finally {
             WayLogger.access("查询手机联系人状态：/getPhoneContactStatus.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
@@ -203,6 +208,7 @@ public class FriendController {
             serviceResult = friendService.getFriendList(phoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "查询好友列表失败," + "请求参数：phoneNo：" + phoneNo);
         } finally {
             WayLogger.access("查询好友列表：/getFriendList.do,参数：phoneNo：" + phoneNo);
@@ -230,10 +236,14 @@ public class FriendController {
             if (StringUtils.isBlank(friendPhoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
+            if(phoneNo.equals(friendPhoneNo)){
+                return ServiceResult.newFailure("不能添加自己为好友");
+            }
             // 申请添加好友
             serviceResult = friendService.applyForAddFriend(phoneNo, friendPhoneNo, applyInfo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "申请添加好友失败," + "请求参数：phoneNo：" + phoneNo);
         } finally {
             WayLogger.access("申请添加好友：/applyForAddFriend.do,参数：phoneNo：" + phoneNo);
@@ -260,6 +270,7 @@ public class FriendController {
             serviceResult = friendService.getApplicationRecordOfFriend(phoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "获取被申请好友记录失败," + "请求参数：phoneNo：" + phoneNo);
         } finally {
             WayLogger.access("获取被申请好友记录：/getApplicationRecordOfFriend.do,参数：phoneNo：" + phoneNo);
@@ -292,6 +303,7 @@ public class FriendController {
             serviceResult = friendService.agreeToAddFriend(phoneNo, friendPhoneNo, isApprove, applicationId);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "同意/拒绝添加好友申请失败," + "请求参数：phoneNo：" + phoneNo);
         } finally {
             WayLogger.access("同意/拒绝添加好友申请：/agreeToAddFriend.do,参数：phoneNo：" + phoneNo);
@@ -322,6 +334,7 @@ public class FriendController {
             serviceResult = friendService.getFriendInfo(phoneNo, friendPhoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "查看好友信息失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
         } finally {
             WayLogger.access("查看好友信息：/getFriendInfo.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
@@ -379,6 +392,7 @@ public class FriendController {
             serviceResult = friendService.modifyFriendInfo(phoneNo, dto);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "修改好友信息失败," + "请求参数：phoneNo：" + phoneNo);
         } finally {
             WayLogger.access("修改好友信息：/modifyFriendInfo.do,参数：phoneNo：" + phoneNo);
@@ -409,6 +423,7 @@ public class FriendController {
             serviceResult = friendService.deleteFriend(phoneNo, friendPhoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "删除好友失败," + "请求参数：phoneNo：" + phoneNo);
         } finally {
             WayLogger.access("删除好友：/deleteFriend.do,参数：phoneNo：" + phoneNo);
@@ -439,6 +454,7 @@ public class FriendController {
             serviceResult = friendService.addGroupInfo(phoneNo, groupName);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "新建组失败," + "请求参数：phoneNo：" + phoneNo);
         } finally {
             WayLogger.access("新建组：/addGroupInfo.do,参数：phoneNo：" + phoneNo);
@@ -469,6 +485,7 @@ public class FriendController {
             serviceResult = friendService.getGroupInfo(phoneNo, groupId);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "查看组信息失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
         } finally {
             WayLogger.access("查看组信息：/getGroupInfo.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
@@ -511,6 +528,7 @@ public class FriendController {
             serviceResult = friendService.modifyGroupInfo(phoneNo, dto);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "修改组信息失败," + "请求参数：phoneNo：" + phoneNo + "，GroupInfoDto：" + dto);
         } finally {
             WayLogger.access("修改组信息：/modifyGroupInfo.do,参数：phoneNo：" + phoneNo + "，GroupInfoDto：" + dto);
@@ -541,6 +559,7 @@ public class FriendController {
             serviceResult = friendService.deleteGroupInfo(phoneNo, groupId);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "删除组信息失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
         } finally {
             WayLogger.access("删除组信息：/deleteGroupInfo.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
@@ -574,6 +593,7 @@ public class FriendController {
             serviceResult = friendService.moveFriendToGroup(phoneNo, groupId, friendPhoneNos);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "将好友添加到分组失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);
         } finally {
             WayLogger.access("将好友添加到分组：/moveFriendToGroup.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);
@@ -608,6 +628,7 @@ public class FriendController {
             serviceResult = friendService.removeFriendFromGroup(phoneNo, groupId, friendPhoneNos);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "将好友从分组中移除失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);
         } finally {
             WayLogger.access("将好友从分组中移除：/removeFriendFromGroup.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);

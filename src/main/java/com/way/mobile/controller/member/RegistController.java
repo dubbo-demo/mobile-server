@@ -82,7 +82,7 @@ public class RegistController {
 		}catch (Exception e) {
 			WayLogger.error(e,"发送短信验证码异常");
 			serviceResult.setCode(ServiceResult.ERROR_CODE);
-			serviceResult.setMessage("失败");
+			serviceResult.setMessage(ServiceResult.ERROR_MSG);
 		}
 		return serviceResult;
 	}
@@ -154,7 +154,7 @@ public class RegistController {
 		}
 		return serviceResult;
 	}
-	
+
 	/**
 	 * @Title: resetPassword
 	 * @Description: 重置密码

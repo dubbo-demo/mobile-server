@@ -48,6 +48,7 @@ public class MemberController {
             serviceResult = memberService.checkPhone(friendPhoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "校验邀请人手机号是否存在失败," + "请求参数：friendPhoneNo：" + friendPhoneNo);
         } finally {
             WayLogger.access("校验邀请人手机号是否存在：/checkPhone.do,参数：friendPhoneNo：" + friendPhoneNo);
@@ -78,6 +79,7 @@ public class MemberController {
             serviceResult = memberService.searchUserByPhoneNo(phoneNo, friendPhoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "根据手机号搜索用户失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
         } finally {
             WayLogger.access("根据手机号搜索用户：/searchUserByPhoneNo.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
@@ -104,6 +106,7 @@ public class MemberController {
             serviceResult = memberService.getMemberInfo(phoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "查看个人信息失败," + "请求参数：phoneNo：" + phoneNo);
         } finally {
             WayLogger.access("查看个人信息：/getMemberInfo.do,参数：phoneNo：" + phoneNo);
@@ -136,6 +139,7 @@ public class MemberController {
             serviceResult = memberService.modifyMemberInfo(dto);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "修改个人信息失败," + "请求参数：phoneNo：" + phoneNo + ",MemberDto：" + dto);
         } finally {
             WayLogger.access("修改个人信息：/modifyMemberInfo.do,参数：phoneNo：" + phoneNo + ",MemberDto：" + dto);
@@ -167,6 +171,7 @@ public class MemberController {
             serviceResult = memberService.getMemberValueAddedTime(phoneNo, type);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "查看用户增值服务时间失败," + "请求参数：phoneNo：" + phoneNo + "type：" + type);
         } finally {
             WayLogger.access("查看用户增值服务时间：/getMemberValueAddedTime.do,参数：phoneNo：" + phoneNo + "type：" + type);

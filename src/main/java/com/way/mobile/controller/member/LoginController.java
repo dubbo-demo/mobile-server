@@ -82,6 +82,7 @@ public class LoginController {
         } catch (Exception e) {
             memberDto.setPassword(StringUtils.EMPTY);
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "登录失败," + "请求参数：" + memberDto);
         } finally {
             memberDto.setPassword(StringUtils.EMPTY);
@@ -105,6 +106,7 @@ public class LoginController {
             loginService.logout(token);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
+            serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "退出应用失败," + "请求参数：" + memberDto);
         } finally {
             WayLogger.access("退出应用：/logout.do,参数：" + memberDto);
