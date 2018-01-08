@@ -52,25 +52,35 @@ public class RegistController {
 		WayLogger.info("生成图片验证码：/getVerificationCode.htm" + ",参数："+ params);
 		ServiceResult<String> serviceResult = ServiceResult.newSuccess();
 		try {
-			// 校验设备号是否为空
-			if (StringUtils.isBlank(params.getDeviceNo()) || "null".equals(params.getDeviceNo())) {
-				WayLogger.error("发送短信验证码........异常，deviceNo设备号不能为空");
-				serviceResult.setCode(ServiceResult.ERROR_CODE);
-				serviceResult.setMessage("设备号不能为空");
-				return serviceResult;
-			}
-			// 校验图片验证码
-			boolean isPass = RedisPatchcaStore.validateImgCode(params.getDeviceNo(), params.getImgCode());
-			if (!isPass) {
-				serviceResult.setCode(ServiceResult.ERROR_CODE);
-				serviceResult.setMessage("图片验证码不正确");
-				return serviceResult;
-			}
+//			// 校验设备号是否为空
+//			if (StringUtils.isBlank(params.getDeviceNo()) || "null".equals(params.getDeviceNo())) {
+//				WayLogger.error("发送短信验证码........异常，deviceNo设备号不能为空");
+//				serviceResult.setCode(ServiceResult.ERROR_CODE);
+//				serviceResult.setMessage("设备号不能为空");
+//				return serviceResult;
+//			}
+//			// 校验图片验证码
+//			boolean isPass = RedisPatchcaStore.validateImgCode(params.getDeviceNo(), params.getImgCode());
+//			if (!isPass) {
+//				serviceResult.setCode(ServiceResult.ERROR_CODE);
+//				serviceResult.setMessage("图片验证码不正确");
+//				return serviceResult;
+//			}
 			// 发生短信验证码
 			ServiceResult<String> smsResult = registService.sendCode(params);
 			String smsCode = smsResult.getData();
-			if(StringUtils.isNotBlank(smsCode)){
-				smsService.sendSms(smsCode, params.getPhoneNo(), SmsTemplateEnum.APP_REGIST_TEMPLATE);
+			if (StringUtils.isNotBlank(smsCode)) {
+				if ("0".equals(params.getType())) {
+					smsService.sendSms(smsCode, params.getPhoneNo(), SmsTemplateEnum.APP_REGIST_TEMPLATE);
+				} else if ("1".equals(params.getType())){
+					smsService.sendSms(smsCode, params.getPhoneNo(), SmsTemplateEnum.APP_RESETPASSWORD_TEMPLATE);
+				} else if ("3".equals(params.getType())){
+					smsService.sendSms(smsCode, params.getPhoneNo(), SmsTemplateEnum.APP_TRANSFER_REWARDSCORE_TEMPLATE);
+				} else if ("4".equals(params.getType())){
+					smsService.sendSms(smsCode, params.getPhoneNo(), SmsTemplateEnum.APP_WITHDRAWAL_REWARDSCORE_TEMPLATE);
+				} else {
+					return ServiceResult.newFailure("短信模板配置异常,模板编码:" + params.getType());
+				}
 			}else{
 				serviceResult.setCode(ServiceResult.ERROR_CODE);
 				serviceResult.setMessage("发送短信验证码失败");
