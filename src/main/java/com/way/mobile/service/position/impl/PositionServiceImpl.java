@@ -5,6 +5,7 @@ import com.way.common.result.ServiceResult;
 import com.way.member.friend.dto.FriendsInfoDto;
 import com.way.member.friend.dto.GroupInfoDto;
 import com.way.member.friend.service.FriendsInfoService;
+import com.way.member.friend.service.GroupInfoService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.position.dto.PositionInfoDto;
 import com.way.member.position.service.PositionInfoService;
@@ -35,6 +36,9 @@ public class PositionServiceImpl implements PositionService {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private GroupInfoService groupInfoService;
 
     /**
      * 上传坐标
@@ -137,7 +141,8 @@ public class PositionServiceImpl implements PositionService {
         Set<String> groupIds = new TreeSet<String>();
         // 查出退出前查看的好友信息
         List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendsInfoBeforeExit(phoneNo);
-
+        // 查询组信息
+        List<GroupInfoDto> groups = groupInfoService.getGroupInfoListByPhoneNo(phoneNo);
         for(FriendsInfoDto dto : friendsInfoDtos){
             if(StringUtils.isBlank(dto.getGroupId())){
                 notGroupFriendslist.add(dto);
@@ -148,16 +153,18 @@ public class PositionServiceImpl implements PositionService {
         }
         data.put("friends", notGroupFriendslist);
         friendsInfoDtos.removeAll(notGroupFriendslist);
-        for(String groupId : groupIds){
-            GroupInfoDto groupInfoDto = new GroupInfoDto();
+
+        for(GroupInfoDto groupInfoDto : groups){
             List<FriendsInfoDto> groupFriendslist = new ArrayList<FriendsInfoDto>();
             for(FriendsInfoDto dto : friendsInfoDtos){
-                if(groupId.equals(dto.getGroupId())){
+                if(groupInfoDto.getGroupId().equals(dto.getGroupId())){
                     groupFriendslist.add(dto);
                 }
             }
-            groupInfoDto.setFriends(groupFriendslist);
-            groupInfoDtos.add(groupInfoDto);
+//            if(groupFriendslist.size() > 0){
+                groupInfoDto.setFriends(groupFriendslist);
+                groupInfoDtos.add(groupInfoDto);
+//            }
         }
         data.put("groups", groupInfoDtos);
         serviceResult.setData(data);

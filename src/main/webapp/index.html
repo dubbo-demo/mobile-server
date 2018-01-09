@@ -154,6 +154,7 @@
           <button onclick="qhDownload()">立即下载</button>
         </div>
         <div class="app_info" >
+            <p style="font-size: .4rem;color: #222222" >仅限安卓版下载</p>
             <p>在哪儿”(Where Are You)APP是通过GPS、手机信号基站、无线Wifi等方式,基于百度地图实现好友定位、电子围栏报警和轨迹回放等功能的绿色软件，让您随时了解至爱亲友的位置和行踪。世界那么大，尽在方寸间。
             特色功能：</p>
             <p>1.位置实时共享：实时显示个人及多位好友的位置信息，相互距离一目了然。</p>
@@ -193,6 +194,6 @@
       
     })
     function qhDownload(){
-        window.location.href = 'http://download.xuxinpei.com::8080/app-release.apk';
+        window.location.href = 'http://103.255.178.23:8080/mobile-server/app-release.apk?'+new Date().getTime();
     }
   </script>

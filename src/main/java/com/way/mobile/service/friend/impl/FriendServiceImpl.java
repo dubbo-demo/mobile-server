@@ -78,8 +78,10 @@ public class FriendServiceImpl implements FriendService {
                     flag = false;
                 }
             }
-            groupInfoDto.setFriends(groupFriendsList);
-            groupInfoDtos.add(groupInfoDto);
+//            if(groupFriendsList.size() > 0){
+                groupInfoDto.setFriends(groupFriendsList);
+                groupInfoDtos.add(groupInfoDto);
+//            }
         }
         data.put("groups", groupInfoDtos);
         serviceResult.setData(data);
