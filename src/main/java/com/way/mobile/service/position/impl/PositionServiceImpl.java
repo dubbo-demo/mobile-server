@@ -47,22 +47,21 @@ public class PositionServiceImpl implements PositionService {
      */
     @Override
     public ServiceResult<String> uploadPosition(PositionInfoDto positionInfoDto) {
-        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(positionInfoDto.getPhoneNo());
-        // 判断用户是否开启增值服务1是,2否
-        // 开启增值服务直接保存
-        if("1".equals(memberDto.getData().getTrajectoryService())){
-            positionInfoService.savePosition(positionInfoDto);
+        // 根据手机号获取用户实时坐标
+        ServiceResult<PositionInfoDto> dto = positionInfoService.getRealtimePositionByPhoneNo(positionInfoDto.getPhoneNo(), null);
+        // 有记录更新
+        if(null != dto.getData()){
+            // 更新总表用户坐标
+            positionInfoService.updatePosition(positionInfoDto, dto.getData().getId());
         }else{
-            // 根据手机号获取用户实时坐标
-            ServiceResult<PositionInfoDto> dto = positionInfoService.getRealtimePositionByPhoneNo(positionInfoDto.getPhoneNo(), null);
-            // 有记录更新
-            if(null != dto.getData()){
-                // 更新用户坐标
-                positionInfoService.updatePosition(positionInfoDto, dto.getData().getId());
-            }else{
-                // 没有记录新建
-                positionInfoService.savePosition(positionInfoDto);
-            }
+            // 没有记录新建到总表
+            positionInfoService.savePosition(positionInfoDto, "0");
+        }
+        // 判断用户是否开启增值服务1是,2否
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(positionInfoDto.getPhoneNo());
+        // 开启增值服务直接保存轨迹信息到分表
+        if("1".equals(memberDto.getData().getTrajectoryService())) {
+            positionInfoService.savePosition(positionInfoDto, null);
         }
         return ServiceResult.newSuccess();
     }
