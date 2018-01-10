@@ -184,13 +184,16 @@ public class RewardScoreController {
                     StringUtils.isBlank(withdrawalInfoDto.getName()) || null == withdrawalInfoDto.getRewardScore()) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
+            if(withdrawalInfoDto.getRewardScore() < 500 || withdrawalInfoDto.getRewardScore() % 100 != 0){
+                return ServiceResult.newFailure("提现积分有误");
+            }
             String key = ConstantsConfig.JEDIS_HEADER_WITHDRAWAL_REWARDSCORE_CODE + phoneNo;
             String code = CacheService.StringKey.getObject(key, String.class);
             if (StringUtils.isBlank(code)) {
-                throw new DataValidateException("请重新获取短信验证码");
+                return ServiceResult.newFailure("请重新获取短信验证码");
             }
             if (!code.equals(verificationCode)) {
-                throw new DataValidateException("短信验证码不正确");
+                return ServiceResult.newFailure("短信验证码不正确");
             }
             // 积分提现
             serviceResult = memberService.withdrawalRewardScore(phoneNo, withdrawalInfoDto);
