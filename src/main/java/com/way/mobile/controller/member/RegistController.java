@@ -197,13 +197,13 @@ public class RegistController {
 				// 重置密码成功，则清零重置密码失败次数，视为第一次登录
 				if (null != ob){
 					CacheService.KeyBase.delete(key);
-					// 密码修改成功，删除redis中登录失败的记录
-					CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhoneNo());
-					// 生成新token
-					String newToken = TokenJedisUtils.putTokenInfoExpire(memberDto.getPhoneNo());
-					memberDto.setToken(newToken);
-					serviceResult.setData(memberDto);
 				}
+				// 密码修改成功，删除redis中登录失败的记录
+				CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhoneNo());
+				// 生成新token
+				String newToken = TokenJedisUtils.putTokenInfoExpire(memberDto.getPhoneNo());
+				memberDto.setToken(newToken);
+				serviceResult.setData(memberDto);
 			} else {
 				// 重置密码失败，重置密码失败次数+1，最后重置密码失败时间改为当前时间
 				MemberResetPasswordDto resetPasswordFailVO = new MemberResetPasswordDto();
