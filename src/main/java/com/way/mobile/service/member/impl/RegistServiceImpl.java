@@ -108,6 +108,11 @@ public class RegistServiceImpl implements RegistService {
 	 * @throws DataValidateException
 	 */
 	public ServiceResult<MemberDto> regist(MemberDto memberDto) throws DataValidateException {
+		// 校验邀请人手机号是否正确
+		ServiceResult<MemberDto> m = memberInfoService.loadMapByMobile(memberDto.getInvitationCode());
+		if (null == m || m.getData() == null){
+			throw new DataValidateException("邀请人不存在");
+		}
 		memberDto.setNickSpell(PingYinUtil.getPingYin(memberDto.getNickName()));
 		String phoneNo = memberDto.getPhoneNo();
 		String key = ConstantsConfig.JEDIS_HEADER_REGIST_CODE + phoneNo;

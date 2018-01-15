@@ -111,6 +111,11 @@ public class RegistController {
 			memberDto.setVersion(request.getHeader("version"));
 			// 设备号
             memberDto.setDeviceNo(request.getHeader("deviceNo"));
+            if(StringUtils.isEmpty(memberDto.getInvitationCode())){
+				serviceResult.setCode(ServiceResult.ERROR_CODE);
+				serviceResult.setMessage("请邀请人信息");
+				return serviceResult;
+			}
 			// 校验短信验证码
 			if (StringUtils.isEmpty(memberDto.getVerificationCode())) {
 				serviceResult.setCode(ServiceResult.ERROR_CODE);
@@ -180,27 +185,25 @@ public class RegistController {
 					|| StringUtils.isEmpty(memberDto.getVerificationCode())) {
 				return ServiceResult.newFailure("必传参数不能为空");
 			}
-			/// 重置密码
-			serviceResult = registService.resetPassword(memberDto);
-//			if (serviceResult.getCode() == ServiceResult.SUCCESS_CODE) {
-//				// 密码修改成功，删除redis中登录失败的记录
-//				CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhoneNo());
-//				// 生成新token
-//				String newToken = TokenJedisUtils.putTokenInfoExpire(memberDto.getPhoneNo());
-//				// dto
-//				memberDto.setToken(newToken);
-//				serviceResult.setData(memberDto);
-//			}
 
 			// 获取重置密码次数
 			String key = ConstantsConfig.JEDIS_HEADER_RESET_PASSWORD_FAIL + memberDto.getPhoneNo();
 			Object ob = CacheService.StringKey.getObject(key, Object.class);
 			// 临时记录重置密码失败次数
 			int tempFailTimes = registService.checkResetPasswordFailTimes(ob, key);
+			/// 重置密码
+			serviceResult = registService.resetPassword(memberDto);
 			if (ServiceResult.SUCCESS_CODE == serviceResult.getCode()) {
 				// 重置密码成功，则清零重置密码失败次数，视为第一次登录
-				if (null != ob)
+				if (null != ob){
 					CacheService.KeyBase.delete(key);
+					// 密码修改成功，删除redis中登录失败的记录
+					CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhoneNo());
+					// 生成新token
+					String newToken = TokenJedisUtils.putTokenInfoExpire(memberDto.getPhoneNo());
+					memberDto.setToken(newToken);
+					serviceResult.setData(memberDto);
+				}
 			} else {
 				// 重置密码失败，重置密码失败次数+1，最后重置密码失败时间改为当前时间
 				MemberResetPasswordDto resetPasswordFailVO = new MemberResetPasswordDto();
