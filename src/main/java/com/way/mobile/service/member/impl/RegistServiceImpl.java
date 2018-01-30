@@ -1,5 +1,6 @@
 package com.way.mobile.service.member.impl;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import com.way.common.cache.RedisRootNameSpace;
 import com.way.common.exception.DataValidateException;
 import com.way.common.redis.CacheService;
@@ -108,10 +109,12 @@ public class RegistServiceImpl implements RegistService {
 	 * @throws DataValidateException
 	 */
 	public ServiceResult<MemberDto> regist(MemberDto memberDto) throws DataValidateException {
-		// 校验邀请人手机号是否正确
-		ServiceResult<MemberDto> m = memberInfoService.loadMapByMobile(memberDto.getInvitationCode());
+		// 推荐人号码
+		String invitationCode = memberDto.getInvitationCode();
+		// 根据邀请码查出邀请人上级用户邀请码
+		ServiceResult<MemberDto> m = memberInfoService.loadMapByInvitationCode(invitationCode);
 		if (null == m || m.getData() == null){
-			throw new DataValidateException("邀请人不存在");
+			throw new DataValidateException("邀请码不存在");
 		}
 		memberDto.setNickSpell(PingYinUtil.getPingYin(memberDto.getNickName()));
 		String phoneNo = memberDto.getPhoneNo();
@@ -129,15 +132,17 @@ public class RegistServiceImpl implements RegistService {
 		if (null != memberRes.getData()){ // 该手机号已经注册
 			throw new DataValidateException("手机号已注册");
 		}
-		memberInfoService.memberRegist(memberDto);
+		memberDto.setInvitationCode(getUniqueInvitationCode(8));
+		memberInfoService.memberRegist(memberDto, invitationCode);
 		// 注册成功调用登录接口登录，并异步保存用户登录信息
 		loginService.login(memberDto);
 		return ServiceResult.newSuccess(memberDto);
 	}
 
-	public static String generateRandomStr(int len) {
+	// 生成邀请码
+	public static String getUniqueInvitationCode(int len) {
 		//字符源，可以根据需要删减
-		String generateSource = "2356789abcdefghgklmnpqrstuvwxyz";//去掉1和i ，0和o
+		String generateSource = "2356789ABCDEFGHGKLMNPQRSTUVWXYZ";// 去掉0、1、4、i和o
 		String rtnStr = "";
 		for (int i = 0; i < len; i++) {
 			//循环随机获得当次字符，并移走选出的字符
@@ -156,25 +161,29 @@ public class RegistServiceImpl implements RegistService {
 	public ServiceResult<MemberDto> resetPassword(MemberDto memberDto) throws DataValidateException {
 		String phoneNo = memberDto.getPhoneNo();
 		// 校验手机号
-		if (!Validater.isMobileNew(phoneNo))
+		if (!Validater.isMobileNew(phoneNo)) {
 			throw new DataValidateException("手机号不正确");
-		if (StringUtils.isEmpty(memberDto.getVerificationCode()))
+		}
+		if (StringUtils.isEmpty(memberDto.getVerificationCode())) {
 			throw new DataValidateException("请输入短信验证码");
-		if (StringUtils.isEmpty(memberDto.getPassword()))
+		}
+		if (StringUtils.isEmpty(memberDto.getPassword())) {
 			throw new DataValidateException("请输入密码");
+		}
 
 		// 校验验证码
 		String key = ConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE + phoneNo;
 		String code = CacheService.StringKey.getObject(key, String.class);
-		if (code == null || code == "")
+		if (code == null || code == "") {
 			throw new DataValidateException("短信验证码已失效");
-		if (!memberDto.getVerificationCode().equals(code))
+		}
+		if (!memberDto.getVerificationCode().equals(code)) {
 			throw new DataValidateException("短信验证码不正确");
-
+		}
 		// 校验用户是否存在
 		ServiceResult<MemberDto> memberRes = memberInfoService.loadMapByMobile(phoneNo);
 		// 用户不存在
-		if (memberRes.getData() == null){
+		if (memberRes.getData() == null) {
 			throw new DataValidateException("手机号未注册");
 		}
 		// 更新密码表
