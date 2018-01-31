@@ -236,11 +236,11 @@ public class FriendServiceImpl implements FriendService {
         ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
         String invitationCode = memberDto.getData().getInvitationCode();
 
-        ServiceResult<MemberDto> friendMemberDto = memberService.getMemberInfo(phoneNo);
+        ServiceResult<MemberDto> friendMemberDto = memberService.getMemberInfo(friendPhoneNo);
         if(null == friendMemberDto.getData()){
             return ServiceResult.newFailure("该用户不存在");
         }
-        String friendInvitationCode = memberDto.getData().getInvitationCode();
+        String friendInvitationCode = friendMemberDto.getData().getInvitationCode();
 
         // 判断是否为好友
         ServiceResult<FriendsInfoDto> friendsInfoDto = friendsInfoService.getFriendInfo(invitationCode, friendInvitationCode);
