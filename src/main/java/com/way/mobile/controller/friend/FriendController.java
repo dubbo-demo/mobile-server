@@ -117,7 +117,7 @@ public class FriendController {
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "取消查看组好友实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
         } finally {
-            WayLogger.access("取消查看组好友实时坐标：/cancelGetFriendPosition.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+            WayLogger.access("取消查看组好友实时坐标：/cancelGetGroupPosition.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
         }
         return serviceResult;
     }

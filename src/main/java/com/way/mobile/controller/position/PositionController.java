@@ -3,7 +3,9 @@ package com.way.mobile.controller.position;
 import com.alibaba.fastjson.JSON;
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
+import com.way.member.member.dto.MemberDto;
 import com.way.member.position.dto.PositionInfoDto;
+import com.way.mobile.service.member.MemberService;
 import com.way.mobile.service.position.PositionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ public class PositionController {
     @Autowired
     private PositionService positionService;
 
+    @Autowired
+    private MemberService memberService;
+
     /**
      * 上传坐标
      */
@@ -42,7 +47,12 @@ public class PositionController {
             if (StringUtils.isBlank(phoneNo)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
+
+            // 根据手机号查用户邀请码
+            ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
             positionInfoDto.setPhoneNo(phoneNo);
+            positionInfoDto.setInvitationCode(memberDto.getData().getInvitationCode());
+
             // 上传坐标
             serviceResult = positionService.uploadPosition(positionInfoDto);
         } catch (Exception e) {
@@ -60,7 +70,7 @@ public class PositionController {
      */
     @RequestMapping(value = "/getRealtimePositionByPhoneNo", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> getRealtimePositionByPhoneNo(HttpServletRequest request, String positionInfoDtos){
+    public ServiceResult<Object> getRealTimePositionByPhoneNo(HttpServletRequest request, String positionInfoDtos){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         String phoneNo = (String) request.getAttribute("phoneNo");
         try {
@@ -76,7 +86,7 @@ public class PositionController {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 根据手机号获取用户实时坐标
-            serviceResult = positionService.getRealtimePositionByPhoneNo(phoneNo, list);
+            serviceResult = positionService.getRealTimePositionByPhoneNo(phoneNo, list);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);

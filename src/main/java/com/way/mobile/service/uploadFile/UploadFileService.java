@@ -13,9 +13,9 @@ public interface UploadFileService {
 
     /**
      * 头像上传
-     * @param phoneNo
+     * @param invitationCode
      * @param file
      * @return
      */
-    String uploadHeadPic(String phoneNo, MultipartFile file);
+    String uploadHeadPic(String invitationCode, MultipartFile file);
 }

@@ -26,7 +26,7 @@ public interface PositionService {
      * @param positionInfoDtos
      * @return
      */
-    ServiceResult<Object> getRealtimePositionByPhoneNo(String phoneNo, List<PositionInfoDto> positionInfoDtos);
+    ServiceResult<Object> getRealTimePositionByPhoneNo(String phoneNo, List<PositionInfoDto> positionInfoDtos);
 
     /**
      * 获取退出前查看的用户实时坐标

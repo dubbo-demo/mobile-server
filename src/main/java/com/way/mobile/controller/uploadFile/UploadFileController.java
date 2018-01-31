@@ -2,6 +2,8 @@ package com.way.mobile.controller.uploadFile;
 
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
+import com.way.member.member.dto.MemberDto;
+import com.way.mobile.service.member.MemberService;
 import com.way.mobile.service.uploadFile.UploadFileService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ public class UploadFileController {
     @Autowired
     private UploadFileService uploadFileService;
 
+    @Autowired
+    private MemberService memberService;
+
     /**
      * 头像上传
      * @param request
@@ -38,7 +43,6 @@ public class UploadFileController {
     @ResponseBody
     public ServiceResult<Object> uploadHeadPic(@ModelAttribute MultipartFile file, HttpServletRequest request){
         String phoneNo = (String) request.getAttribute("phoneNo");
-//        String phoneNo = "15651010836";
         String fileId = "";
         try {
             ServiceResult result = ServiceResult.newSuccess();
@@ -46,8 +50,11 @@ public class UploadFileController {
             if (StringUtils.isBlank(phoneNo) || null == file ) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
+            // 根据手机号查用户邀请码
+            ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+
             // 头像上传
-            fileId = uploadFileService.uploadHeadPic(phoneNo, file);
+            fileId = uploadFileService.uploadHeadPic(memberDto.getData().getInvitationCode(), file);
             if(StringUtils.isBlank(fileId)){
                 return ServiceResult.newFailure();
             }

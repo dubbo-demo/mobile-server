@@ -88,14 +88,14 @@ public class LoginServiceImpl implements LoginService {
 		// 临时记录登录失败次数
 		int tempFailTimes = checkLoginFailTimes(ob, key);
 		/** 调用户中心登录接口验证用户信息， 返回用户信息 */
-		ServiceResult<MemberDto> result = memberInfoService.queryMemberInfo(phoneNo);
+		ServiceResult<MemberDto> result = memberInfoService.getMemberInfo(phoneNo);
 		MemberDto resultDto = result.getData();
 		if(resultDto == null){
 			result.setCode(ServiceResult.ERROR_CODE);
 			result.setMessage("手机号未注册");
 			return result;
 		}else{
-			if(passwordService.checkCurPassword(phoneNo, memberDto.getPassword()).getCode() == 1){
+			if(passwordService.checkCurPassword(result.getData().getInvitationCode(), memberDto.getPassword()).getCode() == 1){
 				result.setCode(ServiceResult.ERROR_CODE);
 				result.setMessage("手机号或密码错误");
 				return result;

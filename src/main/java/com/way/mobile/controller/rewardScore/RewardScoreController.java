@@ -232,7 +232,7 @@ public class RewardScoreController {
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "积分提现失败," + "请求参数：phoneNo：" + phoneNo + "pageNumber：" + pageNumber);
         } finally {
-            WayLogger.access("积分提现：/withdrawalRewardScore.do,参数：phoneNo：" + phoneNo + "pageNumber：" + pageNumber);
+            WayLogger.access("积分提现：/getWithdrawalRewardScoreInfo.do,参数：phoneNo：" + phoneNo + "pageNumber：" + pageNumber);
         }
         return serviceResult;
     }

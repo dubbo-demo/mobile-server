@@ -48,7 +48,7 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public ServiceResult<String> uploadPosition(PositionInfoDto positionInfoDto) {
         // 根据手机号获取用户实时坐标
-        ServiceResult<PositionInfoDto> dto = positionInfoService.getRealtimePositionByPhoneNo(positionInfoDto.getPhoneNo(), null);
+        ServiceResult<PositionInfoDto> dto = positionInfoService.getRealTimePositionByPhoneNo(positionInfoDto.getPhoneNo(), null);
         // 有记录更新
         if(null != dto.getData()){
             // 更新总表用户坐标
@@ -57,12 +57,12 @@ public class PositionServiceImpl implements PositionService {
             // 没有记录新建到总表
             positionInfoService.savePosition(positionInfoDto, "0");
         }
-        // 判断用户是否开启增值服务1是,2否
-        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(positionInfoDto.getPhoneNo());
-        // 开启增值服务直接保存轨迹信息到分表
-        if("1".equals(memberDto.getData().getTrajectoryService())) {
-            positionInfoService.savePosition(positionInfoDto, null);
-        }
+//        // 判断用户是否开启增值服务1是,2否
+//        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(positionInfoDto.getPhoneNo());
+//        // 开启增值服务直接保存轨迹信息到分表
+//        if("1".equals(memberDto.getData().getTrajectoryService())) {
+//            positionInfoService.savePosition(positionInfoDto, null);
+//        }
         return ServiceResult.newSuccess();
     }
 
@@ -73,7 +73,7 @@ public class PositionServiceImpl implements PositionService {
      * @return
      */
     @Override
-    public ServiceResult<Object> getRealtimePositionByPhoneNo(String phoneNo, List<PositionInfoDto> positionInfoDtos) {
+    public ServiceResult<Object> getRealTimePositionByPhoneNo(String phoneNo, List<PositionInfoDto> positionInfoDtos) {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         Map<String, List<PositionInfoDto>> map = new HashMap<String, List<PositionInfoDto>>();
         List<PositionInfoDto> list = new ArrayList<PositionInfoDto>();
@@ -102,7 +102,7 @@ public class PositionServiceImpl implements PositionService {
                 if(friendsInfoDto.getIsAuthorizedVisible() == 1 && ArrayUtils.contains(authorizedWeeks,week) &&
                         now.compareTo(friendsInfoDto.getAuthorizedAccreditStartTime()) >= 0 && now.compareTo(friendsInfoDto.getAuthorizedAccreditEndTime()) < 0){
                     // 根据手机号获取用户实时坐标
-                    ServiceResult<PositionInfoDto> positionInfoDto = positionInfoService.getRealtimePositionByPhoneNo(dto.getPhoneNo(), dto.getModifyTime());
+                    ServiceResult<PositionInfoDto> positionInfoDto = positionInfoService.getRealTimePositionByPhoneNo(dto.getPhoneNo(), dto.getModifyTime());
                     if(null != positionInfoDto.getData()){
                         list.add(positionInfoDto.getData());
                     }
@@ -131,39 +131,40 @@ public class PositionServiceImpl implements PositionService {
      */
     @Override
     public ServiceResult<Object> getUserViewBeforeExit(String phoneNo) {
+        // 查询用户信息
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
+
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        List<PositionInfoDto> list = new ArrayList<PositionInfoDto>();
         Map<String, Object> data = new HashMap<String, Object>();
         // 非组成员好友
-        List<FriendsInfoDto> notGroupFriendslist = new ArrayList<FriendsInfoDto>();
+        List<FriendsInfoDto> notGroupFriendsList = new ArrayList<FriendsInfoDto>();
         List<GroupInfoDto> groupInfoDtos = new ArrayList<GroupInfoDto>();
         Set<String> groupIds = new TreeSet<String>();
         // 查出退出前查看的好友信息
-        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendsInfoBeforeExit(phoneNo);
+        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendsInfoBeforeExit(invitationCode);
         // 查询组信息
-        List<GroupInfoDto> groups = groupInfoService.getGroupInfoListByPhoneNo(phoneNo);
+        List<GroupInfoDto> groups = groupInfoService.getGroupInfoListByInvitationCode(invitationCode);
         for(FriendsInfoDto dto : friendsInfoDtos){
             if(StringUtils.isBlank(dto.getGroupId())){
-                notGroupFriendslist.add(dto);
+                notGroupFriendsList.add(dto);
             }else{
                 // 收集组信息
                 groupIds.add(dto.getGroupId());
             }
         }
-        data.put("friends", notGroupFriendslist);
-        friendsInfoDtos.removeAll(notGroupFriendslist);
+        data.put("friends", notGroupFriendsList);
+        friendsInfoDtos.removeAll(notGroupFriendsList);
 
         for(GroupInfoDto groupInfoDto : groups){
-            List<FriendsInfoDto> groupFriendslist = new ArrayList<FriendsInfoDto>();
+            List<FriendsInfoDto> groupFriendsList = new ArrayList<FriendsInfoDto>();
             for(FriendsInfoDto dto : friendsInfoDtos){
                 if(groupInfoDto.getGroupId().equals(dto.getGroupId())){
-                    groupFriendslist.add(dto);
+                    groupFriendsList.add(dto);
                 }
             }
-//            if(groupFriendslist.size() > 0){
-                groupInfoDto.setFriends(groupFriendslist);
-                groupInfoDtos.add(groupInfoDto);
-//            }
+            groupInfoDto.setFriends(groupFriendsList);
+            groupInfoDtos.add(groupInfoDto);
         }
         data.put("groups", groupInfoDtos);
         serviceResult.setData(data);

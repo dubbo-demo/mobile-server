@@ -12,6 +12,7 @@ import com.way.member.friend.service.GroupInfoService;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.service.MemberInfoService;
 import com.way.mobile.service.friend.FriendService;
+import com.way.mobile.service.member.MemberService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,9 @@ public class FriendServiceImpl implements FriendService {
     @Autowired
     private GroupInfoService groupInfoService;
 
+    @Autowired
+    private MemberService memberService;
+
     /**
      * 获取首页好友以及组信息
      * @param phoneNo
@@ -48,14 +52,17 @@ public class FriendServiceImpl implements FriendService {
     @Override
     public ServiceResult<Object> getFriendsAndGroups(String phoneNo) {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        // 查询用户信息
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
         Map<String, Object> data = new HashMap<String, Object>();
         // 非组成员好友
         List<FriendsInfoDto> notGroupFriendslist = new ArrayList<FriendsInfoDto>();
         List<GroupInfoDto> groupInfoDtos = new ArrayList<GroupInfoDto>();
         // 查询好友列表
-        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendList(phoneNo);
+        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendList(invitationCode);
         // 查询组信息
-        List<GroupInfoDto> groups = groupInfoService.getGroupInfoListByPhoneNo(phoneNo);
+        List<GroupInfoDto> groups = groupInfoService.getGroupInfoListByInvitationCode(invitationCode);
         for(FriendsInfoDto dto : friendsInfoDtos){
             if(StringUtils.isBlank(dto.getGroupName())){
                 notGroupFriendslist.add(dto);
@@ -78,10 +85,8 @@ public class FriendServiceImpl implements FriendService {
                     flag = false;
                 }
             }
-//            if(groupFriendsList.size() > 0){
-                groupInfoDto.setFriends(groupFriendsList);
-                groupInfoDtos.add(groupInfoDto);
-//            }
+            groupInfoDto.setFriends(groupFriendsList);
+            groupInfoDtos.add(groupInfoDto);
         }
         data.put("groups", groupInfoDtos);
         serviceResult.setData(data);
@@ -122,8 +127,11 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<Object> setFriendsVisibleBeforeExiting(String phoneNo, List<String> friendPhoneNoList) {
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
+
         // 查出退出前查看的好友信息
-        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendsInfoBeforeExit(phoneNo);
+        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendsInfoBeforeExit(invitationCode);
         List<String> visibleFriendsList = new ArrayList<String>();
         for(FriendsInfoDto friendsInfoDto : friendsInfoDtos){
             visibleFriendsList.add(friendsInfoDto.getFriendPhoneNo());
@@ -144,7 +152,7 @@ public class FriendServiceImpl implements FriendService {
         // 需要设为退出前可见的好友
         friendPhoneNoList.removeAll(setVisibleFriendsList);
         // 设置好友为退出前可见
-        friendsInfoService.setFriendsVisibleBeforeExiting(phoneNo, setInvisibleFriendsList, friendPhoneNoList);
+        friendsInfoService.setFriendsVisibleBeforeExiting(invitationCode, setInvisibleFriendsList, friendPhoneNoList);
         return ServiceResult.newSuccess();
     }
 
@@ -157,16 +165,18 @@ public class FriendServiceImpl implements FriendService {
     @Override
     public ServiceResult<Object> getPhoneContactStatus(String phoneNo, String friendPhoneNo) {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        ServiceResult<MemberDto> memberDto = memberInfoService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
         Map<String, String> map = new HashMap<String, String>();
         // 是否注册APP
-        ServiceResult<MemberDto> memberDto = memberInfoService.queryMemberInfo(friendPhoneNo);
-        if(null == memberDto.getData()){
+        ServiceResult<MemberDto> friendMemberDto = memberInfoService.getMemberInfo(friendPhoneNo);
+        if(null == friendMemberDto.getData()){
             map.put("status", NumberConstants.STR_TWO);
             serviceResult.setData(map);
             return serviceResult;
         }
         // 查询好友信息
-        ServiceResult<FriendsInfoDto> friendsInfoDto = friendsInfoService.getFriendInfo(phoneNo, friendPhoneNo);
+        ServiceResult<FriendsInfoDto> friendsInfoDto = friendsInfoService.getFriendInfo(invitationCode, friendMemberDto.getData().getInvitationCode());
         if (null == friendsInfoDto.getData()){
             map.put("status", NumberConstants.STR_THREE);
             serviceResult.setData(map);
@@ -185,8 +195,11 @@ public class FriendServiceImpl implements FriendService {
     @Override
     public ServiceResult<Object> getFriendList(String phoneNo) {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        // 查询用户信息
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
         Map<String, List<FriendsInfoDto>> map = new HashMap<String, List<FriendsInfoDto>>();
-        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendList(phoneNo);
+        List<FriendsInfoDto> friendsInfoDtos = friendsInfoService.getFriendList(invitationCode);
         for(FriendsInfoDto friendsInfoDto : friendsInfoDtos){
             friendsInfoDto.setFriendRemarkNameSpell(PingYinUtil.getPingYin(friendsInfoDto.getFriendRemarkName()));
             friendsInfoDto.setRemarkFirstLetter(friendsInfoDto.getFriendRemarkNameSpell().substring(0, 1));
@@ -219,13 +232,24 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<Object> applyForAddFriend(String phoneNo, String friendPhoneNo, String applyInfo) {
+        // 查询用户信息
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
+
+        ServiceResult<MemberDto> friendMemberDto = memberService.getMemberInfo(phoneNo);
+        if(null == friendMemberDto.getData()){
+            return ServiceResult.newFailure("该用户不存在");
+        }
+        String friendInvitationCode = memberDto.getData().getInvitationCode();
+
         // 判断是否为好友
-        ServiceResult<FriendsInfoDto> friendsInfoDto = friendsInfoService.getFriendInfo(phoneNo, friendPhoneNo);
+        ServiceResult<FriendsInfoDto> friendsInfoDto = friendsInfoService.getFriendInfo(invitationCode, friendInvitationCode);
         if(null != friendsInfoDto.getData()){
             return ServiceResult.newFailure("该用户已经是你的好友");
         }
+
         // 申请添加好友
-        applyFriendInfoService.applyForAddFriend(phoneNo, friendPhoneNo, applyInfo);
+        applyFriendInfoService.applyForAddFriend(invitationCode, friendInvitationCode, applyInfo);
         return ServiceResult.newSuccess();
     }
 
@@ -237,9 +261,13 @@ public class FriendServiceImpl implements FriendService {
     @Override
     public ServiceResult<Object> getApplicationRecordOfFriend(String phoneNo) {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        // 查询用户信息
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
+
         Map<String, List<FriendsInfoDto>> map = new HashMap<String, List<FriendsInfoDto>>();
         // 获取被申请好友记录
-        List<FriendsInfoDto> friendsInfoDtos = applyFriendInfoService.getApplicationRecordOfFriend(phoneNo);
+        List<FriendsInfoDto> friendsInfoDtos = applyFriendInfoService.getApplicationRecordOfFriend(invitationCode);
         map.put("records", friendsInfoDtos);
         serviceResult.setData(map);
         return serviceResult;
@@ -268,10 +296,17 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional
     public ServiceResult<Object> modifyFriendInfo(String phoneNo, FriendsInfoDto dto) {
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
+        ServiceResult<MemberDto> friendMemberDto = memberService.getMemberInfo(dto.getFriendPhoneNo());
+        if(null == friendMemberDto.getData()){
+            return ServiceResult.newFailure("该好友不存在");
+        }
+        dto.setFriendInvitationCode(friendMemberDto.getData().getInvitationCode());
         // 修改好友信息
-        friendsInfoService.modifyFriendInfo(phoneNo, dto);
+        friendsInfoService.modifyFriendInfo(invitationCode, dto);
         // 修改被授权人好友信息
-        friendsInfoService.modifyAuthorizedFriendInfo(phoneNo, dto);
+        friendsInfoService.modifyAuthorizedFriendInfo(invitationCode, dto);
         return ServiceResult.newSuccess();
     }
 
@@ -283,10 +318,17 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<Object> deleteFriend(String phoneNo, String friendPhoneNo) {
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
+        ServiceResult<MemberDto> friendMemberDto = memberService.getMemberInfo(friendPhoneNo);
+        if(null == friendMemberDto.getData()){
+            return ServiceResult.newFailure("该好友不存在");
+        }
+        String friendInvitationCode = friendMemberDto.getData().getInvitationCode();
         // 删除好友
-        friendsInfoService.deleteFriend(phoneNo, friendPhoneNo);
+        friendsInfoService.deleteFriend(invitationCode, friendInvitationCode);
         // 删除对方好友
-        friendsInfoService.deleteFriend(friendPhoneNo, phoneNo);
+        friendsInfoService.deleteFriend(friendInvitationCode, invitationCode);
         return ServiceResult.newSuccess();
     }
 
@@ -298,7 +340,9 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<Object> addGroupInfo(String phoneNo, String groupName) {
-        return groupInfoService.addGroupInfo(phoneNo, groupName);
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
+        return groupInfoService.addGroupInfo(invitationCode, groupName);
     }
 
     /**
@@ -327,8 +371,14 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<FriendsInfoDto> getFriendInfo(String phoneNo, String friendPhoneNo) {
-
-        return friendsInfoService.getFriendInfo(phoneNo, friendPhoneNo);
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
+        ServiceResult<MemberDto> friendMemberDto = memberService.getMemberInfo(friendPhoneNo);
+        if(null == friendMemberDto.getData()){
+            return ServiceResult.newFailure("该好友不存在");
+        }
+        String friendInvitationCode = friendMemberDto.getData().getInvitationCode();
+        return friendsInfoService.getFriendInfo(invitationCode, friendInvitationCode);
     }
 
     /**
@@ -363,8 +413,10 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional
     public ServiceResult<GroupInfoDto> deleteGroupInfo(String phoneNo, String groupId) {
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
         // 将好友组信息清空
-        friendsInfoService.updateFriendsGroupInfo(phoneNo, groupId);
+        friendsInfoService.updateFriendsGroupInfo(invitationCode, groupId);
         // 删除组信息
         groupInfoService.deleteGroupInfo(groupId);
         return ServiceResult.newSuccess();
@@ -379,11 +431,13 @@ public class FriendServiceImpl implements FriendService {
      */
     @Override
     public ServiceResult<Object> moveFriendToGroup(String phoneNo, String groupId, String friendPhoneNos) {
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
         // 根据组id查出组信息
         GroupInfoDto groupInfoDto = groupInfoService.getGroupInfo(groupId);
         if(null != groupInfoDto){
             groupInfoDto.setGroupId(groupId);
-            groupInfoDto.setPhoneNo(phoneNo);
+            groupInfoDto.setInvitationCode(invitationCode);
             // 将好友添加到分组
             friendsInfoService.moveFriendToGroup(friendPhoneNos, groupInfoDto);
         }

@@ -30,20 +30,20 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     /**
      * 头像上传
-     * @param phoneNo
+     * @param invitationCode
      * @param file
      * @return
      */
     @Override
-    public String uploadHeadPic(String phoneNo, MultipartFile file) {
+    public String uploadHeadPic(String invitationCode, MultipartFile file) {
         // UUID作为key
         String fileUuid = "";
         try {
             // 根据手机号查出用户头像是否存在
-            FileInfoDto dto = fileInfoService.getFileInfoByPhoneNo(phoneNo);
+            FileInfoDto dto = fileInfoService.getFileInfoByInvitationCode(invitationCode);
             if(null == dto){
                 dto = new FileInfoDto();
-                dto.setPhoneNo(phoneNo);// 手机号
+                dto.setInvitationCode(invitationCode);// 手机号
                 String originalFilename = file.getOriginalFilename();
                 String[] fileItems = originalFilename.split("\\.");
                 // 文件名称
@@ -61,11 +61,11 @@ public class UploadFileServiceImpl implements UploadFileService {
                 // 保存用户头像信息
                 fileInfoService.saveFileInfo(dto);
                 // 根据手机号更新用户头像id
-                memberInfoService.updateHeadPicIdByPhoneNo(phoneNo, fileUuid);
+                memberInfoService.updateHeadPicIdByInvitationCode(invitationCode, fileUuid);
             }else{
                 String originalFilename = file.getOriginalFilename();
                 String[] fileItems = originalFilename.split("\\.");
-                dto.setPhoneNo(phoneNo);// 手机号
+                dto.setInvitationCode(invitationCode);// 手机号
                 // 文件名称
                 dto.setFileName(originalFilename);// 文件名
                 if (fileItems.length >= 2) {
@@ -80,11 +80,11 @@ public class UploadFileServiceImpl implements UploadFileService {
                 // 根据手机号更新用户头像
                 fileInfoService.updateFileInfo(dto);
                 // 根据手机号更新用户头像id
-                memberInfoService.updateHeadPicIdByPhoneNo(phoneNo, fileUuid);
+                memberInfoService.updateHeadPicIdByInvitationCode(invitationCode, fileUuid);
             }
             return fileUuid;
         } catch (Exception e) {
-            WayLogger.error(e, "文件上传异常,入参:{}", phoneNo);
+            WayLogger.error(e, "文件上传异常,入参:{}", invitationCode);
             return null;
         }
     }

@@ -97,17 +97,19 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     public ServiceResult<MemberDto> searchUserByPhoneNo(String phoneNo, String friendPhoneNo) {
-        ServiceResult<MemberDto> serviceResult = memberInfoService.searchUserByPhoneNo(friendPhoneNo);
-        if(serviceResult.getData() != null){
+        ServiceResult<MemberDto> memberDto = memberInfoService.getMemberInfo(friendPhoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
+        ServiceResult<MemberDto> friendMemberDto = memberInfoService.searchUserByPhoneNo(friendPhoneNo);
+        if(friendMemberDto.getData() != null){
             // 判断用户是否为好友
-            ServiceResult<FriendsInfoDto> friendsInfoDto = friendsInfoService.getFriendInfo(phoneNo, friendPhoneNo);
+            ServiceResult<FriendsInfoDto> friendsInfoDto = friendsInfoService.getFriendInfo(invitationCode, friendMemberDto.getData().getInvitationCode());
             if(null != friendsInfoDto.getData()){
-                serviceResult.getData().setIsFriend(Constants.YES);
+                friendMemberDto.getData().setIsFriend(Constants.YES);
             }else{
-                serviceResult.getData().setIsFriend(Constants.NO);
+                friendMemberDto.getData().setIsFriend(Constants.NO);
             }
         }
-        return serviceResult;
+        return friendMemberDto;
     }
 
     /**
@@ -141,10 +143,11 @@ public class MemberServiceImpl implements MemberService {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         // 查询总积分
         ServiceResult<MemberDto> memberDto = getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
         // 查询总页数
-        Integer count = rewardScoreService.getRewardScoreDetailCount(phoneNo);
+        Integer count = rewardScoreService.getRewardScoreDetailCount(invitationCode);
         // 分页查询
-        List<RewardScoreDto> details = rewardScoreService.getRewardScoreDetailList(phoneNo, (pageNumber - 1) * 10);
+        List<RewardScoreDto> details = rewardScoreService.getRewardScoreDetailList(invitationCode, (pageNumber - 1) * 10);
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("totalRewardScore", memberDto.getData().getRewardScore());
         data.put("pageCount", count);
@@ -199,13 +202,14 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public ServiceResult<Object> buyValueAddedServiceByRewardScore(String phoneNo, String type) {
         // 查询会员积分
-        ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
+        ServiceResult<MemberDto> memberDto = memberInfoService.getMemberInfo(phoneNo);
         if(!memberDto.getData().getMemberType().equals("2")){
             return ServiceResult.newFailure("您还不是正式会员");
         }
+        String invitationCode = memberDto.getData().getInvitationCode();
 
         // 根据增值服务类型获取用户增值服务信息
-        MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(phoneNo, type);
+        MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(invitationCode, type);
         int day = 0;
         // 获取增值服务有效期开始时间
         Date startTime = new Date();
@@ -216,7 +220,7 @@ public class MemberServiceImpl implements MemberService {
             day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
         }
         if(null != memberValueAddedInfoDto){
-            if(memberValueAddedInfoDto.getIsOpen() == 1){
+            if(memberValueAddedInfoDto.getIsOpen() == 1 || memberValueAddedInfoDto.getIsOpen() == 3){
                 day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
                 // 判断增值服务是否需要购买
                 if(day == 0){
@@ -264,11 +268,12 @@ public class MemberServiceImpl implements MemberService {
             return ServiceResult.newFailure("积分不够");
         }
         // 查询该手机号是否存在
-        if(null == memberInfoService.searchUserByPhoneNo(friendPhoneNo).getData()){
+        ServiceResult<MemberDto> friendMemberDto = getMemberInfo(friendPhoneNo);
+        if(null == friendMemberDto.getData()){
             return ServiceResult.newFailure("该手机号不存在");
         }
         // 积分转增
-        memberInfoService.transferRewardScoreToFriend(phoneNo, rewardScore, friendPhoneNo);
+        memberInfoService.transferRewardScoreToFriend(memberDto.getData().getInvitationCode(), rewardScore, friendMemberDto.getData().getInvitationCode(), phoneNo, friendPhoneNo);
         return ServiceResult.newSuccess();
     }
 
@@ -280,7 +285,10 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     public ServiceResult<Object> withdrawalRewardScore(String phoneNo, WithdrawalInfoDto withdrawalInfoDto) {
+        ServiceResult<MemberDto> memberDto = memberInfoService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
         withdrawalInfoDto.setPhoneNo(phoneNo);
+        withdrawalInfoDto.setInvitationCode(invitationCode);
         memberInfoService.withdrawalRewardScore(withdrawalInfoDto);
         return ServiceResult.newSuccess();
     }
@@ -294,10 +302,12 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public ServiceResult<Object> getWithdrawalRewardScoreInfo(String phoneNo, Integer pageNumber) {
         ServiceResult serviceResult = ServiceResult.newSuccess();
+        ServiceResult<MemberDto> memberDto = memberInfoService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
         // 查询总页数
-        Integer count = memberInfoService.getWithdrawalRewardScoreCount(phoneNo);
+        Integer count = memberInfoService.getWithdrawalRewardScoreCount(invitationCode);
         // 分页查询
-        List<WithdrawalInfoDto> details = memberInfoService.getWithdrawalRewardScoreInfo(phoneNo, (pageNumber - 1) * 10);
+        List<WithdrawalInfoDto> details = memberInfoService.getWithdrawalRewardScoreInfo(invitationCode, (pageNumber - 1) * 10);
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("pageCount", count);
         data.put("pageNumber", pageNumber);
@@ -315,10 +325,12 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public ServiceResult<Object> getRechargeInfo(String phoneNo, Integer pageNumber) {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
+        ServiceResult<MemberDto> memberDto = memberInfoService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
         // 查询总页数
-        Integer count = rechargeInfoService.getRechargeInfoCount(phoneNo);
+        Integer count = rechargeInfoService.getRechargeInfoCount(invitationCode);
         // 分页查询
-        List<RechargeInfoDto> details = rechargeInfoService.getRechargeInfoList(phoneNo, (pageNumber - 1) * 10);
+        List<RechargeInfoDto> details = rechargeInfoService.getRechargeInfoList(invitationCode, (pageNumber - 1) * 10);
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("pageCount", count);
         data.put("pageNumber", pageNumber);
@@ -345,12 +357,12 @@ public class MemberServiceImpl implements MemberService {
             amount = getRewardScore(validityDurationType);
         }else{
             // 查询会员积分
-            ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
+            ServiceResult<MemberDto> memberDto = memberInfoService.getMemberInfo(phoneNo);
             if(!memberDto.getData().getMemberType().equals("2")){
                 return ServiceResult.newFailure("您还不是正式会员");
             }
             // 根据增值服务类型获取用户增值服务信息
-            MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(phoneNo, type);
+            MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(memberDto.getData().getInvitationCode(), type);
             int day = 0;
             // 获取增值服务有效期开始时间
             Date startTime = new Date();
@@ -361,7 +373,7 @@ public class MemberServiceImpl implements MemberService {
                 day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
             }
             if(null != memberValueAddedInfoDto){
-                if(memberValueAddedInfoDto.getIsOpen() == 1){
+                if(memberValueAddedInfoDto.getIsOpen() == 1 || memberValueAddedInfoDto.getIsOpen() == 3){
                     day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
                     // 判断增值服务是否需要购买
                     if(day == 0){
@@ -409,8 +421,6 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     public ServiceResult<Object> buyServiceByRecharge(String phoneNo, Integer type, Integer validityDurationType) {
-        ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        Map<String, String> map = new HashMap<String, String>();
         // 计算出需要的费用
         Double amount = 0.0;
         String name = null;
@@ -419,7 +429,7 @@ public class MemberServiceImpl implements MemberService {
         // 获取会员结束时间
         Date endTime = null;
         // 查询会员
-        ServiceResult<MemberDto> memberDto = memberInfoService.loadMapByMobile(phoneNo);
+        ServiceResult<MemberDto> memberDto = memberInfoService.getMemberInfo(phoneNo);
         if("2".equals(memberDto.getData().getMemberType()) && null != memberDto.getData().getMemberStartTime() &&
                 null != memberDto.getData().getMemberEndTime() && startTime.before(memberDto.getData().getMemberEndTime())){
             startTime = memberDto.getData().getMemberEndTime();
@@ -490,8 +500,11 @@ public class MemberServiceImpl implements MemberService {
     public ServiceResult<Object> getMemberValueAddedTime(String phoneNo, String type) {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         Map<String ,Object> data = new HashMap<String ,Object>();
+        ServiceResult<MemberDto> memberDto = memberInfoService.getMemberInfo(phoneNo);
+        String invitationCode = memberDto.getData().getInvitationCode();
+
         // 根据增值服务类型获取用户增值服务信息
-        MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(phoneNo, type);
+        MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(invitationCode, type);
         if(null != memberValueAddedInfoDto){
             data.put("startTime", memberValueAddedInfoDto.getStartTime());
             data.put("endTime", memberValueAddedInfoDto.getEndTime());

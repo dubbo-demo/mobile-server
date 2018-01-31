@@ -1,6 +1,5 @@
 package com.way.mobile.service.member.impl;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import com.way.common.cache.RedisRootNameSpace;
 import com.way.common.exception.DataValidateException;
 import com.way.common.redis.CacheService;
@@ -8,10 +7,11 @@ import com.way.common.result.ServiceResult;
 import com.way.common.util.DateUtils;
 import com.way.common.util.PingYinUtil;
 import com.way.common.util.Validater;
-import com.way.member.member.service.MemberInfoService;
-import com.way.member.member.service.PasswordService;
+import com.way.member.member.dto.InviteRelationshipInfoDto;
 import com.way.member.member.dto.MemberDto;
 import com.way.member.member.dto.MemberResetPasswordDto;
+import com.way.member.member.service.InviteRelationshipInfoService;
+import com.way.member.member.service.MemberInfoService;
 import com.way.mobile.common.constant.ConstantsConfig;
 import com.way.mobile.common.constant.ResponseMsg;
 import com.way.mobile.common.constant.VerificationCodeType;
@@ -43,7 +43,7 @@ public class RegistServiceImpl implements RegistService {
 	@Autowired
 	private LoginService loginService;
 	@Autowired
-	private PasswordService passwordService;
+	private InviteRelationshipInfoService inviteRelationshipInfoService;
 
 	/**
 	 * @Title: sendCode
@@ -110,12 +110,13 @@ public class RegistServiceImpl implements RegistService {
 	 */
 	public ServiceResult<MemberDto> regist(MemberDto memberDto) throws DataValidateException {
 		// 推荐人号码
-		String invitationCode = memberDto.getInvitationCode();
+		String nextLevelInvitationCode = memberDto.getInvitationCode();// 上级
 		// 根据邀请码查出邀请人上级用户邀请码
-		ServiceResult<MemberDto> m = memberInfoService.loadMapByInvitationCode(invitationCode);
-		if (null == m || m.getData() == null){
+		ServiceResult<InviteRelationshipInfoDto> inviteRelationship = inviteRelationshipInfoService.queryInviteRelationshipInfoByUnderNextLevelInvitationCode(nextLevelInvitationCode);
+		if (null == inviteRelationship || inviteRelationship.getData() == null){
 			throw new DataValidateException("邀请码不存在");
 		}
+		String invitationCode = inviteRelationship.getData().getNextLevelInvitationCode();// 上上级
 		memberDto.setNickSpell(PingYinUtil.getPingYin(memberDto.getNickName()));
 		String phoneNo = memberDto.getPhoneNo();
 		String key = ConstantsConfig.JEDIS_HEADER_REGIST_CODE + phoneNo;
@@ -133,7 +134,7 @@ public class RegistServiceImpl implements RegistService {
 			throw new DataValidateException("手机号已注册");
 		}
 		memberDto.setInvitationCode(getUniqueInvitationCode(8));
-		memberInfoService.memberRegist(memberDto, invitationCode);
+		memberInfoService.memberRegist(memberDto, invitationCode, nextLevelInvitationCode);
 		// 注册成功调用登录接口登录，并异步保存用户登录信息
 		loginService.login(memberDto);
 		return ServiceResult.newSuccess(memberDto);
@@ -187,7 +188,7 @@ public class RegistServiceImpl implements RegistService {
 			throw new DataValidateException("手机号未注册");
 		}
 		// 更新密码表
-		memberInfoService.updatePassword(phoneNo, memberDto.getPassword());
+		memberInfoService.updatePassword(memberRes.getData().getInvitationCode(), memberDto.getPassword());
 		// 验证码校验成功，移除redis中的验证码
 		CacheService.KeyBase.delete(key);
 		return ServiceResult.newSuccess();
