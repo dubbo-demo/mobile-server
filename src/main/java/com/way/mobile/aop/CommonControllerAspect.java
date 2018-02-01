@@ -185,7 +185,7 @@ public class CommonControllerAspect {
                 ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
                 Date date = new Date();
                 // 判断用户是否为会员
-                if(!"2".equals(memberDto.getData().getMemberType()) || date.before(memberDto.getData().getMemberStartTime())
+                if("1".equals(memberDto.getData().getMemberType())  || date.before(memberDto.getData().getMemberStartTime())
                         || date.after(memberDto.getData().getMemberEndTime())){
                     return ServiceResult.newFailure(Constants.MEMBERSHIP_EXPIRES, "您还不是会员，请先购买会员");
                 }
