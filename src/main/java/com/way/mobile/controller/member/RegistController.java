@@ -113,7 +113,7 @@ public class RegistController {
             memberDto.setDeviceNo(request.getHeader("deviceNo"));
             if(StringUtils.isEmpty(memberDto.getInvitationCode())){
 				serviceResult.setCode(ServiceResult.ERROR_CODE);
-				serviceResult.setMessage("请邀请人信息");
+				serviceResult.setMessage("请输入邀请码");
 				return serviceResult;
 			}
 			// 校验短信验证码
