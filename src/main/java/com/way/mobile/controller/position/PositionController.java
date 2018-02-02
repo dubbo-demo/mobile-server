@@ -119,7 +119,7 @@ public class PositionController {
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
             WayLogger.error(e, "获取退出前查看的用户实时坐标失败," + "请求参数：" + phoneNo);
         } finally {
-            WayLogger.access("获取退出前查看的用户实时坐标：/getPositionsBeforeExit.do,参数：" + phoneNo);
+            WayLogger.access("获取退出前查看的用户实时坐标：/getUserViewBeforeExit.do,参数：" + phoneNo);
         }
         return serviceResult;
     }

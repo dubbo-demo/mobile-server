@@ -430,7 +430,7 @@ public class MemberServiceImpl implements MemberService {
         Date endTime = null;
         // 查询会员
         ServiceResult<MemberDto> memberDto = memberInfoService.getMemberInfo(phoneNo);
-        if("2".equals(memberDto.getData().getMemberType()) && null != memberDto.getData().getMemberStartTime() &&
+        if(!"1".equals(memberDto.getData().getMemberType()) && null != memberDto.getData().getMemberStartTime() &&
                 null != memberDto.getData().getMemberEndTime() && startTime.before(memberDto.getData().getMemberEndTime())){
             startTime = memberDto.getData().getMemberEndTime();
         }
@@ -450,11 +450,11 @@ public class MemberServiceImpl implements MemberService {
                 endTime = DateUtils.dayEnd(DateUtils.addMonths(startTime,12));
             }
         }else{
-            if(!memberDto.getData().getMemberType().equals("2")){
+            if(memberDto.getData().getMemberType().equals("1")){
                 return ServiceResult.newFailure("您还不是正式会员");
             }
             // 根据增值服务类型获取用户增值服务信息
-            MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(phoneNo, String.valueOf(type));
+            MemberValueAddedInfoDto memberValueAddedInfoDto = memberValueAddedInfoService.getMemberValueAddedInfoByType(memberDto.getData().getInvitationCode(), String.valueOf(type));
             int day = 0;
             // 获取会员结束时间
             endTime = memberDto.getData().getMemberEndTime();
@@ -463,7 +463,7 @@ public class MemberServiceImpl implements MemberService {
                 day = (int)DateUtils.getDoubleSubDays(startTime, endTime);
             }
             if(null != memberValueAddedInfoDto){
-                if(memberValueAddedInfoDto.getIsOpen() == 1){
+                if(memberValueAddedInfoDto.getIsOpen() == 1 || memberValueAddedInfoDto.getIsOpen() == 3 ){
                     day = (int)DateUtils.getDoubleSubDays(memberValueAddedInfoDto.getEndTime(), endTime);
                     // 判断增值服务是否需要购买
                     if(day == 0){
