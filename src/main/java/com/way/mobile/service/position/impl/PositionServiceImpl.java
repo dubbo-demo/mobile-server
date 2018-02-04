@@ -104,6 +104,7 @@ public class PositionServiceImpl implements PositionService {
                     // 根据手机号获取用户实时坐标
                     ServiceResult<PositionInfoDto> positionInfoDto = positionInfoService.getRealTimePositionByPhoneNo(dto.getPhoneNo(), dto.getModifyTime());
                     if(null != positionInfoDto.getData()){
+                        positionInfoDto.getData().setPhoneNo(dto.getPhoneNo());
                         list.add(positionInfoDto.getData());
                     }
                 }else{

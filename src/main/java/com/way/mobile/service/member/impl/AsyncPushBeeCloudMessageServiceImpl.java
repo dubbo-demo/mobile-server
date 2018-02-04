@@ -1,7 +1,10 @@
 package com.way.mobile.service.member.impl;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import com.way.base.beeCloud.dto.BeeCloudMessageDetailDto;
 import com.way.base.beeCloud.service.BeeCloudMessageDetailService;
+import com.way.common.result.ServiceResult;
+import com.way.member.member.dto.MemberDto;
 import com.way.member.order.dto.MemberOrderInfoDto;
 import com.way.member.order.service.MemberOrderInfoService;
 import com.way.member.recharge.dto.RechargeInfoDto;
@@ -43,15 +46,18 @@ public class AsyncPushBeeCloudMessageServiceImpl implements AsyncPushBeeCloudMes
     public void pushBeeCloudMessage(BeeCloudMessageDetailDto message_detail) {
         // 根据内部交易号查出交易信息
         MemberOrderInfoDto memberOrderInfoDto = memberOrderInfoService.getOrderInfo(message_detail.getOut_trade_no());
-        if(Double.valueOf(message_detail.getTotal_fee()).equals(memberOrderInfoDto.getAmount()*100)){
+        if(Double.valueOf(message_detail.getTotal_fee()).equals(memberOrderInfoDto.getAmount())){
             // 会员购买服务
             memberService.buyServiceByRecharge(memberOrderInfoDto.getPhoneNo(), memberOrderInfoDto.getType(), memberOrderInfoDto.getValidityDurationType());
             message_detail.setFlag(1);
             message_detail.setModifyTime(new Date());
 
+            // 查询会员
+            ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(memberOrderInfoDto.getPhoneNo());
+
             RechargeInfoDto dto = new RechargeInfoDto();
-            dto.setPhoneNo(memberOrderInfoDto.getPhoneNo());
-            dto.setAmount(memberOrderInfoDto.getAmount());
+            dto.setInvitationCode(memberDto.getData().getInvitationCode());
+            dto.setAmount(memberOrderInfoDto.getAmount()/100);
             dto.setType(String.valueOf(memberOrderInfoDto.getType()));
             dto.setOrderNumber(message_detail.getOut_trade_no());
             dto.setCreateTime(new Date());
