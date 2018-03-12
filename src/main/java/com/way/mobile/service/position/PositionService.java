@@ -22,34 +22,34 @@ public interface PositionService {
 
     /**
      * 根据手机号获取用户实时坐标
-     * @param phoneNo
+     * @param invitationCode
      * @param positionInfoDtos
      * @return
      */
-    ServiceResult<Object> getRealTimePositionByPhoneNo(String phoneNo, List<PositionInfoDto> positionInfoDtos);
+    ServiceResult<Object> getRealTimePositionByPhoneNo(String invitationCode, List<PositionInfoDto> positionInfoDtos);
 
     /**
      * 获取退出前查看的用户实时坐标
-     * @param phoneNo
+     * @param invitationCode
      * @return
      */
-    ServiceResult<Object> getUserViewBeforeExit(String phoneNo);
+    ServiceResult<Object> getUserViewBeforeExit(String invitationCode);
 
     /**
      * 根据组ID获取用户实时坐标
-     * @param phoneNo
+     * @param invitationCode
      * @param groupId
      * @return
      */
-    ServiceResult<Object> getRealtimePositionByGroupId(String phoneNo, String groupId);
+    ServiceResult<Object> getRealtimePositionByGroupId(String invitationCode, String groupId);
 
     /**
      * 查询用户历史轨迹坐标
-     * @param phoneNo
-     * @param friendPhoneNo
+     * @param invitationCode
+     * @param friendInvitationCode
      * @param startTime
      * @param endTime
      * @return
      */
-    ServiceResult<Object> getMemberHistoryPositions(String phoneNo, String friendPhoneNo, String startTime, String endTime);
+    ServiceResult<Object> getMemberHistoryPositions(String invitationCode, String friendInvitationCode, String startTime, String endTime);
 }

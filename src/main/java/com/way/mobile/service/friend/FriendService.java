@@ -16,149 +16,149 @@ public interface FriendService {
 
     /**
      * 获取首页好友以及组信息
-     * @param phoneNo
+     * @param invitationCode
      * @return
      */
-    ServiceResult<Object> getFriendsAndGroups(String phoneNo);
+    ServiceResult<Object> getFriendsAndGroups(String invitationCode);
 
     /**
      * 取消查看好友实时坐标
-     * @param phoneNo
-     * @param friendPhoneNoList
+     * @param invitationCode
+     * @param friendInvitationCodes
      * @return
      */
-    ServiceResult<Object> cancelGetFriendPosition(String phoneNo, List<String> friendPhoneNoList);
+    ServiceResult<Object> cancelGetFriendPosition(String invitationCode, List<String> friendInvitationCodes);
 
     /**
      * 取消查看组好友实时坐标
-     * @param phoneNo
+     * @param invitationCode
      * @param groupId
      * @return
      */
-    ServiceResult<Object> cancelGetGroupPosition(String phoneNo, String groupId);
+    ServiceResult<Object> cancelGetGroupPosition(String invitationCode, String groupId);
 
     /**
      * 设置好友为退出前可见
-     * @param phoneNo
-     * @param friendPhoneNoList
+     * @param invitationCode
+     * @param friendInvitationCodeList
      * @return
      */
-    ServiceResult<Object> setFriendsVisibleBeforeExiting(String phoneNo, List<String> friendPhoneNoList);
+    ServiceResult<Object> setFriendsVisibleBeforeExiting(String invitationCode, List<String> friendInvitationCodeList);
 
     /**
      * 查询手机联系人状态
-     * @param phoneNo
+     * @param invitationCode
      * @param friendPhoneNo
      * @return
      */
-    ServiceResult<Object> getPhoneContactStatus(String phoneNo, String friendPhoneNo);
+    ServiceResult<Object> getPhoneContactStatus(String invitationCode, String friendPhoneNo);
 
     /**
      * 查询好友列表
-     * @param phoneNo
+     * @param invitationCode
      * @return
      */
-    ServiceResult<Object> getFriendList(String phoneNo);
+    ServiceResult<Object> getFriendList(String invitationCode);
 
     /**
      * 申请添加好友
-     * @param phoneNo
-     * @param friendPhoneNo
+     * @param invitationCode
+     * @param friendInvitationCode
      * @param applyInfo
      * @return
      */
-    ServiceResult<Object> applyForAddFriend(String phoneNo, String friendPhoneNo, String applyInfo);
+    ServiceResult<Object> applyForAddFriend(String invitationCode, String friendInvitationCode, String applyInfo);
 
     /**
      * 获取被申请好友记录
-     * @param phoneNo
+     * @param invitationCode
      * @return
      */
-    ServiceResult<Object> getApplicationRecordOfFriend(String phoneNo);
+    ServiceResult<Object> getApplicationRecordOfFriend(String invitationCode);
 
     /**
      * 同意/拒绝添加好友申请
      *
-     * @param phoneNo
-     * @param friendPhoneNo
+     * @param invitationCode
+     * @param friendInvitationCode
      * @param isApprove
      * @param applicationId
      * @return
      */
-    ServiceResult<Object> agreeToAddFriend(String phoneNo, String friendPhoneNo, String isApprove, String applicationId);
+    ServiceResult<Object> agreeToAddFriend(String invitationCode, String friendInvitationCode, String isApprove, String applicationId);
 
     /**
      * 修改好友信息
-     * @param phoneNo
+     * @param invitationCode
      * @param dto
      * @return
      */
-    ServiceResult<Object> modifyFriendInfo(String phoneNo, FriendsInfoDto dto);
+    ServiceResult<Object> modifyFriendInfo(String invitationCode, FriendsInfoDto dto);
 
     /**
      * 删除好友
-     * @param phoneNo
-     * @param friendPhoneNo
+     * @param invitationCode
+     * @param friendInvitationCode
      * @return
      */
-    ServiceResult<Object> deleteFriend(String phoneNo, String friendPhoneNo);
+    ServiceResult<Object> deleteFriend(String invitationCode, String friendInvitationCode);
 
     /**
      * 新建组
-     * @param phoneNo
+     * @param invitationCode
      * @param groupName
      * @return
      */
-    ServiceResult<Object> addGroupInfo(String phoneNo, String groupName);
+    ServiceResult<Object> addGroupInfo(String invitationCode, String groupName);
 
     /**
      * 查看组信息
-     * @param phoneNo
+     * @param invitationCode
      * @param groupId
      * @return
      */
-    ServiceResult<GroupInfoDto> getGroupInfo(String phoneNo, String groupId);
+    ServiceResult<GroupInfoDto> getGroupInfo(String invitationCode, String groupId);
 
     /**
      * 查看好友信息
-     * @param phoneNo
-     * @param friendPhoneNo
+     * @param invitationCode
+     * @param friendInvitationCode
      * @return
      */
-    ServiceResult<FriendsInfoDto> getFriendInfo(String phoneNo, String friendPhoneNo);
+    ServiceResult<FriendsInfoDto> getFriendInfo(String invitationCode, String friendInvitationCode);
 
     /**
      * 修改组信息
-     * @param phoneNo
+     * @param invitationCode
      * @param dto
      * @return
      */
-    ServiceResult<GroupInfoDto> modifyGroupInfo(String phoneNo, GroupInfoDto dto);
+    ServiceResult<GroupInfoDto> modifyGroupInfo(String invitationCode, GroupInfoDto dto);
 
     /**
      * 删除组信息
-     * @param phoneNo
+     * @param invitationCode
      * @param groupId
      * @return
      */
-    ServiceResult<GroupInfoDto> deleteGroupInfo(String phoneNo, String groupId);
+    ServiceResult<GroupInfoDto> deleteGroupInfo(String invitationCode, String groupId);
 
     /**
      * 将好友添加到分组
-     * @param phoneNo
+     * @param invitationCode
      * @param groupId
-     * @param friendPhoneNos
+     * @param friendInvitationCodes
      * @return
      */
-    ServiceResult<Object> moveFriendToGroup(String phoneNo, String groupId, String friendPhoneNos);
+    ServiceResult<Object> moveFriendToGroup(String invitationCode, String groupId, String friendInvitationCodes);
 
     /**
      * 将好友从分组中移除
-     * @param phoneNo
+     * @param invitationCode
      * @param groupId
-     * @param friendPhoneNos
+     * @param friendInvitationCodes
      * @return
      */
-    ServiceResult<Object> removeFriendFromGroup(String phoneNo, String groupId, String friendPhoneNos);
+    ServiceResult<Object> removeFriendFromGroup(String invitationCode, String groupId, String friendInvitationCodes);
 
 }

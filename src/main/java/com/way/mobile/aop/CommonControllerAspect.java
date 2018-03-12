@@ -81,7 +81,7 @@ public class CommonControllerAspect {
     public Object doAround(ProceedingJoinPoint pjp) throws Throwable {
         Object[] params = pjp.getArgs();
         String newToken = null;
-        String phoneNo = null;
+        String invitationCode = null;
         HttpServletRequest paramRequest = null;
         String pathInfoUrl = null;
         if (null != params && params.length > 0) {
@@ -117,8 +117,8 @@ public class CommonControllerAspect {
                     if(tokenInfo.getStatus() == Constants.INVALID){
                         return ServiceResult.newFailure(Constants.OKEN_EXPIRED_OTHERLOGIN, "该账户已在其他设备登录，请注意安全");
                     }
-                    paramRequest.setAttribute("phoneNo", tokenInfo.getPhoneNo());
-                    phoneNo = tokenInfo.getPhoneNo();
+                    paramRequest.setAttribute("invitationCode", tokenInfo.getInvitationCode());
+                    invitationCode = tokenInfo.getInvitationCode();
                 }
             // 文件上传相关请求
             } else if (params[1] instanceof MultipartHttpServletRequest) {
@@ -148,8 +148,8 @@ public class CommonControllerAspect {
                 if(tokenInfo.getStatus() == Constants.INVALID){
                     return ServiceResult.newFailure(Constants.OKEN_EXPIRED_OTHERLOGIN, "该账户已在其他设备登录，请注意安全");
                 }
-                mulReq.setAttribute("phoneNo", tokenInfo.getPhoneNo());
-                phoneNo = tokenInfo.getPhoneNo();
+                mulReq.setAttribute("invitationCode", tokenInfo.getInvitationCode());
+                invitationCode = tokenInfo.getInvitationCode();
                 // 校验文件大小
 //                ServiceResult serviceResult = verificationFile(mulReq);
 //                if(Constants.INVALID == serviceResult.getCode()){
@@ -179,10 +179,10 @@ public class CommonControllerAspect {
 				}
 			}
 			// 判断用户会员
-            if(phoneNo != null && (!"buyMemberByRewardScore.do".equals(pathInfoUrl) && !"buyMemberByRecharge.do".equals(pathInfoUrl)
+            if(invitationCode != null && (!"buyMemberByRewardScore.do".equals(pathInfoUrl) && !"buyMemberByRecharge.do".equals(pathInfoUrl)
                 && !"getMemberInfo.do".equals(pathInfoUrl) &&!"getOrderNumber.do".equals(pathInfoUrl))){
                 // 查询用户信息
-                ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+                ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(invitationCode);
                 Date date = new Date();
                 // 判断用户是否为会员
                 if("1".equals(memberDto.getData().getMemberType())  || date.before(memberDto.getData().getMemberStartTime())
@@ -207,7 +207,7 @@ public class CommonControllerAspect {
         try {
             if (isMatch) {
                 // 步骤redis的key
-                limitKey = getLimitRedisKey(pjp, params, phoneNo);
+                limitKey = getLimitRedisKey(pjp, params, invitationCode);
                 ServiceResult serviceResult = reSubmitLimit(pjp, limitKey);
                 if (null != serviceResult.getData()) {
                     isLimit = true;
@@ -353,30 +353,30 @@ public class CommonControllerAspect {
      *
      * @param pjp
      * @param params
-     * @param phoneNo
+     * @param invitationCode
      * @return
      */
-    private String getLimitRedisKey(ProceedingJoinPoint pjp, Object[] params, String phoneNo) {
+    private String getLimitRedisKey(ProceedingJoinPoint pjp, Object[] params, String invitationCode) {
         String deviceNo = "";
         String methodName = pjp.getSignature().getName();
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
                 .getRequestAttributes()).getRequest();
         //memberid找不到 尝试获取请求头 deviceNo
-        if (StringUtils.isBlank(phoneNo)) {
+        if (StringUtils.isBlank(invitationCode)) {
             deviceNo = request.getHeader("deviceNo");
         }
 
         //要防止一些特殊接口可能出现memberId 和deviceNo 都不存在的情况， 要规避这样的情况
-        if (StringUtils.isBlank(phoneNo) && StringUtils.isBlank(deviceNo)) {
+        if (StringUtils.isBlank(invitationCode) && StringUtils.isBlank(deviceNo)) {
             String queryStr = request.getQueryString();
             if (StringUtils.isNotBlank(queryStr)) {
-                phoneNo = String.valueOf(request.getQueryString().hashCode());
+                invitationCode = String.valueOf(request.getQueryString().hashCode());
             } else {//随机 通常这个不会被执行  只是做冗余
-                phoneNo = RandomStringUtils.randomNumeric(8);
+                invitationCode = RandomStringUtils.randomNumeric(8);
             }
         }
         // 步骤redis的key
-        String key = noShardedRedisCacheUtil.key(RedisConstants.REQUEST_BLACKLIST + methodName, phoneNo, deviceNo);
+        String key = noShardedRedisCacheUtil.key(RedisConstants.REQUEST_BLACKLIST + methodName, invitationCode, deviceNo);
         return key;
     }
 

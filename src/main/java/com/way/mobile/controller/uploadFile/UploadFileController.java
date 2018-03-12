@@ -2,7 +2,6 @@ package com.way.mobile.controller.uploadFile;
 
 import com.way.common.log.WayLogger;
 import com.way.common.result.ServiceResult;
-import com.way.member.member.dto.MemberDto;
 import com.way.mobile.service.member.MemberService;
 import com.way.mobile.service.uploadFile.UploadFileService;
 import org.apache.commons.lang3.StringUtils;
@@ -42,19 +41,19 @@ public class UploadFileController {
     @RequestMapping(value = "/uploadHeadPic", method = RequestMethod.POST)
     @ResponseBody
     public ServiceResult<Object> uploadHeadPic(@ModelAttribute MultipartFile file, HttpServletRequest request){
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         String fileId = "";
         try {
             ServiceResult result = ServiceResult.newSuccess();
             // 校验参数
-            if (StringUtils.isBlank(phoneNo) || null == file ) {
+            if (StringUtils.isBlank(invitationCode) || null == file ) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            // 根据手机号查用户邀请码
-            ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+//            // 根据手机号查用户邀请码
+//            ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(invitationCode);
 
             // 头像上传
-            fileId = uploadFileService.uploadHeadPic(memberDto.getData().getInvitationCode(), file);
+            fileId = uploadFileService.uploadHeadPic(invitationCode, file);
             if(StringUtils.isBlank(fileId)){
                 return ServiceResult.newFailure();
             }
@@ -63,10 +62,10 @@ public class UploadFileController {
             result.setData(resMap);
             return result;
         } catch (Exception e) {
-            WayLogger.error(e, "头像上传," + "请求参数：" + phoneNo);
+            WayLogger.error(e, "头像上传," + "请求参数：" + invitationCode);
             return ServiceResult.newFailure();
         } finally {
-            WayLogger.access("头像上传：/uploadHeadPic.do,参数：" + phoneNo + ",文件id：" + fileId);
+            WayLogger.access("头像上传：/uploadHeadPic.do,参数：" + invitationCode + ",文件id：" + fileId);
         }
     }
 

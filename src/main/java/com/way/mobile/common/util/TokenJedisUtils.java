@@ -15,20 +15,20 @@ import org.apache.commons.lang3.StringUtils;
 public class TokenJedisUtils {
 
 	/**
-	 * @param phoneNo
+	 * @param invitationCode
 	 * @Title: putTokenInfoExpire
 	 * @Description: 将用户的token信息保存到redis中，并设置有效时长
 	 * @return: String
 	 */
-	public static String putTokenInfoExpire(String phoneNo) {
+	public static String putTokenInfoExpire(String invitationCode) {
 		String token = null;
-		if (StringUtils.isNotBlank(phoneNo)) {
+		if (StringUtils.isNotBlank(invitationCode)) {
 			token = BeanUtils.getUUID();
 			LoginTokenInfo tokenInfo = new LoginTokenInfo();
-			tokenInfo.setPhoneNo(phoneNo);
+			tokenInfo.setInvitationCode(invitationCode);
 			tokenInfo.setStatus(0);
 			CacheService.StringKey.set(token, tokenInfo);
-			CacheService.StringKey.set(phoneNo, token);
+			CacheService.StringKey.set(invitationCode, token);
 		}
 		return token;
 	}
@@ -38,15 +38,15 @@ public class TokenJedisUtils {
 	 * @Description: 重新设置token的有效时长 
 	 * @return: void
 	 */
-	public static void expireTokenInfo(String token, String phoneNo) {
-		if (StringUtils.isNotBlank(phoneNo)) {
+	public static void expireTokenInfo(String token, String invitationCode) {
+		if (StringUtils.isNotBlank(invitationCode)) {
 			LoginTokenInfo tokenInfo = new LoginTokenInfo();
-			tokenInfo.setPhoneNo(phoneNo);
+			tokenInfo.setInvitationCode(invitationCode);
 			tokenInfo.setStatus(0);
 //			CacheService.StringKey.set(token, tokenInfo, RedisRootNameSpace.UnitEnum.THIRTY_MIN);
 //			CacheService.StringKey.set(memberId, token, RedisRootNameSpace.UnitEnum.THIRTY_MIN);
 			CacheService.StringKey.set(token, tokenInfo);
-			CacheService.StringKey.set(phoneNo, token);
+			CacheService.StringKey.set(invitationCode, token);
 		}
 	}
 	
@@ -60,7 +60,7 @@ public class TokenJedisUtils {
 			LoginTokenInfo tokenInfo = CacheService.StringKey.getObject(token, LoginTokenInfo.class);
 			if (tokenInfo != null) {
 				CacheService.KeyBase.delete(token);
-				CacheService.KeyBase.delete(tokenInfo.getPhoneNo());
+				CacheService.KeyBase.delete(tokenInfo.getInvitationCode());
 			}
 		}
 	}
@@ -97,7 +97,7 @@ public class TokenJedisUtils {
 		String phoneNo = null;
 		LoginTokenInfo tokenInfo = CacheService.StringKey.getObject(token, LoginTokenInfo.class);
 		if (null != tokenInfo)
-			phoneNo = tokenInfo.getPhoneNo();
+			phoneNo = tokenInfo.getInvitationCode();
 		return phoneNo;
 	}
 	

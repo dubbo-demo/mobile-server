@@ -59,30 +59,30 @@ public class MemberController {
     /**
      * 根据手机号搜索用户
      * @param request
-     * @param friendPhoneNo
+     * @param friendInvitationCode
      * @return
      */
     @RequestMapping(value = "/searchUserByPhoneNo", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<MemberDto> searchUserByPhoneNo(HttpServletRequest request, String friendPhoneNo){
+    public ServiceResult<MemberDto> searchUserByPhoneNo(HttpServletRequest request, String friendInvitationCode){
         ServiceResult<MemberDto> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(friendPhoneNo)) {
+            if (StringUtils.isBlank(friendInvitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 根据手机号搜索用户
-            serviceResult = memberService.searchUserByPhoneNo(phoneNo, friendPhoneNo);
+            serviceResult = memberService.searchUserByPhoneNo(invitationCode, friendInvitationCode);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "根据手机号搜索用户失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+            WayLogger.error(e, "根据手机号搜索用户失败," + "请求参数：invitationCode：" + invitationCode + "，friendInvitationCode：" + friendInvitationCode);
         } finally {
-            WayLogger.access("根据手机号搜索用户：/searchUserByPhoneNo.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+            WayLogger.access("根据手机号搜索用户：/searchUserByPhoneNo.do,参数：invitationCode：" + invitationCode + "，friendInvitationCode：" + friendInvitationCode);
         }
         return serviceResult;
     }
@@ -96,20 +96,20 @@ public class MemberController {
     @ResponseBody
     public ServiceResult<MemberDto> getMemberInfo(HttpServletRequest request){
         ServiceResult<MemberDto> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 查看个人信息
-            serviceResult = memberService.getMemberInfo(phoneNo);
+            serviceResult = memberService.getMemberInfo(invitationCode);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "查看个人信息失败," + "请求参数：phoneNo：" + phoneNo);
+            WayLogger.error(e, "查看个人信息失败," + "请求参数：invitationCode：" + invitationCode);
         } finally {
-            WayLogger.access("查看个人信息：/getMemberInfo.do,参数：phoneNo：" + phoneNo);
+            WayLogger.access("查看个人信息：/getMemberInfo.do,参数：invitationCode：" + invitationCode);
         }
         return serviceResult;
     }
@@ -124,10 +124,10 @@ public class MemberController {
     @ResponseBody
     public ServiceResult<Object> modifyMemberInfo(HttpServletRequest request, @ModelAttribute MemberDto dto){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             if (StringUtils.isBlank(dto.getHeadPic()) && StringUtils.isBlank(dto.getNickName())
@@ -135,14 +135,14 @@ public class MemberController {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 修改个人信息
-            dto.setPhoneNo(phoneNo);
+            dto.setInvitationCode(invitationCode);
             serviceResult = memberService.modifyMemberInfo(dto);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "修改个人信息失败," + "请求参数：phoneNo：" + phoneNo + ",MemberDto：" + dto);
+            WayLogger.error(e, "修改个人信息失败," + "请求参数：invitationCode：" + invitationCode + ",MemberDto：" + dto);
         } finally {
-            WayLogger.access("修改个人信息：/modifyMemberInfo.do,参数：phoneNo：" + phoneNo + ",MemberDto：" + dto);
+            WayLogger.access("修改个人信息：/modifyMemberInfo.do,参数：invitationCode：" + invitationCode + ",MemberDto：" + dto);
         }
         return serviceResult;
     }
@@ -157,10 +157,10 @@ public class MemberController {
     @ResponseBody
     public ServiceResult<Object> getMemberValueAddedTime(HttpServletRequest request, String type){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 校验type
@@ -168,13 +168,13 @@ public class MemberController {
                 return ServiceResult.newFailure("必传参数有误");
             }
             // 查看用户增值服务时间
-            serviceResult = memberService.getMemberValueAddedTime(phoneNo, type);
+            serviceResult = memberService.getMemberValueAddedTime(invitationCode, type);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "查看用户增值服务时间失败," + "请求参数：phoneNo：" + phoneNo + "type：" + type);
+            WayLogger.error(e, "查看用户增值服务时间失败," + "请求参数：invitationCode：" + invitationCode + "type：" + type);
         } finally {
-            WayLogger.access("查看用户增值服务时间：/getMemberValueAddedTime.do,参数：phoneNo：" + phoneNo + "type：" + type);
+            WayLogger.access("查看用户增值服务时间：/getMemberValueAddedTime.do,参数：invitationCode：" + invitationCode + "type：" + type);
         }
         return serviceResult;
     }

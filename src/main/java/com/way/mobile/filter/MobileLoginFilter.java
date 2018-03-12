@@ -67,8 +67,8 @@ public class MobileLoginFilter extends HttpServlet implements Filter {
 					ResponseUtils.toJsonOrJsonP(request, response, ServiceResult.TOKEN_EXPIRED_OTHERLOGIN, "该账户已在其他设备登录，请注意安全");
 					return;
 				}
-				request.setAttribute("memberId", tokenInfo.getPhoneNo());
-				TokenJedisUtils.expireTokenInfo(token,tokenInfo.getPhoneNo());
+				request.setAttribute("invitationCode", tokenInfo.getInvitationCode());
+				TokenJedisUtils.expireTokenInfo(token,tokenInfo.getInvitationCode());
 			}
 		}
 		filterChain.doFilter(request, response);

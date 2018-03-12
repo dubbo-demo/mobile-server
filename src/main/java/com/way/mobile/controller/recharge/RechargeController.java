@@ -51,23 +51,23 @@ public class RechargeController {
     @ResponseBody
     public ServiceResult<Object> getRechargeInfo(HttpServletRequest request, Integer pageNumber){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             if (null == pageNumber) { // 第几页为空
                 pageNumber = 1;
             }
             // 查看充值记录
-            serviceResult = memberService.getRechargeInfo(phoneNo, pageNumber);
+            serviceResult = memberService.getRechargeInfo(invitationCode, pageNumber);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "查看充值记录失败," + "请求参数：phoneNo：" + phoneNo + "pageNumber：" + pageNumber);
+            WayLogger.error(e, "查看充值记录失败," + "请求参数：invitationCode：" + invitationCode + "pageNumber：" + pageNumber);
         } finally {
-            WayLogger.access("查看充值记录：/getRechargeInfo.do,参数：phoneNo：" + phoneNo + "pageNumber：" + pageNumber);
+            WayLogger.access("查看充值记录：/getRechargeInfo.do,参数：invitationCode：" + invitationCode + "pageNumber：" + pageNumber);
         }
         return serviceResult;
     }
@@ -83,10 +83,10 @@ public class RechargeController {
     @ResponseBody
     public ServiceResult<Object> getOrderNumber(HttpServletRequest request, String type, String validityDurationType){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 校验token
@@ -98,13 +98,13 @@ public class RechargeController {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // APP获取购买订单号
-            serviceResult = memberService.getOrderNumber(phoneNo, type, validityDurationType);
+            serviceResult = memberService.getOrderNumber(invitationCode, type, validityDurationType);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "APP获取购买订单号失败," + "请求参数：phoneNo：" + phoneNo + "type：" + type + "validityDurationType：" + validityDurationType);
+            WayLogger.error(e, "APP获取购买订单号失败," + "请求参数：invitationCode：" + invitationCode + "type：" + type + "validityDurationType：" + validityDurationType);
         } finally {
-            WayLogger.access("APP获取购买订单号：/getOrderNumber.do,参数：phoneNo：" + phoneNo + "type：" + type + "validityDurationType：" + validityDurationType);
+            WayLogger.access("APP获取购买订单号：/getOrderNumber.do,参数：invitationCode：" + invitationCode + "type：" + type + "validityDurationType：" + validityDurationType);
         }
         return serviceResult;
     }

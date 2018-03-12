@@ -39,20 +39,20 @@ public class FriendController {
     @ResponseBody
     public ServiceResult<Object> getFriendsAndGroups(HttpServletRequest request){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 获取首页好友以及组信息
-            serviceResult = friendService.getFriendsAndGroups(phoneNo);
+            serviceResult = friendService.getFriendsAndGroups(invitationCode);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "获取首页好友以及组信息失败," + "请求参数：" + phoneNo);
+            WayLogger.error(e, "获取首页好友以及组信息失败," + "请求参数：" + invitationCode);
         } finally {
-            WayLogger.access("获取首页好友以及组信息：/getFriendsAndGroups.do,参数：" + phoneNo);
+            WayLogger.access("获取首页好友以及组信息：/getFriendsAndGroups.do,参数：" + invitationCode);
         }
         return serviceResult;
     }
@@ -65,31 +65,31 @@ public class FriendController {
      */
     @RequestMapping(value = "/cancelGetFriendPosition", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> cancelGetFriendPosition(HttpServletRequest request, String friendPhoneNos){
+    public ServiceResult<Object> cancelGetFriendPosition(HttpServletRequest request, String friendInvitationCodes){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(friendPhoneNos)) {
+            if (StringUtils.isBlank(friendInvitationCodes)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            List<String> friendPhoneNoList = JSON.parseArray(friendPhoneNos, String.class);
-            for(String friendPhoneNo : friendPhoneNoList){
-                if (StringUtils.isBlank(friendPhoneNo)) {
+            List<String> friendInvitationCodeList = JSON.parseArray(friendInvitationCodes, String.class);
+            for(String friendInvitationCode : friendInvitationCodeList){
+                if (StringUtils.isBlank(friendInvitationCode)) {
                     return ServiceResult.newFailure("必传参数不能为空");
                 }
             }
             // 取消查看好友实时坐标
-            serviceResult = friendService.cancelGetFriendPosition(phoneNo, friendPhoneNoList);
+            serviceResult = friendService.cancelGetFriendPosition(invitationCode, friendInvitationCodeList);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "取消查看好友实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
+            WayLogger.error(e, "取消查看好友实时坐标失败," + "请求参数：invitationCode：" + invitationCode + "，friendInvitationCodes：" + friendInvitationCodes);
         } finally {
-            WayLogger.access("取消查看好友实时坐标：/cancelGetFriendPosition.do,参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
+            WayLogger.access("取消查看好友实时坐标：/cancelGetFriendPosition.do,参数：invitationCode：" + invitationCode + "，friendInvitationCodes：" + friendInvitationCodes);
         }
         return serviceResult;
     }
@@ -104,20 +104,20 @@ public class FriendController {
     @ResponseBody
     public ServiceResult<Object> cancelGetGroupPosition(HttpServletRequest request, String groupId){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 取消查看组好友实时坐标
-            serviceResult = friendService.cancelGetGroupPosition(phoneNo, groupId);
+            serviceResult = friendService.cancelGetGroupPosition(invitationCode, groupId);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "取消查看组好友实时坐标失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+            WayLogger.error(e, "取消查看组好友实时坐标失败," + "请求参数：invitationCode：" + invitationCode + "，groupId：" + groupId);
         } finally {
-            WayLogger.access("取消查看组好友实时坐标：/cancelGetGroupPosition.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+            WayLogger.access("取消查看组好友实时坐标：/cancelGetGroupPosition.do,参数：invitationCode：" + invitationCode + "，groupId：" + groupId);
         }
         return serviceResult;
     }
@@ -125,38 +125,38 @@ public class FriendController {
     /**
      * 设置好友为退出前可见
      * @param request
-     * @param friendPhoneNos
+     * @param friendInvitationCodes
      * @return
      */
     @RequestMapping(value = "/setFriendsVisibleBeforeExiting", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> setFriendsVisibleBeforeExiting(HttpServletRequest request, String friendPhoneNos){
+    public ServiceResult<Object> setFriendsVisibleBeforeExiting(HttpServletRequest request, String friendInvitationCodes){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(friendPhoneNos)) {
+            if (StringUtils.isBlank(friendInvitationCodes)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            List<String> friendPhoneNoList = JSON.parseArray(friendPhoneNos, String.class);
-            if(friendPhoneNoList.size() > 0){
-                for(String friendPhoneNo : friendPhoneNoList){
-                    if (StringUtils.isBlank(friendPhoneNo)) {
+            List<String> friendInvitationCodeList = JSON.parseArray(friendInvitationCodes, String.class);
+            if(friendInvitationCodeList.size() > 0){
+                for(String friendInvitation : friendInvitationCodeList){
+                    if (StringUtils.isBlank(friendInvitation)) {
                         return ServiceResult.newFailure("必传参数不能为空");
                     }
                 }
             }
             // 设置好友为退出前可见
-            serviceResult = friendService.setFriendsVisibleBeforeExiting(phoneNo, friendPhoneNoList);
+            serviceResult = friendService.setFriendsVisibleBeforeExiting(invitationCode, friendInvitationCodeList);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "设置好友为退出前可见失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
+            WayLogger.error(e, "设置好友为退出前可见失败," + "请求参数：invitationCode：" + invitationCode + "，friendInvitationCodes：" + friendInvitationCodes);
         } finally {
-            WayLogger.access("设置好友为退出前可见：/setFriendsVisibleBeforeExiting.do,参数：phoneNo：" + phoneNo + "，friendPhoneNos：" + friendPhoneNos);
+            WayLogger.access("设置好友为退出前可见：/setFriendsVisibleBeforeExiting.do,参数：invitationCode：" + invitationCode + "，friendInvitationCodes：" + friendInvitationCodes);
         }
         return serviceResult;
     }
@@ -171,20 +171,20 @@ public class FriendController {
     @ResponseBody
     public ServiceResult<Object> getPhoneContactStatus(HttpServletRequest request, String friendPhoneNo){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 查询手机联系人状态
-            serviceResult = friendService.getPhoneContactStatus(phoneNo, friendPhoneNo);
+            serviceResult = friendService.getPhoneContactStatus(invitationCode, friendPhoneNo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "查询手机联系人状态失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+            WayLogger.error(e, "查询手机联系人状态失败," + "请求参数：invitationCode：" + invitationCode + "，friendPhoneNo：" + friendPhoneNo);
         } finally {
-            WayLogger.access("查询手机联系人状态：/getPhoneContactStatus.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+            WayLogger.access("查询手机联系人状态：/getPhoneContactStatus.do,参数：invitationCode：" + invitationCode + "，friendPhoneNo：" + friendPhoneNo);
         }
         return serviceResult;
     }
@@ -198,20 +198,20 @@ public class FriendController {
     @ResponseBody
     public ServiceResult<Object> getFriendList(HttpServletRequest request){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 查询好友列表
-            serviceResult = friendService.getFriendList(phoneNo);
+            serviceResult = friendService.getFriendList(invitationCode);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "查询好友列表失败," + "请求参数：phoneNo：" + phoneNo);
+            WayLogger.error(e, "查询好友列表失败," + "请求参数：invitationCode：" + invitationCode);
         } finally {
-            WayLogger.access("查询好友列表：/getFriendList.do,参数：phoneNo：" + phoneNo);
+            WayLogger.access("查询好友列表：/getFriendList.do,参数：invitationCode：" + invitationCode);
         }
         return serviceResult;
     }
@@ -219,34 +219,34 @@ public class FriendController {
     /**
      * 申请添加好友
      * @param request
-     * @param friendPhoneNo
+     * @param friendInvitationCode
      * @param applyInfo
      * @return
      */
     @RequestMapping(value = "/applyForAddFriend", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> applyForAddFriend(HttpServletRequest request, String friendPhoneNo, String applyInfo){
+    public ServiceResult<Object> applyForAddFriend(HttpServletRequest request, String friendInvitationCode, String applyInfo){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(friendPhoneNo)) {
+            if (StringUtils.isBlank(friendInvitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if(phoneNo.equals(friendPhoneNo)){
+            if(invitationCode.equals(friendInvitationCode)){
                 return ServiceResult.newFailure("不能添加自己为好友");
             }
             // 申请添加好友
-            serviceResult = friendService.applyForAddFriend(phoneNo, friendPhoneNo, applyInfo);
+            serviceResult = friendService.applyForAddFriend(invitationCode, friendInvitationCode, applyInfo);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "申请添加好友失败," + "请求参数：phoneNo：" + phoneNo);
+            WayLogger.error(e, "申请添加好友失败," + "请求参数：invitationCode：" + invitationCode);
         } finally {
-            WayLogger.access("申请添加好友：/applyForAddFriend.do,参数：phoneNo：" + phoneNo);
+            WayLogger.access("申请添加好友：/applyForAddFriend.do,参数：invitationCode：" + invitationCode);
         }
         return serviceResult;
     }
@@ -260,20 +260,20 @@ public class FriendController {
     @ResponseBody
     public ServiceResult<Object> getApplicationRecordOfFriend(HttpServletRequest request){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 获取被申请好友记录
-            serviceResult = friendService.getApplicationRecordOfFriend(phoneNo);
+            serviceResult = friendService.getApplicationRecordOfFriend(invitationCode);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "获取被申请好友记录失败," + "请求参数：phoneNo：" + phoneNo);
+            WayLogger.error(e, "获取被申请好友记录失败," + "请求参数：invitationCode：" + invitationCode);
         } finally {
-            WayLogger.access("获取被申请好友记录：/getApplicationRecordOfFriend.do,参数：phoneNo：" + phoneNo);
+            WayLogger.access("获取被申请好友记录：/getApplicationRecordOfFriend.do,参数：invitationCode：" + invitationCode);
         }
         return serviceResult;
     }
@@ -281,32 +281,32 @@ public class FriendController {
     /**
      * 同意/拒绝添加好友申请
      * @param request
-     * @param friendPhoneNo
+     * @param friendInvitationCode
      * @param isApprove
      * @param applicationId
      * @return
      */
     @RequestMapping(value = "/agreeToAddFriend", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> agreeToAddFriend(HttpServletRequest request, String friendPhoneNo, String isApprove, String applicationId){
+    public ServiceResult<Object> agreeToAddFriend(HttpServletRequest request, String friendInvitationCode, String isApprove, String applicationId){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             if (StringUtils.isBlank(isApprove)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 同意/拒绝添加好友申请
-            serviceResult = friendService.agreeToAddFriend(phoneNo, friendPhoneNo, isApprove, applicationId);
+            serviceResult = friendService.agreeToAddFriend(invitationCode, friendInvitationCode, isApprove, applicationId);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "同意/拒绝添加好友申请失败," + "请求参数：phoneNo：" + phoneNo);
+            WayLogger.error(e, "同意/拒绝添加好友申请失败," + "请求参数：invitationCode：" + invitationCode);
         } finally {
-            WayLogger.access("同意/拒绝添加好友申请：/agreeToAddFriend.do,参数：phoneNo：" + phoneNo);
+            WayLogger.access("同意/拒绝添加好友申请：/agreeToAddFriend.do,参数：invitationCode：" + invitationCode);
         }
         return serviceResult;
     }
@@ -314,30 +314,30 @@ public class FriendController {
     /**
      * 查看好友信息
      * @param request
-     * @param friendPhoneNo
+     * @param friendInvitationCode
      * @return
      */
     @RequestMapping(value = "/getFriendInfo", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<FriendsInfoDto> getFriendInfo(HttpServletRequest request, String friendPhoneNo){
+    public ServiceResult<FriendsInfoDto> getFriendInfo(HttpServletRequest request, String friendInvitationCode){
         ServiceResult<FriendsInfoDto> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(friendPhoneNo)) {
+            if (StringUtils.isBlank(friendInvitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 查看好友信息
-            serviceResult = friendService.getFriendInfo(phoneNo, friendPhoneNo);
+            serviceResult = friendService.getFriendInfo(invitationCode, friendInvitationCode);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "查看好友信息失败," + "请求参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+            WayLogger.error(e, "查看好友信息失败," + "请求参数：invitationCode：" + invitationCode + "，friendInvitationCode：" + friendInvitationCode);
         } finally {
-            WayLogger.access("查看好友信息：/getFriendInfo.do,参数：phoneNo：" + phoneNo + "，friendPhoneNo：" + friendPhoneNo);
+            WayLogger.access("查看好友信息：/getFriendInfo.do,参数：invitationCode：" + invitationCode + "，friendInvitationCode：" + friendInvitationCode);
         }
         return serviceResult;
     }
@@ -352,13 +352,13 @@ public class FriendController {
     @ResponseBody
     public ServiceResult<Object> modifyFriendInfo(HttpServletRequest request, @ModelAttribute FriendsInfoDto dto){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(dto.getFriendPhoneNo())) {
+            if (StringUtils.isBlank(dto.getFriendInvitationCode())) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             if (StringUtils.isBlank(dto.getFriendRemarkName())) {
@@ -389,13 +389,13 @@ public class FriendController {
                 }
             }
             // 修改好友信息
-            serviceResult = friendService.modifyFriendInfo(phoneNo, dto);
+            serviceResult = friendService.modifyFriendInfo(invitationCode, dto);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "修改好友信息失败," + "请求参数：phoneNo：" + phoneNo);
+            WayLogger.error(e, "修改好友信息失败," + "请求参数：invitationCode：" + invitationCode);
         } finally {
-            WayLogger.access("修改好友信息：/modifyFriendInfo.do,参数：phoneNo：" + phoneNo);
+            WayLogger.access("修改好友信息：/modifyFriendInfo.do,参数：invitationCode：" + invitationCode);
         }
         return serviceResult;
     }
@@ -403,30 +403,30 @@ public class FriendController {
     /**
      * 删除好友
      * @param request
-     * @param friendPhoneNo
+     * @param friendInvitationCode
      * @return
      */
     @RequestMapping(value = "/deleteFriend", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> deleteFriend(HttpServletRequest request, String friendPhoneNo){
+    public ServiceResult<Object> deleteFriend(HttpServletRequest request, String friendInvitationCode){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(friendPhoneNo)) {
+            if (StringUtils.isBlank(friendInvitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 删除好友
-            serviceResult = friendService.deleteFriend(phoneNo, friendPhoneNo);
+            serviceResult = friendService.deleteFriend(invitationCode, friendInvitationCode);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "删除好友失败," + "请求参数：phoneNo：" + phoneNo);
+            WayLogger.error(e, "删除好友失败," + "请求参数：invitationCode：" + invitationCode);
         } finally {
-            WayLogger.access("删除好友：/deleteFriend.do,参数：phoneNo：" + phoneNo);
+            WayLogger.access("删除好友：/deleteFriend.do,参数：invitationCode：" + invitationCode);
         }
         return serviceResult;
     }
@@ -441,23 +441,23 @@ public class FriendController {
     @ResponseBody
     public ServiceResult<Object> addGroupInfo(HttpServletRequest request, String groupName){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             if (StringUtils.isBlank(groupName)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 新建组
-            serviceResult = friendService.addGroupInfo(phoneNo, groupName);
+            serviceResult = friendService.addGroupInfo(invitationCode, groupName);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "新建组失败," + "请求参数：phoneNo：" + phoneNo);
+            WayLogger.error(e, "新建组失败," + "请求参数：invitationCode：" + invitationCode);
         } finally {
-            WayLogger.access("新建组：/addGroupInfo.do,参数：phoneNo：" + phoneNo);
+            WayLogger.access("新建组：/addGroupInfo.do,参数：invitationCode：" + invitationCode);
         }
         return serviceResult;
     }
@@ -472,23 +472,23 @@ public class FriendController {
     @ResponseBody
     public ServiceResult<GroupInfoDto> getGroupInfo(HttpServletRequest request, String groupId){
         ServiceResult<GroupInfoDto> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             if (StringUtils.isBlank(groupId)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 查看组信息
-            serviceResult = friendService.getGroupInfo(phoneNo, groupId);
+            serviceResult = friendService.getGroupInfo(invitationCode, groupId);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "查看组信息失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+            WayLogger.error(e, "查看组信息失败," + "请求参数：invitationCode：" + invitationCode + "，groupId：" + groupId);
         } finally {
-            WayLogger.access("查看组信息：/getGroupInfo.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+            WayLogger.access("查看组信息：/getGroupInfo.do,参数：invitationCode：" + invitationCode + "，groupId：" + groupId);
         }
         return serviceResult;
     }
@@ -503,10 +503,10 @@ public class FriendController {
     @ResponseBody
     public ServiceResult<GroupInfoDto> modifyGroupInfo(HttpServletRequest request, @ModelAttribute GroupInfoDto dto){
         ServiceResult<GroupInfoDto> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             if (StringUtils.isBlank(dto.getGroupId())) {
@@ -525,13 +525,13 @@ public class FriendController {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 修改组信息
-            serviceResult = friendService.modifyGroupInfo(phoneNo, dto);
+            serviceResult = friendService.modifyGroupInfo(invitationCode, dto);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "修改组信息失败," + "请求参数：phoneNo：" + phoneNo + "，GroupInfoDto：" + dto);
+            WayLogger.error(e, "修改组信息失败," + "请求参数：invitationCode：" + invitationCode + "，GroupInfoDto：" + dto);
         } finally {
-            WayLogger.access("修改组信息：/modifyGroupInfo.do,参数：phoneNo：" + phoneNo + "，GroupInfoDto：" + dto);
+            WayLogger.access("修改组信息：/modifyGroupInfo.do,参数：invitationCode：" + invitationCode + "，GroupInfoDto：" + dto);
         }
         return serviceResult;
     }
@@ -546,23 +546,23 @@ public class FriendController {
     @ResponseBody
     public ServiceResult<GroupInfoDto> deleteGroupInfo(HttpServletRequest request, String groupId){
         ServiceResult<GroupInfoDto> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             if (StringUtils.isBlank(groupId)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 删除组信息
-            serviceResult = friendService.deleteGroupInfo(phoneNo, groupId);
+            serviceResult = friendService.deleteGroupInfo(invitationCode, groupId);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "删除组信息失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+            WayLogger.error(e, "删除组信息失败," + "请求参数：invitationCode：" + invitationCode + "，groupId：" + groupId);
         } finally {
-            WayLogger.access("删除组信息：/deleteGroupInfo.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId);
+            WayLogger.access("删除组信息：/deleteGroupInfo.do,参数：invitationCode：" + invitationCode + "，groupId：" + groupId);
         }
         return serviceResult;
     }
@@ -575,28 +575,28 @@ public class FriendController {
      */
     @RequestMapping(value = "/moveFriendToGroup", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> moveFriendToGroup(HttpServletRequest request, String groupId, String friendPhoneNos){
+    public ServiceResult<Object> moveFriendToGroup(HttpServletRequest request, String groupId, String friendInvitationCodes){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             if (StringUtils.isBlank(groupId)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(friendPhoneNos)) {
+            if (StringUtils.isBlank(friendInvitationCodes)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 将好友添加到分组
-            serviceResult = friendService.moveFriendToGroup(phoneNo, groupId, friendPhoneNos);
+            serviceResult = friendService.moveFriendToGroup(invitationCode, groupId, friendInvitationCodes);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "将好友添加到分组失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);
+            WayLogger.error(e, "将好友添加到分组失败," + "请求参数：invitationCode：" + invitationCode + "，groupId：" + groupId + "，friendInvitationCodes：" + friendInvitationCodes);
         } finally {
-            WayLogger.access("将好友添加到分组：/moveFriendToGroup.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);
+            WayLogger.access("将好友添加到分组：/moveFriendToGroup.do,参数：invitationCode：" + invitationCode + "，groupId：" + groupId + "，friendInvitationCodes：" + friendInvitationCodes);
         }
         return serviceResult;
     }
@@ -605,33 +605,33 @@ public class FriendController {
      * 将好友从分组中移除
      * @param request
      * @param groupId
-     * @param friendPhoneNos
+     * @param friendInvitationCodes
      * @return
      */
     @RequestMapping(value = "/removeFriendFromGroup", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult<Object> removeFriendFromGroup(HttpServletRequest request, String groupId, String friendPhoneNos){
+    public ServiceResult<Object> removeFriendFromGroup(HttpServletRequest request, String groupId, String friendInvitationCodes){
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
-        String phoneNo = (String) request.getAttribute("phoneNo");
+        String invitationCode = (String) request.getAttribute("invitationCode");
         try {
             // 校验token
-            if (StringUtils.isBlank(phoneNo)) {
+            if (StringUtils.isBlank(invitationCode)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             if (StringUtils.isBlank(groupId)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
-            if (StringUtils.isBlank(friendPhoneNos)) {
+            if (StringUtils.isBlank(friendInvitationCodes)) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 将好友从分组中移除
-            serviceResult = friendService.removeFriendFromGroup(phoneNo, groupId, friendPhoneNos);
+            serviceResult = friendService.removeFriendFromGroup(invitationCode, groupId, friendInvitationCodes);
         } catch (Exception e) {
             serviceResult.setCode(ServiceResult.ERROR_CODE);
             serviceResult.setMessage(ServiceResult.ERROR_MSG);
-            WayLogger.error(e, "将好友从分组中移除失败," + "请求参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);
+            WayLogger.error(e, "将好友从分组中移除失败," + "请求参数：invitationCode：" + invitationCode + "，groupId：" + groupId + "，friendInvitationCodes：" + friendInvitationCodes);
         } finally {
-            WayLogger.access("将好友从分组中移除：/removeFriendFromGroup.do,参数：phoneNo：" + phoneNo + "，groupId：" + groupId + "，friendPhoneNos：" + friendPhoneNos);
+            WayLogger.access("将好友从分组中移除：/removeFriendFromGroup.do,参数：invitationCode：" + invitationCode + "，groupId：" + groupId + "，friendInvitationCodes：" + friendInvitationCodes);
         }
         return serviceResult;
     }

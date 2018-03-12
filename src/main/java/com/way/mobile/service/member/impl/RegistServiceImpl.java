@@ -22,8 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Random;
+import java.util.*;
 
 /**
  *
@@ -55,32 +54,33 @@ public class RegistServiceImpl implements RegistService {
 		String phoneNo = memberDto.getPhoneNo();
 		// 验证手机号是否已经注册
 		ServiceResult<MemberDto> m = memberInfoService.loadMapByMobile(phoneNo);
-		String smsCodeType = ConstantsConfig.JEDIS_HEADER_REGIST_CODE;
+		String key = null;
 		if (VerificationCodeType.FORGET_PASSWORD.equals(memberDto.getType())) {// 忘记密码的时候，校验
-			smsCodeType = ConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE;
 			// 未注册返回失败
 			if (null == m || m.getData() == null){
 				throw new DataValidateException("手机号码不存在");
 			}
+			key = ConstantsConfig.JEDIS_HEADER_FORGET_PASSWORD_CODE + phoneNo;
 		} else if (VerificationCodeType.REGIST.equals(memberDto.getType())) {// 注册时候，发送验证码的校验
 			// 校验手机号码是否已注册
 			if (m != null && m.getData() != null) {
 				throw new DataValidateException("手机号码存在");
 			}
+			key = ConstantsConfig.JEDIS_HEADER_REGIST_CODE + phoneNo;
 		} else if (VerificationCodeType.TRANSFE_RREWARDSCORE.equals(memberDto.getType())) {// 积分转赠，发送验证码的校验
-			smsCodeType = ConstantsConfig.JEDIS_HEADER_TRANSFE_RREWARDSCORE_CODE;
 			// 校验手机号码是否已注册
 			if (null == m || m.getData() == null){
 				throw new DataValidateException("手机号码不存在");
 			}
+			key = ConstantsConfig.JEDIS_HEADER_TRANSFE_RREWARDSCORE_CODE + m.getData().getInvitationCode();
 		} else if (VerificationCodeType.WITHDRAWAL_REWARDSCORE.equals(memberDto.getType())) {// 积分提现，发送验证码的校验
-			smsCodeType = ConstantsConfig.JEDIS_HEADER_WITHDRAWAL_REWARDSCORE_CODE;
 			// 校验手机号码是否已注册
 			if (null == m || m.getData() == null){
 				throw new DataValidateException("手机号码不存在");
 			}
+			key = ConstantsConfig.JEDIS_HEADER_WITHDRAWAL_REWARDSCORE_CODE + phoneNo;
 		}
-		String key = smsCodeType + phoneNo;
+
 		// 校验发送验证码的时间间隔
 		long surplusExpire = CacheService.KeyBase.getExprise(key);// 剩余有效时间
 		long usedExpire = propertyConfig.getSmsCodeExpire() - surplusExpire;// 已过时间
@@ -133,7 +133,8 @@ public class RegistServiceImpl implements RegistService {
 		if (null != memberRes.getData()){ // 该手机号已经注册
 			throw new DataValidateException("手机号已注册");
 		}
-		memberDto.setInvitationCode(getUniqueInvitationCode(8));
+
+		memberDto.setInvitationCode(String.valueOf(Double.valueOf(89999999*Math.random() + 10000000).intValue()).replace("4", getUniqueInvitationCode(1)));
 		memberInfoService.memberRegist(memberDto, invitationCode, nextLevelInvitationCode);
 		// 注册成功调用登录接口登录，并异步保存用户登录信息
 		loginService.login(memberDto);
@@ -143,7 +144,7 @@ public class RegistServiceImpl implements RegistService {
 	// 生成邀请码
 	public static String getUniqueInvitationCode(int len) {
 		//字符源，可以根据需要删减
-		String generateSource = "2356789ABCDEFGHGKLMNPQRSTUVWXYZ";// 去掉0、1、4、i和o
+		String generateSource = "12356789";// 去掉0、4
 		String rtnStr = "";
 		for (int i = 0; i < len; i++) {
 			//循环随机获得当次字符，并移走选出的字符
@@ -191,7 +192,7 @@ public class RegistServiceImpl implements RegistService {
 		memberInfoService.updatePassword(memberRes.getData().getInvitationCode(), memberDto.getPassword());
 		// 验证码校验成功，移除redis中的验证码
 		CacheService.KeyBase.delete(key);
-		return ServiceResult.newSuccess();
+		return ServiceResult.newSuccess(memberRes.getData());
 	}
 	
 	/**

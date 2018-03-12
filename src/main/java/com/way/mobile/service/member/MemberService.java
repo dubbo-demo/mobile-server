@@ -23,18 +23,18 @@ public interface MemberService {
     /**
      * 根据手机号搜索用户
      *
-     * @param phoneNo
-     * @param friendPhoneNo
+     * @param invitationCode
+     * @param friendInvitationCode
      * @return
      */
-    ServiceResult<MemberDto> searchUserByPhoneNo(String phoneNo, String friendPhoneNo);
+    ServiceResult<MemberDto> searchUserByPhoneNo(String invitationCode, String friendInvitationCode);
 
     /**
      * 查看个人信息
-     * @param phoneNo
+     * @param invitationCode
      * @return
      */
-    ServiceResult<MemberDto> getMemberInfo(String phoneNo);
+    ServiceResult<MemberDto> getMemberInfo(String invitationCode);
 
     /**
      * 修改个人信息
@@ -45,61 +45,61 @@ public interface MemberService {
 
     /**
      * 查看积分明细
-     * @param phoneNo
+     * @param invitationCode
      * @param pageNumber
      * @return
      */
-    ServiceResult<Object> getRewardScoreDetail(String phoneNo, Integer pageNumber);
+    ServiceResult<Object> getRewardScoreDetail(String invitationCode, Integer pageNumber);
 
     /**
      * 积分购买会员
-     * @param phoneNo
+     * @param invitationCode
      * @param validityDurationType
      * @return
      */
-    ServiceResult<Object> buyMemberByRewardScore(String phoneNo, String validityDurationType);
+    ServiceResult<Object> buyMemberByRewardScore(String invitationCode, String validityDurationType);
 
     /**
      * 积分购买增值服务
-     * @param phoneNo
+     * @param invitationCode
      * @param type
      * @return
      */
-    ServiceResult<Object> buyValueAddedServiceByRewardScore(String phoneNo, String type);
+    ServiceResult<Object> buyValueAddedServiceByRewardScore(String invitationCode, String type);
 
     /**
      * 积分转增
-     * @param phoneNo
+     * @param invitationCode
      * @param rewardScore
-     * @param friendPhoneNo
+     * @param friendInvitationCode
      * @return
      */
-    ServiceResult<Object> transferRewardScoreToFriend(String phoneNo, Double rewardScore, String friendPhoneNo);
+    ServiceResult<Object> transferRewardScoreToFriend(String invitationCode, Double rewardScore, String friendInvitationCode);
 
     /**
      * 积分提现
-     * @param phoneNo
+     * @param invitationCode
      * @param withdrawalInfoDto
      * @return
      */
-    ServiceResult<Object> withdrawalRewardScore(String phoneNo, WithdrawalInfoDto withdrawalInfoDto);
+    ServiceResult<Object> withdrawalRewardScore(String invitationCode, WithdrawalInfoDto withdrawalInfoDto);
 
     /**
      * 查看充值记录
-     * @param phoneNo
+     * @param invitationCode
      * @param pageNumber
      * @return
      */
-    ServiceResult<Object> getRechargeInfo(String phoneNo, Integer pageNumber);
+    ServiceResult<Object> getRechargeInfo(String invitationCode, Integer pageNumber);
 
     /**
      * APP获取购买订单号
-     * @param phoneNo
+     * @param invitationCode
      * @param type
      * @param validityDurationType
      * @return
      */
-    ServiceResult<Object> getOrderNumber(String phoneNo, String type, String validityDurationType);
+    ServiceResult<Object> getOrderNumber(String invitationCode, String type, String validityDurationType);
 
     /**
      * 充值购买会员/增值服务
@@ -112,17 +112,17 @@ public interface MemberService {
 
     /**
      * 获取积分提现记录
-     * @param phoneNo
+     * @param invitationCode
      * @param pageNumber
      * @return
      */
-    ServiceResult<Object> getWithdrawalRewardScoreInfo(String phoneNo, Integer pageNumber);
+    ServiceResult<Object> getWithdrawalRewardScoreInfo(String invitationCode, Integer pageNumber);
 
     /**
      * 查看用户增值服务时间
-     * @param phoneNo
+     * @param invitationCode
      * @param type
      * @return
      */
-    ServiceResult<Object> getMemberValueAddedTime(String phoneNo, String type);
+    ServiceResult<Object> getMemberValueAddedTime(String invitationCode, String type);
 }

@@ -48,7 +48,7 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public ServiceResult<String> uploadPosition(PositionInfoDto positionInfoDto) {
         // 根据手机号获取用户实时坐标
-        ServiceResult<PositionInfoDto> dto = positionInfoService.getRealTimePositionByPhoneNo(positionInfoDto.getPhoneNo(), null);
+        ServiceResult<PositionInfoDto> dto = positionInfoService.getRealTimePositionByPhoneNo(positionInfoDto.getInvitationCode(), null);
         // 有记录更新
         if(null != dto.getData()){
             // 更新总表用户坐标
@@ -68,16 +68,16 @@ public class PositionServiceImpl implements PositionService {
 
     /**
      * 根据手机号获取用户实时坐标
-     * @param phoneNo
+     * @param invitationCode
      * @param positionInfoDtos
      * @return
      */
     @Override
-    public ServiceResult<Object> getRealTimePositionByPhoneNo(String phoneNo, List<PositionInfoDto> positionInfoDtos) {
+    public ServiceResult<Object> getRealTimePositionByPhoneNo(String invitationCode, List<PositionInfoDto> positionInfoDtos) {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         Map<String, List<PositionInfoDto>> map = new HashMap<String, List<PositionInfoDto>>();
         List<PositionInfoDto> list = new ArrayList<PositionInfoDto>();
-        List<String> friendPhoneNos = new ArrayList<String>();
+        List<String> friendInvitationCodes = new ArrayList<String>();
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         String week = String.valueOf(cal.get(Calendar.DAY_OF_WEEK) - 1);
@@ -90,26 +90,26 @@ public class PositionServiceImpl implements PositionService {
         String now = hour.concat(":").concat(minute);
         for(PositionInfoDto dto : positionInfoDtos){
             // 校验手机号
-            if (StringUtils.isBlank(dto.getPhoneNo())) {
+            if (StringUtils.isBlank(dto.getInvitationCode())) {
                 return ServiceResult.newFailure("必传参数不能为空");
             }
             // 查询是否被好友授权可见
-            FriendsInfoDto friendsInfoDto = friendsInfoService.checkIsAuthorizedVisible(phoneNo, dto.getPhoneNo());
+            FriendsInfoDto friendsInfoDto = friendsInfoService.checkIsAuthorizedVisible(invitationCode, dto.getInvitationCode());
             if(null != friendsInfoDto){
-                friendPhoneNos.add(dto.getPhoneNo());
+                friendInvitationCodes.add(dto.getInvitationCode());
                 // 根据被授权开始时间、被授权结束时间、被授权星期计算出是否被授权可见
                 String[] authorizedWeeks = friendsInfoDto.getAuthorizedWeeks().split(",");
                 if(friendsInfoDto.getIsAuthorizedVisible() == 1 && ArrayUtils.contains(authorizedWeeks,week) &&
                         now.compareTo(friendsInfoDto.getAuthorizedAccreditStartTime()) >= 0 && now.compareTo(friendsInfoDto.getAuthorizedAccreditEndTime()) < 0){
                     // 根据手机号获取用户实时坐标
-                    ServiceResult<PositionInfoDto> positionInfoDto = positionInfoService.getRealTimePositionByPhoneNo(dto.getPhoneNo(), dto.getModifyTime());
+                    ServiceResult<PositionInfoDto> positionInfoDto = positionInfoService.getRealTimePositionByPhoneNo(dto.getInvitationCode(), dto.getModifyTime());
                     if(null != positionInfoDto.getData()){
-                        positionInfoDto.getData().setPhoneNo(dto.getPhoneNo());
+                        positionInfoDto.getData().setInvitationCode(dto.getInvitationCode());
                         list.add(positionInfoDto.getData());
                     }
                 }else{
                     PositionInfoDto positionInfoDto = new PositionInfoDto();
-                    positionInfoDto.setPhoneNo(dto.getPhoneNo());
+                    positionInfoDto.setInvitationCode(dto.getInvitationCode());
                     positionInfoDto.setIsAccreditVisible("2");
                     list.add(positionInfoDto);
                 }
@@ -117,7 +117,7 @@ public class PositionServiceImpl implements PositionService {
         }
         map.put("positions", list);
         serviceResult.setData(map);
-        if(CollectionUtils.isEmpty(friendPhoneNos)){
+        if(CollectionUtils.isEmpty(friendInvitationCodes)){
             return ServiceResult.newFailure("必传参数不能为空");
         }
         // 标记好友退出前查看为是：1
@@ -127,14 +127,14 @@ public class PositionServiceImpl implements PositionService {
 
     /**
      * 获取退出前查看的用户
-     * @param phoneNo
+     * @param invitationCode
      * @return
      */
     @Override
-    public ServiceResult<Object> getUserViewBeforeExit(String phoneNo) {
-        // 查询用户信息
-        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
-        String invitationCode = memberDto.getData().getInvitationCode();
+    public ServiceResult<Object> getUserViewBeforeExit(String invitationCode) {
+//        // 查询用户信息
+//        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+//        String invitationCode = memberDto.getData().getInvitationCode();
 
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         Map<String, Object> data = new HashMap<String, Object>();
@@ -175,56 +175,56 @@ public class PositionServiceImpl implements PositionService {
 
     /**
      * 根据组ID获取用户实时坐标
-     * @param phoneNo
+     * @param invitationCode
      * @param groupId
      * @return
      */
     @Override
-    public ServiceResult<Object> getRealtimePositionByGroupId(String phoneNo, String groupId) {
+    public ServiceResult<Object> getRealtimePositionByGroupId(String invitationCode, String groupId) {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         // 标记组好友退出前查看为是：1
-        friendsInfoService.updateIsCheckBeforeExitByGroupId(phoneNo, groupId, Constants.YES_INT);
+        friendsInfoService.updateIsCheckBeforeExitByGroupId(invitationCode, groupId, Constants.YES_INT);
         return serviceResult;
     }
 
     /**
      * 查询用户历史轨迹坐标
-     * @param phoneNo
-     * @param friendPhoneNo
+     * @param invitationCode
+     * @param friendInvitationCode
      * @param startTime
      * @param endTime
      * @return
      */
     @Override
-    public ServiceResult<Object> getMemberHistoryPositions(String phoneNo, String friendPhoneNo, String startTime, String endTime) {
+    public ServiceResult<Object> getMemberHistoryPositions(String invitationCode, String friendInvitationCode, String startTime, String endTime) {
         ServiceResult<Object> serviceResult = ServiceResult.newSuccess();
         // 查询用户信息
-        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(phoneNo);
+        ServiceResult<MemberDto> memberDto = memberService.getMemberInfo(invitationCode);
         // 判断用户是否开通增值服务
         if("2".equals(memberDto.getData().getTrajectoryService())){
             return ServiceResult.newFailure("您没有开通增值服务");
         }
         // 如果被查询用户不是自己
-        if(!phoneNo.equals(friendPhoneNo)){
+        if(!invitationCode.equals(friendInvitationCode)){
             // 判断该用户是否为好友
-            ServiceResult<FriendsInfoDto> friendsInfoDto = friendsInfoService.getFriendInfo(phoneNo, friendPhoneNo);
+            ServiceResult<FriendsInfoDto> friendsInfoDto = friendsInfoService.getFriendInfo(invitationCode, friendInvitationCode);
             if(null == friendsInfoDto.getData()){
                 return ServiceResult.newFailure("该用户不是您的好友");
             }
             // 判断用户是否开通增值服务
-            ServiceResult<MemberDto> searchMemberDto = memberService.getMemberInfo(friendPhoneNo);
+            ServiceResult<MemberDto> searchMemberDto = memberService.getMemberInfo(friendInvitationCode);
             // 判断用户是否开通增值服务
             if(null== searchMemberDto.getData() ||"2".equals(searchMemberDto.getData().getTrajectoryService())){
                 return ServiceResult.newFailure("该用户没有开通增值服务");
             }
             // 查询好友轨迹
-            List<PositionInfoDto> positionInfoDtos = positionInfoService.getMemberHistoryPositions(friendPhoneNo, startTime, endTime);
+            List<PositionInfoDto> positionInfoDtos = positionInfoService.getMemberHistoryPositions(friendInvitationCode, startTime, endTime);
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("positions", positionInfoDtos);
             serviceResult.setData(map);
         }else{
             // 查询自己轨迹
-            List<PositionInfoDto> positionInfoDtos =  positionInfoService.getMemberHistoryPositions(phoneNo, startTime, endTime);
+            List<PositionInfoDto> positionInfoDtos =  positionInfoService.getMemberHistoryPositions(invitationCode, startTime, endTime);
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("positions", positionInfoDtos);
             serviceResult.setData(map);

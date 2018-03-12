@@ -105,7 +105,7 @@ public class LoginServiceImpl implements LoginService {
 				if (null != ob) 
 					CacheService.KeyBase.delete(key);
 				// 登录成功返回token
-				String oldToken = TokenJedisUtils.getTokenByMemberId(phoneNo);
+				String oldToken = TokenJedisUtils.getTokenByMemberId(result.getData().getInvitationCode());
 				if (null != oldToken) {// 存在旧token，说明是在另一台设备上登录，将旧token状态置为1
 					LoginTokenInfo tokenInfo = TokenJedisUtils.getTokenInfo(oldToken);
 					if (null != tokenInfo) {
@@ -113,7 +113,7 @@ public class LoginServiceImpl implements LoginService {
 						TokenJedisUtils.resetTokenInfoExpire(oldToken, tokenInfo, (int) TokenJedisUtils.getTokenSurplusExpire(oldToken));
 					}
 				}
-				String newToken = TokenJedisUtils.putTokenInfoExpire(phoneNo);
+				String newToken = TokenJedisUtils.putTokenInfoExpire(result.getData().getInvitationCode());
 				resultDto.setToken(newToken);
 			} else if (ServiceResult.ERROR_CODE == result.getCode()) {
 				// 密码错误登录失败，登录失败次数+1，最后登录失败时间改为当前时间

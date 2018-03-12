@@ -150,7 +150,7 @@ public class RegistController {
 			serviceResult.setData(dto);
 			if (serviceResult.getCode().equals(ServiceResult.SUCCESS_CODE)) {// 注册成功
 				// 生成新token
-				String newToken = TokenJedisUtils.putTokenInfoExpire(dto.getPhoneNo());
+				String newToken = TokenJedisUtils.putTokenInfoExpire(dto.getInvitationCode());
 				// dto
 				dto.setToken(newToken);
 				serviceResult.setData(dto);
@@ -193,7 +193,7 @@ public class RegistController {
 			int tempFailTimes = registService.checkResetPasswordFailTimes(ob, key);
 			/// 重置密码
 			serviceResult = registService.resetPassword(memberDto);
-			if (ServiceResult.SUCCESS_CODE == serviceResult.getCode()) {
+			if (ServiceResult.SUCCESS_CODE != serviceResult.getCode()) {
 				// 重置密码成功，则清零重置密码失败次数，视为第一次登录
 				if (null != ob){
 					CacheService.KeyBase.delete(key);
@@ -201,7 +201,7 @@ public class RegistController {
 				// 密码修改成功，删除redis中登录失败的记录
 				CacheService.KeyBase.delete(ConstantsConfig.JEDIS_HEADER_LOGIN_FAIL + memberDto.getPhoneNo());
 				// 生成新token
-				String newToken = TokenJedisUtils.putTokenInfoExpire(memberDto.getPhoneNo());
+				String newToken = TokenJedisUtils.putTokenInfoExpire(serviceResult.getData().getInvitationCode());
 				memberDto.setToken(newToken);
 				serviceResult.setData(memberDto);
 			} else {
